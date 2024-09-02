@@ -9,8 +9,10 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    env_file:
+      - .env
     environment:
-      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
 
   backend:
     build:
@@ -22,10 +24,12 @@ services:
       - redis
       - db
       - chroma
+    env_file:
+      - .backend/env
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/fashiondb
-      - REDIS_URL=redis://redis:6379
-      - CHROMA_URL=http://chroma:8000
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CHROMA_URL=${CHROMA_URL}
 
   redis:
     image: redis:alpine
@@ -38,16 +42,18 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
 
   db:
     image: postgres:13
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=fashiondb
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -65,9 +71,11 @@ services:
       - "9001:9001"
     volumes:
       - minio_data:/data
+    env_file:
+      - .env
     environment:
-      - MINIO_ROOT_USER=minioadmin
-      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
 
 volumes:

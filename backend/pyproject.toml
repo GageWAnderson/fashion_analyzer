@@ -10,6 +10,7 @@ python = "^3.12"
 fastapi = "^0.112.2"
 langchain = "^0.2.15"
 langgraph = "^0.2.16"
+redis = "^5.0.8"
 
 
 [tool.poetry.group.dev.dependencies]

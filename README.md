@@ -67,8 +67,11 @@ This will start the frontend and backend containers and run the application.
 ### Run the Web Crawler
 To run the web crawler, use the Poetry script:
 ```bash
-poetry run python web_crawler.py
+poetry run crawl_all_sites
 ```
+
+### Authentication & Authorization
+TODO: Implement
 
 ## Contributing
 
