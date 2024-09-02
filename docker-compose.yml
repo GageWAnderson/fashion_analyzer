@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db
+      - chroma
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/fashiondb
+      - REDIS_URL=redis://redis:6379
+      - CHROMA_URL=http://chroma:8000
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=fashiondb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    ports:
+      - "8080:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+  chroma_data:
+  minio_data:
