@@ -10,9 +10,7 @@ services:
     depends_on:
       - backend
     env_file:
-      - .env
-    environment:
-      - REACT_APP_API_URL=${REACT_APP_API_URL}
+      - ./frontend/.env
 
   backend:
     build:
@@ -25,11 +23,7 @@ services:
       - db
       - chroma
     env_file:
-      - .backend/env
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - REDIS_URL=${REDIS_URL}
-      - CHROMA_URL=${CHROMA_URL}
+      - ./backend/.env
 
   redis:
     image: redis:alpine
@@ -37,10 +31,13 @@ services:
       - "6379:6379"
 
   caddy:
-    image: caddy:2
+    container_name: caddy_reverse_proxy
+    image: caddy:alpine
     ports:
       - "80:80"
+      - "8000:8000"
       - "443:443"
+    env_file: ".env"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data

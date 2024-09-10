@@ -3,7 +3,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import image_analysis, other_routes
+from app.api.routes import image_analysis, other_routes, feedback
 from app.core import config
 
 app = FastAPI()
@@ -24,6 +24,7 @@ app.add_middleware(
 # Include routers
 app.include_router(image_analysis.router)
 app.include_router(other_routes.router)
+app.include_router(feedback.router)  # Add this line
 
 
 @app.get("/")
