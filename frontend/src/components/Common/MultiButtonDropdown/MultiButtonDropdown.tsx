@@ -28,7 +28,7 @@ export const MultiButtonDropdown = ({ title, items, isInline }: MultiButtonDropd
         }`}
       >
         {title}
-        <Icon.BiChevronDown className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+        <Icon.BiChevronDown className="-mr-1 size-5 text-gray-400" aria-hidden="true" />
       </Menu.Button>
 
       <Transition

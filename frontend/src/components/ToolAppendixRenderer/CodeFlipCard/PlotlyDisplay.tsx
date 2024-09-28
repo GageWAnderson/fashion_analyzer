@@ -18,9 +18,9 @@ const PlotlyDisplay = (props: Props) => {
     layout: DATA_JSON.layout,
   } || { data: [], layout: {} }
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center">
+    <div className="flex size-full flex-col items-center justify-center">
       <Plot
-        className="flex h-full w-full flex-col items-center justify-center"
+        className="flex size-full flex-col items-center justify-center"
         data={data}
         layout={layout}
         style={{ width: "100%", height: "100%" }}

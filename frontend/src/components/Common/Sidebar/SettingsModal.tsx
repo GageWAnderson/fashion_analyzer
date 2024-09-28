@@ -69,7 +69,7 @@ export const SettingsModal = (props: Props) => {
       <div className="flex flex-col items-center justify-center rounded-lg bg-transparent px-cmd py-cxl dark:bg-base-100">
         <h3 className="m-0 p-0 !text-fluid-cmd font-bold">Settings</h3>
         <div className="daisydivider" />
-        <div className="flex h-full w-full flex-col gap-cmd">
+        <div className="flex size-full flex-col gap-cmd">
           <Input type="text" label="OpenAI API Key" value={openaiApiKey} onChange={(value) => setOpenaiApiKey(value)} />
           <Input type="text" label="OpenAI Org ID" value={openaiOrgId} onChange={(value) => setOpenaiOrgId(value)} />
           <Input

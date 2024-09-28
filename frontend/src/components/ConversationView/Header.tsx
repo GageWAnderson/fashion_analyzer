@@ -17,7 +17,7 @@ const Header = () => {
 
   return (
     <div
-      className="daisynavbar items-center justify-center border-b-[2px] bg-neutral p-csm dark:border-b-base-100 dark:!bg-base-200"
+      className="daisynavbar items-center justify-center border-b-2 bg-neutral p-csm dark:border-b-base-100 dark:!bg-base-200"
       data-cy={CONVERSATION_VIEW_SELECTORS.topbarWrapper}
     >
       <div className="absolute !right-csm !top-cmd z-[1000]">

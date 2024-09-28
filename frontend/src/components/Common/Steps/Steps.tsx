@@ -24,7 +24,7 @@ export const Steps = ({ steps, activeStepIndex, onStepClick }: StepsProps) => {
   }
 
   return (
-    <ul className="daisysteps daisysteps-horizontal h-full w-full overflow-visible lg:daisysteps-vertical lg:w-auto">
+    <ul className="daisysteps daisysteps-horizontal size-full overflow-visible lg:daisysteps-vertical lg:w-auto">
       {steps?.map((step, index) => {
         const positionClasses =
           index === 0
@@ -51,7 +51,7 @@ export const Steps = ({ steps, activeStepIndex, onStepClick }: StepsProps) => {
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
-                        className="h-3 w-3 shrink-0 stroke-current"
+                        className="size-3 shrink-0 stroke-current"
                       >
                         <path
                           strokeLinecap="round"

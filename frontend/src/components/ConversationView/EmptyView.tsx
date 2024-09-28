@@ -1,7 +1,3 @@
-import Image from "next/image"
-
-import { useTheme } from "next-themes"
-import { APPLICATION_TITLE, getMainLogoSrc } from "~/utils"
 import { CONVERSATION_VIEW_SELECTORS } from "./ConversationView.selectors"
 
 // examples are used to show some examples to the user.
@@ -21,11 +17,10 @@ const EmptyView = (props: Props) => {
 
   return (
     <div
-      className={`${className || ""} flex h-full w-full flex-col items-center justify-start text-black dark:text-black`}
+      className={`${className || ""} flex size-full flex-col items-center justify-start text-black dark:text-black`}
       data-cy={CONVERSATION_VIEW_SELECTORS.emptyChatMessageAreaWrapper}
     >
-      <div className="mb-8 flex w-96 max-w-full items-center justify-center font-medium leading-loose">
-      </div>
+      <div className="mb-8 flex w-96 max-w-full items-center justify-center font-medium leading-loose"></div>
       <div className="group mx-auto flex w-full max-w-full flex-row items-start justify-start rounded-lg bg-base-100 p-4">
         <div className="mb-4 w-full px-4 py-3">
           <h3 className="font-medium"> Can be used with any set of tools as a general purpose helpful chatbot!</h3>

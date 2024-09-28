@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { Markdown } from "~/components/CodeView/Markdown"
-import Icon from "../../../../CustomIcons/Icon"
 import { CONVERSATION_VIEW_SELECTORS } from "~/components/ConversationView/ConversationView.selectors"
+import Icon from "../../../../CustomIcons/Icon"
 
 interface Props {
   text: string
@@ -49,7 +49,7 @@ export const LLMResponse = (props: Props) => {
     <div className="mb-1 w-auto">
       {thought && !finalResponse && (
         <div className="mt-1 flex w-full flex-wrap" data-cy={CONVERSATION_VIEW_SELECTORS.chatResponseMarkdown}>
-          <span className="mb-1 mr-2 mt-1 h-auto w-6 text-accent">
+          <span className="my-1 mr-2 h-auto w-6 text-accent">
             <Icon.IoChatbubbleEllipsesOutline className="h-auto w-6" />
           </span>
           <div className="w-auto max-w-[calc(100%-2rem)]">

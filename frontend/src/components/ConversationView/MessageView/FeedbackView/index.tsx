@@ -75,7 +75,7 @@ const FeedbackView = (props: Props) => {
             </div>
           </div>
           <div className="border-t-2 border-dashed border-gray-400" />
-          <div className="my-2 flex h-full w-full flex-row items-center justify-between">
+          <div className="my-2 flex size-full flex-row items-center justify-between">
             <div className="w-2/3 pr-2">
               <label className="flex w-full flex-col items-start justify-start">
                 <span className="text-md mb-1 font-bold text-gray-600 dark:text-gray-400">
@@ -95,7 +95,7 @@ const FeedbackView = (props: Props) => {
                         : "bg-gray-500 text-gray-100 hover:bg-gray-700"
                     }`}
                   >
-                    <Icon.FiThumbsUp className="h-6 w-6" />
+                    <Icon.FiThumbsUp className="size-6" />
                   </button>
                 </Tooltip>
                 <Tooltip content={"Not good enough"} position="daisytooltip-top">
@@ -107,17 +107,17 @@ const FeedbackView = (props: Props) => {
                         : "bg-gray-500 text-gray-100 hover:bg-gray-700"
                     }`}
                   >
-                    <Icon.FiThumbsDown className="h-6 w-6" />
+                    <Icon.FiThumbsDown className="size-6" />
                   </button>
                 </Tooltip>
               </div>
             </div>
           </div>
-          <div className="flex h-full w-full flex-col items-start justify-start">
+          <div className="flex size-full flex-col items-start justify-start">
             <div className="dark:bg-bcg-dark mb-4 w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-700 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:text-gray-300">
               <div className="flex h-auto w-full flex-row items-end justify-between text-clip rounded-lg border dark:border-zinc-700">
                 <TextareaAutosize
-                  className="hide-scrollbar h-full w-full whitespace-pre-wrap break-all border-none bg-transparent py-2 pl-2 font-mono text-sm leading-6 outline-none"
+                  className="hide-scrollbar size-full whitespace-pre-wrap break-all border-none bg-transparent py-2 pl-2 font-mono text-sm leading-6 outline-none"
                   value={comment}
                   rows={5}
                   minRows={5}

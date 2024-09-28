@@ -224,7 +224,7 @@ const CodeFlipCard = (props: Props) => {
               {!isHidden && (
                 <Tooltip content={showCode ? ResultTitle : "Show code"} position="daisytooltip-top">
                   <button
-                    className="flex h-6 w-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100"
+                    className="flex size-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100"
                     onClick={() => setShowCode(!showCode)}
                     disabled={SUPPORT_EDITING_LANG.includes(language)}
                   >
@@ -237,7 +237,7 @@ const CodeFlipCard = (props: Props) => {
               <div className="ml-2">
                 <CSVLink data={executionResult?.rawResult} filename={filename} separator={separator}>
                   <Tooltip content="Download as CSV" position="daisytooltip-top">
-                    <button className="flex h-6 w-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100">
+                    <button className="flex size-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100">
                       <Icon.AiOutlineDownload className="h-auto w-full" />
                     </button>
                   </Tooltip>
@@ -248,7 +248,7 @@ const CodeFlipCard = (props: Props) => {
               <div className="ml-2">
                 <Tooltip content="Download as PNG" position="daisytooltip-top">
                   <button
-                    className="flex h-6 w-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100"
+                    className="flex size-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100"
                     onClick={handleGraphDownload}
                   >
                     <Icon.AiOutlineDownload className="h-auto w-full" />
@@ -259,7 +259,7 @@ const CodeFlipCard = (props: Props) => {
             <div className="ml-2">
               <Tooltip content={isHidden ? "Show" : "Collapse"} position="daisytooltip-top">
                 <button
-                  className="flex h-6 w-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100"
+                  className="flex size-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100"
                   onClick={() => setIsHidden(!isHidden)}
                 >
                   {isHidden ? (

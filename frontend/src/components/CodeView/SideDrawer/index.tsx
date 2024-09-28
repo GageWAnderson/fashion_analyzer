@@ -87,7 +87,7 @@ const SideDrawer = () => {
       )}
       onToggle={(isOpen) => queryStore.toggleDrawer(isOpen)}
     >
-      <div className="flex w-screen max-w-full flex-col items-start justify-start p-4 sm:w-[calc(60vw)] lg:w-[calc(50vw)] 2xl:w-[calc(40vw)] dark:text-gray-300">
+      <div className="flex w-screen max-w-full flex-col items-start justify-start p-4 dark:text-gray-300 sm:w-[calc(60vw)] lg:w-[calc(50vw)] 2xl:w-[calc(40vw)]">
         <h2 className="pb-cmd text-fluid-cmd font-bold">Execute SQL</h2>
         <>
           <div className="mt-4 flex w-full flex-row items-center justify-start">
@@ -97,7 +97,7 @@ const SideDrawer = () => {
           {showExecutionWarningBanner && <ExecutionWarningBanner className="mt-4 rounded-lg" />}
           <div className="mt-4 flex h-auto w-full flex-row items-end justify-between text-clip rounded-lg border bg-neutral px-2 dark:border-zinc-700 dark:bg-base-300">
             <TextareaAutosize
-              className="hide-scrollbar h-full w-full resize-none whitespace-pre-wrap break-all border-none bg-transparent py-2 pl-2 font-mono text-sm leading-6 outline-none"
+              className="hide-scrollbar size-full resize-none whitespace-pre-wrap break-all border-none bg-transparent py-2 pl-2 font-mono text-sm leading-6 outline-none"
               value={statement}
               rows={1}
               minRows={1}

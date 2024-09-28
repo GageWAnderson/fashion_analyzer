@@ -73,7 +73,7 @@ const MessageTextarea = (props: Props) => {
     <div className="flex h-auto w-full flex-row items-end justify-between rounded-lg border border-base-100 px-2 py-1">
       <TextareaAutosize
         ref={textareaRef}
-        className="hide-scrollbar h-full w-full resize-none border-none bg-transparent p-2 leading-6 outline-none"
+        className="hide-scrollbar size-full resize-none border-none bg-transparent p-2 leading-6 outline-none"
         placeholder={"Message the agent"}
         rows={1}
         minRows={1}

@@ -53,7 +53,7 @@ export const Tabs: FC<TabsProps> = ({ children, forcedActiveTab, classNames, fix
 
   const getButtonClasses = (label: string) =>
     clsx(
-      "w-full flex flex-1 items-center justify-center p-2 text-gray-700 w-full font-medium rounded-t-[10px] shadow-[rgba(50,50,93,0.25)_0px_6px_12px_-2px,_rgba(0,0,0,0.3)_0px_3px_7px_-3px] min-w-[75px] bg-neutral dark:bg-base-100 relative",
+      "size-full flex flex-1 items-center justify-center p-2 text-gray-700 font-medium rounded-t-[10px] shadow-[rgba(50,50,93,0.25)_0px_6px_12px_-2px,_rgba(0,0,0,0.3)_0px_3px_7px_-3px] min-w-[75px] bg-neutral dark:bg-base-100 relative",
       {
         "border-b-2 border-b-accent": activeTab === label,
       },

@@ -25,12 +25,12 @@ const ChatLanding: NextPage = () => {
         <meta name="FashionAgent" content="By Gage Anderson" />
         {/* <link rel="icon" href="/favicon.ico" TODO: Uncomment when you make an icon /> */}
       </Head>
-      <main className="flex h-full w-full flex-col bg-neutral dark:bg-base-300">
+      <main className="flex size-full flex-col bg-neutral dark:bg-base-300">
         <div className="sticky top-0 z-1 flex w-full flex-col items-start justify-start bg-accent dark:bg-accent dark:text-neutral">
           <TopWarningBanner />
         </div>
 
-        <div className="flex h-full w-full flex-row !overflow-hidden">
+        <div className="flex size-full flex-row !overflow-hidden">
           <ConversationSidebar />
           <ConversationView />
           <SideDrawer />

@@ -1,7 +1,6 @@
+import { useClickOutside } from "@react-hookz/web"
 import { AnimatePresence, motion } from "framer-motion"
 import { useEffect, useRef, useState } from "react"
-
-import { useClickOutside } from "@react-hookz/web"
 
 interface DrawerV2Props {
   side?: "left" | "right"
@@ -71,7 +70,7 @@ export const Drawer = ({
         {!open && colapsedHeader && (
           <motion.div
             className={`flex items-center justify-center bg-base-100 px-cxs py-clg dark:!bg-base-200 ${
-              side === "right" ? "border-l-[2px] dark:!border-l-base-100" : "border-r-[2px] dark:!border-r-base-100"
+              side === "right" ? "border-l-2 dark:!border-l-base-100" : "border-r-2 dark:!border-r-base-100"
             } 3xl:!min-w-[75px] daisydrawer-button !min-w-[35zpx] md:!min-w-[55px]`}
           >
             {colapsedHeader(toggle)}
@@ -94,8 +93,8 @@ export const Drawer = ({
                 side === "left" ? "left-0" : "right-0"
               } z-50 ${contentWrapperClasses} h-full bg-base-100 p-cmd dark:bg-base-200 ${
                 side === "left"
-                  ? "!z-[100] !border-l-neutral dark:border-r-[2px]  dark:!border-r-base-100"
-                  : "!border-l-neutral dark:border-l-[2px] dark:!border-l-base-100"
+                  ? "!z-100 !border-l-neutral dark:border-r-2  dark:!border-r-base-100"
+                  : "!border-l-neutral dark:border-l-2 dark:!border-l-base-100"
               }`}
               ref={ref}
             >

@@ -1,4 +1,3 @@
-import Image from "next/image"
 import { signOut } from "next-auth/react"
 import { useTheme } from "next-themes"
 import { useState } from "react"
@@ -8,8 +7,6 @@ import Icon from "~/components/CustomIcons/Icon"
 
 import { useConversationStore } from "~/stores"
 import { type Conversation } from "~/types"
-
-import { APPLICATION_TITLE, getMainLogoSrc, LOGO_SRC } from "~/utils"
 
 import { CONVERSATION_SIDEBAR_SELECTORS } from "./ConversationSidebar.selectors"
 import UpdateConversationModal from "./UpdateConversationModal"
@@ -53,13 +50,12 @@ const ConversationSidebar = () => {
         contentWrapperClasses="w-full max-w-[220px]"
         colapsedHeader={(toggle) => (
           <div
-            className="my-clg flex h-full w-full grow flex-col items-center justify-between gap-clg"
+            className="my-clg flex size-full grow flex-col items-center justify-between gap-clg"
             data-cy={CONVERSATION_SIDEBAR_SELECTORS.collapsedSidebarWrapper}
           >
-
             <div
-              className="flex h-full max-h-[calc(96%-60px)] w-full flex-col
-            items-center gap-csm overflow-auto px-c2xs"
+              className="flex size-full max-h-[calc(96%-60px)] flex-col items-center
+            gap-csm overflow-auto px-c2xs"
             >
               <Accordion
                 forceAccordionItemsToggle={true}
@@ -120,11 +116,7 @@ const ConversationSidebar = () => {
             </div>
           </div>
         )}
-        expandedHeader={
-          <div className="m-0 flex w-full justify-center">
-            Placeholder
-          </div>
-        }
+        expandedHeader={<div className="m-0 flex w-full justify-center">Placeholder</div>}
         footer={(toggle) => (
           <div className="flex w-full flex-col justify-center">
             <div className="daisydivider !m-0 py-cmd" />
