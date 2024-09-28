@@ -1,4 +1,4 @@
-__all__ = ["agent_router"]
+__all__ = ["router"]
 from functools import partial
 
 from fastapi import APIRouter
@@ -8,14 +8,20 @@ from app.schemas.chat import Conversation
 from utils.functional import ajoin
 from app.graphs.chat import ChatGraph
 from app.services.agent import agent_chat
-from app.dependencies import get_llm, get_tools
+from app.core.config import settings
+from app.services.llm import get_llm, get_tools
 
-agent_router = APIRouter()
+router = APIRouter()
 
-agent_chat = partial(agent_chat, ChatGraph.from_dependencies(get_llm(), get_tools()))
+agent_chat = partial(
+    agent_chat,
+    ChatGraph.from_dependencies(
+        get_llm(settings.OPENAI_MODEL, settings.OPENAI_API_KEY), get_tools()
+    ),
+)
 
 
-@agent_router.post("/agent")
+@router.post("/agent")
 async def agent(conversation: Conversation) -> StreamingResponse:
     return StreamingResponse(
         ajoin(
