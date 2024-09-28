@@ -46,6 +46,8 @@ pip install -r requirements.txt
 To start the frontend, run:
 ```bash
 cd frontend
+pnpm install
+pnpm run prisma:generate
 pnpm run dev
 ```
 

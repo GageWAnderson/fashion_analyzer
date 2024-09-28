@@ -1,20 +1,56 @@
-import type { Config } from "tailwindcss";
+import { type Config } from "tailwindcss"
 
-const config: Config = {
+import {
+  LIGHT_THEME,
+  DARK_THEME,
+  UI_LAYOUT_SPACINGS,
+  UI_FONT_SIZES,
+  NEG_UI_LAYOUT_SPACINGS,
+  UI_FLUID_FONT_SIZES,
+} from "./src/styles/themes"
+
+const defaultTheme = require("tailwindcss/defaultTheme")
+
+export default {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx}",
+    "./src/pages/**/*.{js,ts,jsx,tsx}",
+    "./src/components/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: ["class", '[data-theme="dark"]'],
   theme: {
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      zIndex: {
+        1: "1",
+        100: "100",
       },
+      fontFamily: {
+        sans: ["BCG Sans", ...defaultTheme.fontFamily.sans],
+        mono: [...defaultTheme.fontFamily.mono],
+        serif: ["BCG Serif", ...defaultTheme.fontFamily.serif],
+      },
+      spacing: { ...UI_LAYOUT_SPACINGS, ...NEG_UI_LAYOUT_SPACINGS },
+      fontSize: { ...UI_FONT_SIZES, ...UI_FLUID_FONT_SIZES },
     },
   },
-  plugins: [],
-};
-export default config;
+  plugins: [require("@tailwindcss/typography"), require("daisyui")],
+  daisyui: {
+    themes: [
+      {
+        light: {
+          ...LIGHT_THEME.colors,
+          ...LIGHT_THEME.extendedClasses,
+        },
+      },
+      {
+        dark: {
+          ...DARK_THEME.colors,
+          ...LIGHT_THEME.extendedClasses,
+        },
+      },
+    ],
+    prefix: "daisy",
+    base: false,
+    themeRoot: "*",
+  },
+} satisfies Config
