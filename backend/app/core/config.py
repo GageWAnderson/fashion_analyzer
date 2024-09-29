@@ -16,10 +16,15 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o"
     OPENAI_API_BASE: Optional[str] = None
 
+    OLLAMA_BASE_MODEL: str = "llama3.1"
+    OLLAMA_EMBEDDING_MODEL: str = "nomic-embed-text:latest"
+
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
     REDIS_PASSWORD: Optional[str] = None
+
+    QA_TOOL_LLM: str = "llama3.1"
 
     class Config:
         case_sensitive = True

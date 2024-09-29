@@ -1,8 +1,8 @@
-__all__ = ["router"]
+__all__ = ["agent_router"]
 
 from fastapi import APIRouter
-from api.v1.endpoints.agent import router
+from app.api.v1.endpoints.agent import agent_router
 
 router = APIRouter()
 
-router.include_router(router, prefix="/chat", tags=["chat"])
+router.include_router(agent_router, prefix="/chat", tags=["chat"])

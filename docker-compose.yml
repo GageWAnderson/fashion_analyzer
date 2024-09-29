@@ -11,7 +11,7 @@ services:
       - ./frontend/.env
 
   backend:
-    command: "poetry run uvicorn app.main:main --reload --port 9090"
+    command: "poetry run uvicorn app.main:app --reload --port 9090"
     build:
       context: ./backend
       dockerfile: Dockerfile

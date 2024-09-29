@@ -9,7 +9,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from contextlib import asynccontextmanager
 from langchain.globals import set_llm_cache
-from langchain.cache import RedisCache
+from langchain_community.cache import RedisCache
 from pydantic import ValidationError
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -108,11 +108,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(api.router)
-
-set_llm_cache(RedisCache(redis_=get_redis_client_sync()))
-
-
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the Fashion Analyzer API"}
+app.include_router(api.router, prefix=settings.API_V1_STR)

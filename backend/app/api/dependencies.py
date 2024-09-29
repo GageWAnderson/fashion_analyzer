@@ -1,6 +1,6 @@
 from redis import Redis as RedisSync
 from redis import Redis
-import aioredis
+from redis import asyncio as aioredis
 
 from app.core.config import settings
 
