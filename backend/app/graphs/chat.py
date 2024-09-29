@@ -10,6 +10,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langgraph.graph import StateGraph, START, END
 from langchain.schema import BaseMessage
 from langgraph.prebuilt import ToolExecutor, ToolInvocation
+from langgraph.graph.state import CompiledStateGraph
 
 
 class AgentState(TypedDict):
@@ -41,7 +42,7 @@ async def action(executor: ToolExecutor, state: AgentState) -> AgentState:
 
 
 class ChatGraph(BaseModel):
-    graph: StateGraph[AgentState]
+    graph: CompiledStateGraph
 
     @classmethod
     def from_dependencies(
@@ -53,8 +54,8 @@ class ChatGraph(BaseModel):
         graph.add_node("agent", partial(agent, llm.bind_tools(tools)))
         graph.add_node("action", partial(action, ToolExecutor(tools)))
         graph.add_edge(START, "agent")
-        graph.add_conditional_edge(
+        graph.add_conditional_edges(
             "agent", should_continue, {"continue": "action", "end": END}
         )
         graph.add_edge("action", "agent")
-        return cls(graph=graph.compile())
+        return graph.compile()
