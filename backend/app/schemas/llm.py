@@ -1,3 +1,3 @@
 from typing import Literal
 
-LLMType = Literal["gpt-4o", "lama3.1-8b-instruct"]
+LLMType = Literal["gpt-4o", "gpt-4o-mini", "llama3.1"]
