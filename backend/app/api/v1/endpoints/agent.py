@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.services.llm import get_llm
 from app.tools.qa import qa_tool
 from app.tools.search import search_tool
+from app.utils.runs import stop_run
 
 agent_router = APIRouter()
 
@@ -33,3 +34,11 @@ async def agent(conversation: Conversation) -> StreamingResponse:
         ),
         media_type="text/plain-text",
     )
+
+
+@agent_router.get("/run/{run_id}/cancel", response_model=bool)
+async def run_cancel(
+    run_id: str,
+) -> bool:
+    await stop_run(run_id)
+    return True

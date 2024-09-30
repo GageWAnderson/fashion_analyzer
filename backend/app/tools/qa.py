@@ -17,4 +17,5 @@ async def qa_tool(
     """This tool answers user questions from your long term memory.
     Use this tool when the question doesn't require data from the past year"""
     llm = get_llm(settings.OLLAMA_BASE_MODEL)
+    print(f"qa_tool: {input}")
     return await llm.ainvoke(input)

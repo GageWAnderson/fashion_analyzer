@@ -17,6 +17,7 @@ from langgraph.graph.state import CompiledStateGraph
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], operator.add]
 
+
 # TODO: Move this to a yaml config file
 SHOULD_CONTINUE_PROMPT = PromptTemplate(
     input_variables=["original_question", "last_message"],
@@ -24,31 +25,36 @@ SHOULD_CONTINUE_PROMPT = PromptTemplate(
 and the last message in the conversation:
 {last_message}
 
-Is the agent's task complete? Answer with 'Yes' if the task is done, or 'No' if more actions or information are needed."""
+Is the agent's task complete? Answer with 'Yes' if the task is done, or 'No' if more actions or information are needed.""",
 )
 
-async def should_continue(llm: BaseLanguageModel, state: AgentState) -> str:
-    messages = state.get("messages", [])
-    if not messages:
-        return "continue"
 
-    original_question = messages[
-        0
-    ].content  # TODO: Come up with a better way to track the original question in state
-    last_message = messages[-1]
+# async def should_continue(llm: BaseLanguageModel, state: AgentState) -> str:
+#     messages = state.get("messages", [])
+#     if not messages:
+#         return "continue"
 
-    prompt = SHOULD_CONTINUE_PROMPT.format(
-        original_question=original_question,
-        last_message=last_message.content
-    )
+#     original_question = messages[
+#         0
+#     ].content  # TODO: Come up with a better way to track the original question in state
+#     last_message = messages[-1]
 
-    response = await llm.ainvoke([HumanMessage(content=prompt)])
-    print(response.content.strip().lower())
-    return "end" if "yes" in response.content.strip().lower() else "continue"
+#     prompt = SHOULD_CONTINUE_PROMPT.format(
+#         original_question=original_question, last_message=last_message.content
+#     )
+
+#     response = await llm.ainvoke([HumanMessage(content=prompt)])
+#     print(response.content.strip().lower())
+#     return "end" if "yes" in response.content.strip().lower() else "continue"
+
+def should_continue(state: AgentState) -> str:
+    return "continue" if state["messages"][-1].tool_calls else "end"
 
 
 async def agent(model: BaseLanguageModel, state: AgentState) -> AgentState:
-    return {"messages": [await model.ainvoke(state["messages"])]}
+    response = await model.ainvoke(state["messages"])
+    print(f"response: {response}")
+    return {"messages": [response]}
 
 
 async def action(executor: ToolExecutor, state: AgentState) -> AgentState:
@@ -57,7 +63,7 @@ async def action(executor: ToolExecutor, state: AgentState) -> AgentState:
         raise ValueError("Last message does not contain tool calls")
 
     tool_call = last_message.tool_calls[0]
-    print(tool_call)
+    print(f"tool_call: {tool_call}")
     return {
         "messages": [
             ToolMessage(
@@ -84,13 +90,16 @@ class ChatGraph:
         llm: BaseLanguageModel,
         tools: list[StructuredTool],
     ) -> "ChatGraph":
-        should_continue_fn = partial(should_continue, llm)
+        # should_continue_fn = partial(should_continue, llm)
         graph = StateGraph(AgentState)
+
         graph.add_node("agent", partial(agent, llm.bind_tools(tools)))
         graph.add_node("action", partial(action, ToolExecutor(tools)))
+
         graph.add_edge(START, "agent")
+        graph.add_edge("action", "agent")
         graph.add_conditional_edges(
-            "action", should_continue_fn, path_map={"continue": "agent", "end": END}
+            "agent", should_continue, path_map={"continue": "action", "end": END}
         )
-        graph.add_edge("agent", "action")
+
         return graph.compile()

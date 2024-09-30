@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     OPENAI_API_KEY: Optional[str] = None
     OPENAI_ORGANIZATION: Optional[str] = None
-    OPENAI_MODEL: str = "gpt-4o"
+    OPENAI_MODEL: str = "gpt-4o-mini"
     OPENAI_API_BASE: Optional[str] = None
 
     OLLAMA_BASE_MODEL: str = "llama3.1"

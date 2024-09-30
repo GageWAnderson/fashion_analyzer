@@ -5,7 +5,7 @@ from typing import Any, Callable
 from pydantic import BaseModel, Field
 
 from langchain_core.callbacks import AsyncCallbackHandler
-
+from langchain.schema import LLMResult
 
 class DataTypes(Enum):
     ACTION = "action"
@@ -52,7 +52,7 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
             ).model_dump_json()
         )
 
-    async def on_llm_end(self, **kwargs: Any) -> None:
+    async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
                 data=Signals.END.value, data_type=DataTypes.SIGNAL, metadata=kwargs
@@ -66,7 +66,7 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
             ).model_dump_json()
         )
 
-    async def on_tool_start(self, serialized: dict[str, Any], **kwargs: Any) -> None:
+    async def on_tool_start(self, serialized: dict[str, Any], input_str: str, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
                 data=(tool_name := serialized["name"]),
@@ -76,7 +76,7 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
             ).model_dump_json()
         )
 
-    async def on_tool_end(self, **kwargs: Any) -> None:
+    async def on_tool_end(self, output: Any, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
                 data=Signals.TOOL_END.value,

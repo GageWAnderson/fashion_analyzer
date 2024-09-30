@@ -13,6 +13,8 @@ def get_llm(
     match llm:
         case "gpt-4o":
             return ChatOpenAI(model="gpt-4o", api_key=api_key, temperature=temperature)
+        case "gpt-4o-mini":
+            return ChatOpenAI(model="gpt-4o-mini", api_key=api_key, temperature=temperature)
         case "llama3.1":
             return ChatOllama(model="llama3.1", temperature=temperature)
         # TODO: Add more Ollama models
