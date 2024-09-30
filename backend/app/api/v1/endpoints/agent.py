@@ -20,7 +20,7 @@ agent_chat = partial(
     agent_chat,
     ChatGraph.from_dependencies(
         get_llm(settings.OLLAMA_BASE_MODEL),
-        [qa_tool, search_tool],
+        [qa_tool, search_tool, rag_tool],
     ),
 )
 

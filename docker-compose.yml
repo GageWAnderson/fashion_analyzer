@@ -74,6 +74,18 @@ services:
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
 
+  crawler:
+    build: 
+      context: ./crawler
+      dockerfile: Dockerfile
+    depends_on:
+      - chroma
+    environment:
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+    volumes:
+      - ./crawler_data:/app/data
+
 volumes:
   postgres_data:
   caddy_data:

@@ -26,7 +26,7 @@ def agent_chat(
         await queue.put(data)
 
     asyncio.create_task(
-        agent.ainvoke(
+        agent.ainvoke( # TODO: Enable LangGraph streaming with graph.stream()
             {"messages": conversation.load_messages()},
             config={
                 "callbacks": [
