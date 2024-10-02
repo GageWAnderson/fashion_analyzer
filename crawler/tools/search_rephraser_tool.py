@@ -4,7 +4,7 @@ from crawler.schemas.config import CrawlerConfig
 from crawler.schemas.state import WebCrawlerState
 from crawler.schemas.search import SearchCategories
 from crawler.utils.json import extract_json_from_markdown
-from crawler.utils.llm import llm
+from crawler.utils.llm import get_llm
 from crawler.schemas.search import update_search_categories
 
 
@@ -13,6 +13,7 @@ def search_rephraser_tool(config: CrawlerConfig, state: WebCrawlerState):
     search_rephraser_prompt_template = PromptTemplate.from_template(
         config.search_rephraser_prompt
     )
+    llm = get_llm(config.llm)
     while retries < config.search_plan_retry_limit:
         try:
             new_search_categories = llm.invoke(

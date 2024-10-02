@@ -1,110 +1,109 @@
-crawler:
-  llm: llama3.1
-  embedding_model: nomic-embed-text
-  vector_store_collection_name: fashion_trends
-  search_plan_retry_limit: 3
-  num_search_iterations: 5
-  vector_search_type: mmr
-  vector_search_k: 10
-  vector_search_fetch_k: 5
-  init_message: Search the internet for the latest trends in women's and men's fashion.
-  men_fashion_categories:
-    - Suits and Blazers
-    - Shirts (Casual and Dress)
-    - Pants (Jeans, Chinos, Dress Pants)
-    - T-shirts and Polos
-    - Footwear (Sneakers, Dress Shoes, Boots)
-    - Outerwear (Jackets, Coats, Vests)
-    - Accessories (Watches, Belts, Sunglasses)
-    - Sportswear and Activewear
-    - Underwear and Socks
-    - Bags (Backpacks, Briefcases, Messenger Bags)
-  women_fashion_categories:
-    - Dresses and Skirts
-    - Tops and Blouses
-    - Pants and Leggings
-    - Footwear (Heels, Flats, Boots)
-    - Outerwear (Coats, Jackets, Blazers)
-    - Handbags and Purses
-    - Jewelry and Accessories
-    - Sportswear and Activewear
-    - Lingerie and Sleepwear
-    - Sunglasses and Hats
-  is_done_prompt: |
-    You are an expert fashion designer. Your goal is to summarize the latest trends in fashion for the average magazine reader.
-    The current year is {current_year} and the month is {current_month}. 
-    You are required by your manager to summarize all common fashion categories.
-    You are a diligent designer, so you have precisely tracked the state of your notes so far.
+llm: llama3.1
+embedding_model: nomic-embed-text
+vector_store_collection_name: fashion_trends
+search_plan_retry_limit: 3
+num_search_iterations: 5
+vector_search_type: mmr
+vector_search_k: 10
+vector_search_fetch_k: 5
+init_message: Search the internet for the latest trends in women's and men's fashion.
+men_fashion_categories:
+  - Suits and Blazers
+  - Shirts (Casual and Dress)
+  - Pants (Jeans, Chinos, Dress Pants)
+  - T-shirts and Polos
+  - Footwear (Sneakers, Dress Shoes, Boots)
+  - Outerwear (Jackets, Coats, Vests)
+  - Accessories (Watches, Belts, Sunglasses)
+  - Sportswear and Activewear
+  - Underwear and Socks
+  - Bags (Backpacks, Briefcases, Messenger Bags)
+women_fashion_categories:
+  - Dresses and Skirts
+  - Tops and Blouses
+  - Pants and Leggings
+  - Footwear (Heels, Flats, Boots)
+  - Outerwear (Coats, Jackets, Blazers)
+  - Handbags and Purses
+  - Jewelry and Accessories
+  - Sportswear and Activewear
+  - Lingerie and Sleepwear
+  - Sunglasses and Hats
+is_done_prompt: |
+  You are an expert fashion designer. Your goal is to summarize the latest trends in fashion for the average magazine reader.
+  The current year is {current_year} and the month is {current_month}. 
+  You are required by your manager to summarize all common fashion categories.
+  You are a diligent designer, so you have precisely tracked the state of your notes so far.
 
-    CATEGORIES:
-    {categories}
-                                                           
-    STATE:
-    {state}
+  CATEGORIES:
+  {categories}
+                                                          
+  STATE:
+  {state}
 
-    Your job is to decide whether you are done summarizing all the categories.
-    Return "true" if you are done and "false" if you are not done.
+  Your job is to decide whether you are done summarizing all the categories.
+  Return "true" if you are done and "false" if you are not done.
 
-    ANSWER:
-  search_planner_prompt: |
-    You are an expert fashion designer and data scientist. Your goal is to search the internet for the latest fashion trends to summarize them.
-    The current year is {current_year} and the month is {current_month}. 
-    Your goal is to come up with a some JSON-formatted internet search queries to learn about the following categories.
+  ANSWER:
+search_planner_prompt: |
+  You are an expert fashion designer and data scientist. Your goal is to search the internet for the latest fashion trends to summarize them.
+  The current year is {current_year} and the month is {current_month}. 
+  Your goal is to come up with a some JSON-formatted internet search queries to learn about the following categories.
 
-    CATEGORIES:
-    {categories}
+  CATEGORIES:
+  {categories}
 
-    You are a diligent designer, so you have precisely tracked the state of your notes so far.
-    Don't search about a category if it's already present the below state.
-    STATE:
-    {state}
+  You are a diligent designer, so you have precisely tracked the state of your notes so far.
+  Don't search about a category if it's already present the below state.
+  STATE:
+  {state}
 
-    You are also an adept software engineer, who is fluent in JSON. Respond with your search queries in JSON format.
-    Return your JSON answer in markdown format leading with ```json and ending with ```
-    Follow the below JSON format when making your answer.
-    REQUIRED JSON FORMAT:
-    ```json
-    {{
-        "plans": [
-            {{
-                category: "example category",
-                queries: ["example query 1", "example query 2", ...]
-            }}
-        ]
-    }}
-    ```
+  You are also an adept software engineer, who is fluent in JSON. Respond with your search queries in JSON format.
+  Return your JSON answer in markdown format leading with ```json and ending with ```
+  Follow the below JSON format when making your answer.
+  REQUIRED JSON FORMAT:
+  ```json
+  {{
+      "plans": [
+          {{
+              category: "example category",
+              queries: ["example query 1", "example query 2", ...]
+          }}
+      ]
+  }}
+  ```
 
-    SEARCH QUERIES JSON:
-  search_rephraser_prompt: |
-    You are an expert fashion designer. Your goal is to come up with a list of relevant fashion categories for each season.
+  SEARCH QUERIES JSON:
+search_rephraser_prompt: |
+  You are an expert fashion designer. Your goal is to come up with a list of relevant fashion categories for each season.
 
-    You are also an adept software engineer, who is fluent in JSON. Respond with your search queries in JSON format.
-    Return your JSON answer in markdown format leading with ```json and ending with ```
-    Follow the below JSON format when making your answer.
-    REQUIRED JSON FORMAT:
-    ```json
-    {{
-        "categories": [
-            "category_1",
-            "category_2",
-            ...
-        ]
-    }}
-    ```
+  You are also an adept software engineer, who is fluent in JSON. Respond with your search queries in JSON format.
+  Return your JSON answer in markdown format leading with ```json and ending with ```
+  Follow the below JSON format when making your answer.
+  REQUIRED JSON FORMAT:
+  ```json
+  {{
+      "categories": [
+          "category_1",
+          "category_2",
+          ...
+      ]
+  }}
+  ```
 
-    FASHION CATEGORIES JSON:
-  fashion_summarizer_prompt: |
-    You are an expert fashion designer and social media influencer. Your goal is to summarize the latest trends in fashion.
-    You have done a significant amount of research in the past month ({current_month}, {current_year}) to inform your search.
+  FASHION CATEGORIES JSON:
+fashion_summarizer_prompt: |
+  You are an expert fashion designer and social media influencer. Your goal is to summarize the latest trends in fashion.
+  You have done a significant amount of research in the past month ({current_month}, {current_year}) to inform your search.
 
-    Given the research findings about fashion trends below:
-    {retrieved_chunks}
+  Given the research findings about fashion trends below:
+  {retrieved_chunks}
 
-    Write a concise summary about the trends. Make sure your answer touches on all the trends and is as informative as possible!
+  Write a concise summary about the trends. Make sure your answer touches on all the trends and is as informative as possible!
 
-    Summary:
-  chunk_format: |
-    Note:
-      {page_content}
-    Citation:
-      {metadata}
+  Summary:
+chunk_format: |
+  Note:
+    {page_content}
+  Citation:
+    {metadata}

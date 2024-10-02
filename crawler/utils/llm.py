@@ -1,3 +1,4 @@
+import os
 from typing import Optional, Literal
 
 from langchain_openai import ChatOpenAI
@@ -7,13 +8,16 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_core.embeddings import Embeddings
 
+from crawler.schemas.config import config
 
 LLMType = Literal["gpt-4o", "gpt-4o-mini", "llama3.1"]
 EmbeddingModelType = Literal["text-embedding-3-small", "nomic-embed-text"]
 
 
 def get_llm(
-    llm: LLMType, api_key: Optional[str] = None, temperature: float = 0.0
+    llm: LLMType,
+    api_key: Optional[str] = None,
+    temperature: float = 0.0,
 ) -> BaseLanguageModel:
     match llm:
         case "gpt-4o":
@@ -23,7 +27,11 @@ def get_llm(
                 model="gpt-4o-mini", api_key=api_key, temperature=temperature
             )
         case "llama3.1":
-            return ChatOllama(model="llama3.1", temperature=temperature)
+            return ChatOllama(
+                base_url=config.ollama_url,
+                model="llama3.1",
+                temperature=temperature,
+            )
         # TODO: Add more Ollama models
         # TODO: Add vLLM models
         case _:
@@ -39,6 +47,10 @@ def get_embedding_model(
         case "text-embedding-3-small":
             return OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key)
         case "nomic-embed-text":
-            return OllamaEmbeddings(model="nomic-embed-text", temperature=temperature)
+            return OllamaEmbeddings(
+                base_url=config.ollama_url,
+                model="nomic-embed-text",
+                temperature=temperature,
+            )
         case _:
             raise ValueError(f"Invalid embedding model: {embedding_model}")

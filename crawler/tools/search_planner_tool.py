@@ -7,7 +7,7 @@ from crawler.schemas.state import WebCrawlerState
 from crawler.schemas.search import SearchPlans
 from crawler.utils.json import extract_json_from_markdown
 from crawler.utils.time import get_current_year_and_month
-from crawler.utils.llm import llm
+from crawler.utils.llm import get_llm
 
 
 # TODO Refactor into a LangChain tool with a from_config method
@@ -16,6 +16,7 @@ def search_planner_tool(config: CrawlerConfig, state: WebCrawlerState):
     search_planner_prompt_template = PromptTemplate.from_template(
         config.search_planner_prompt
     )
+    llm = get_llm(config.llm)
 
     def search_planner_prompt(state: WebCrawlerState) -> PromptTemplate:
         current_year, current_month = get_current_year_and_month()

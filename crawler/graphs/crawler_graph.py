@@ -3,6 +3,7 @@ from functools import partial
 from pydantic import BaseModel
 from langgraph.graph import StateGraph
 from langgraph.graph import START, END
+from langgraph.graph.state import CompiledStateGraph
 
 from crawler.schemas.state import WebCrawlerState
 from crawler.tools.search_tool import search_tool
@@ -14,13 +15,16 @@ from crawler.schemas.config import CrawlerConfig
 
 
 class CrawlerGraph(BaseModel):
-    graph: StateGraph
+    graph: CompiledStateGraph
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @classmethod
     def from_config(cls, config: CrawlerConfig) -> "CrawlerGraph":
         graph_builder = StateGraph(WebCrawlerState)
 
-        vector_store = ChromaVectorStore.from_config(config)
+        vector_store = ChromaVectorStore.from_config(config).vector_store
 
         # TODO: Refactor tools to be LangChain Tool objects that have a .from_config method
         graph_builder.add_node("search_planner", partial(search_planner_tool, config))
@@ -33,7 +37,7 @@ class CrawlerGraph(BaseModel):
         graph_builder.add_edge("search_planner", "search_tool")
         graph_builder.add_conditional_edges(
             "search_tool",
-            search_done_tool,
+            partial(search_done_tool, config),
             path_map={
                 "true": END,
                 "false": "search_planner",

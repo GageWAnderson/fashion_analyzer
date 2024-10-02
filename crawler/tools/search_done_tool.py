@@ -1,6 +1,6 @@
 from crawler.schemas.config import CrawlerConfig
 from crawler.schemas.state import WebCrawlerState
-from crawler.utils.llm import llm
+from crawler.utils.llm import get_llm
 
 from langchain_core.prompts import PromptTemplate
 from crawler.utils.time import get_current_year_and_month
@@ -14,6 +14,7 @@ def search_done_tool(config: CrawlerConfig, state: WebCrawlerState) -> bool:
 
     # TODO: Fine-tune an LLM to check if a search is complete
     is_done_prompt_template = PromptTemplate.from_template(config.is_done_prompt)
+    llm = get_llm(config.llm)
 
     def is_done_prompt(state: WebCrawlerState) -> PromptTemplate:
         current_year, current_month = get_current_year_and_month()

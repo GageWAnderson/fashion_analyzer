@@ -13,8 +13,8 @@ services:
   backend:
     command: "poetry run uvicorn app.main:app --reload --port 9090"
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     ports:
       - "9090:9090"
     depends_on:
@@ -75,21 +75,24 @@ services:
     command: server /data --console-address ":9001"
 
   crawler:
+    command: "poetry run crawler"
     build: 
-      context: ./crawler
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: crawler/Dockerfile
     depends_on:
       - chroma
     environment:
-      - CHROMA_HOST=chroma
-      - CHROMA_PORT=8000
+      - CHROMA_HOST=${CHROMA_HOST}
+      - CHROMA_PORT=${CHROMA_PORT}
+      - OLLAMA_URL=${OLLAMA_URL}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
     volumes:
       - ./crawler_data:/app/data
 
   crawler-scheduler:
     image: mcuadros/ofelia:latest
     depends_on:
-      - crawler 
+      - crawler
     command: daemon --docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

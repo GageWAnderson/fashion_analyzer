@@ -18,10 +18,16 @@ langchain = "^0.3.1"
 case-converter = "^1.1.0"
 redis = "^5.1.0"
 fastapi-cache2 = "^0.2.2"
-
+langchain-community = "^0.3.1"
+langchain-openai = "^0.2.1"
+langchain-core = "^0.3.7"
+langchain-chroma = "^0.1.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
+
+[tool.poetry.scripts]
+crawler = "crawler.crawler:main"
 
 [build-system]
 requires = ["poetry-core"]

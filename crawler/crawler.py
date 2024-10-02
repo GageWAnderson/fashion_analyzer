@@ -12,9 +12,9 @@ logger = setup_logging()
 
 def crawl():
     logger.info("Starting crawl process")
-    config = CrawlerConfig.from_yaml("crawler/config.yml")
+    config = CrawlerConfig.from_yaml("crawler/config/config.yml")
     logger.debug(f"Loaded config: {config}")
-    graph = CrawlerGraph.from_config(config)
+    graph = CrawlerGraph.from_config(config).graph
 
     init_msg = [HumanMessage(content=config.init_message)]
     logger.info(f"Initial message: {config.init_message}")
@@ -26,9 +26,11 @@ def crawl():
     logger.info("Crawl process completed")
 
 
-if __name__ == "__main__":
+def main():
     try:
+        logger.info("Starting crawl process")
         crawl()
+        logger.info("Crawl process completed")
     except Exception as e:
         logger.error(f"An error occurred during the crawl process: {str(e)}")
         logger.error(traceback.format_exc())
