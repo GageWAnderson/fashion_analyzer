@@ -3,7 +3,7 @@ import traceback
 from langchain_core.messages import HumanMessage
 
 from crawler.graphs.crawler_graph import CrawlerGraph
-from crawler.schemas.config import CrawlerConfig
+from crawler.schemas.config import config
 from crawler.config.logging_config import setup_logging
 
 # Set up logging
@@ -11,9 +11,6 @@ logger = setup_logging()
 
 
 def crawl():
-    logger.info("Starting crawl process")
-    config = CrawlerConfig.from_yaml("crawler/config/config.yml")
-    logger.debug(f"Loaded config: {config}")
     graph = CrawlerGraph.from_config(config).graph
 
     init_msg = [HumanMessage(content=config.init_message)]
@@ -29,6 +26,7 @@ def crawl():
 def main():
     try:
         logger.info("Starting crawl process")
+        logger.info(f"Config: {config}")
         crawl()
         logger.info("Crawl process completed")
     except Exception as e:

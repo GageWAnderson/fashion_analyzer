@@ -1,6 +1,9 @@
 # Use an official Python runtime as the base image
 FROM python:3.12-slim
 
+# Enable fast streaming of unbuffered output
+ENV PYTHONUNBUFFERED=1
+
 # Set the working directory in the container
 WORKDIR /app
 

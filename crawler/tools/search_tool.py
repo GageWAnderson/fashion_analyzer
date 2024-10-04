@@ -2,6 +2,7 @@ from langchain_core.messages import AIMessage
 from langgraph.graph.message import add_messages
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_community.vectorstores import VectorStore
+
 from crawler.schemas.state import WebCrawlerState
 from crawler.schemas.search import increment_search_iterations
 from crawler.utils.tavily import save_tavily_res_to_vector_db
@@ -18,7 +19,7 @@ def search_tool(vector_store: VectorStore, state: WebCrawlerState):
         print(f"Search plan: {plan}")
         tavily_search = TavilySearchResults()
         for query in plan.queries:
-            res = AIMessage(content=tavily_search.invoke({"query": query}))
+            res = AIMessage(content=tavily_search.invoke({"query": query})) # TODO: make res more readable
             if "HTTPError" in res.content:
                 raise ValueError(f"HTTP exception in calling Tavily API: {res}")
             save_tavily_res_to_vector_db(res, vector_store)

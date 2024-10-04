@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import Optional, Literal
 
 from langchain_openai import ChatOpenAI
@@ -12,6 +13,8 @@ from crawler.schemas.config import config
 
 LLMType = Literal["gpt-4o", "gpt-4o-mini", "llama3.1"]
 EmbeddingModelType = Literal["text-embedding-3-small", "nomic-embed-text"]
+
+logger = logging.getLogger(__name__)
 
 
 def get_llm(

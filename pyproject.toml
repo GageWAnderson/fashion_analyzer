@@ -6,7 +6,7 @@ authors = ["Gage Anderson <gage@gageanderson.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.13"
 fastapi = "^0.112.2"
 langgraph = "^0.2.16"
 uvicorn = "^0.30.6"
@@ -22,6 +22,9 @@ langchain-community = "^0.3.1"
 langchain-openai = "^0.2.1"
 langchain-core = "^0.3.7"
 langchain-chroma = "^0.1.4"
+minio = "^7.2.9"
+unstructured = {extras = ["all-docs"], version = "^0.15.13"}
+unstructured-ingest = "^0.0.23"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
