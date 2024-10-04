@@ -1,0 +1,184 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    env_file:
+      - ./frontend/.env
+    networks:
+      - frontend_network
+
+  backend:
+    command: "poetry run uvicorn app.main:app --reload --port 9090"
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "9090:9090"
+    depends_on:
+      - redis
+      - db
+      - chroma
+    env_file:
+      - .env
+    networks:
+      - backend_network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - backend_network
+
+  caddy:
+    container_name: caddy_reverse_proxy
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "8000:8000"
+      - "443:443"
+    env_file: ".env"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - frontend_network
+      - backend_network
+
+  db:
+    image: postgres:13
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend_network
+
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    ports:
+      - "8080:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    networks:
+      - backend_network
+      - crawler_network
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - backend_network
+      - crawler_network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    command: ollama pull llama3.1:latest
+    networks:
+      - backend_network
+      - crawler_network
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    env_file:
+      - .env
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - backend_network
+
+  minio-setup:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - ./scripts/init_minio.sh:/scripts/init_minio.sh
+    entrypoint: >
+      /bin/sh -c "chmod +x /scripts/init_minio.sh && /scripts/init_minio.sh"
+    networks:
+      - backend_network
+
+  crawler:
+    command: "poetry run crawler"
+    build: 
+      context: .
+      dockerfile: crawler/Dockerfile
+    depends_on:
+      - chroma
+    env_file:
+      - .env
+    environment:
+      - CHROMA_HOST=${CHROMA_HOST}
+      - CHROMA_PORT=${CHROMA_PORT}
+      - OLLAMA_URL=${OLLAMA_URL}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+    volumes:
+      - ./crawler_data:/app/data
+    networks:
+      - crawler_network
+      - backend_network
+
+  crawler-scheduler:
+    image: mcuadros/ofelia:latest
+    depends_on:
+      - crawler
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      ofelia.job-run.crawl-job.schedule: "@every 168h"
+      ofelia.job-run.crawl-job.container: "crawler"
+    networks:
+      - crawler_network
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+  chroma_data:
+  minio_data:
+  ollama_data:
+
+networks:
+  frontend_network:
+    driver: bridge
+  backend_network:
+    driver: bridge
+  crawler_network:
+    driver: bridge
