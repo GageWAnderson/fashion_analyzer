@@ -74,27 +74,33 @@ services:
       - backend_network
       - crawler_network
 
-  # TODO: Re-enable Ollama containerization on NVIDIA GPU systems, Mac processors don't support it
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   ports:
-  #     - "11434:11434"
-  #   volumes:
-  #     - ollama_data:/root/.ollama
-  #   networks:
-  #     - backend_network
-  #     - crawler_network
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - backend_network
+      - crawler_network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
-  # ollama-init:
-  #   image: ollama/ollama:latest
-  #   depends_on:
-  #     - ollama
-  #   volumes:
-  #     - ollama_data:/root/.ollama
-  #   command: ollama pull llama3.1:latest
-  #   networks:
-  #     - backend_network
-  #     - crawler_network
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      - ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    command: ollama pull llama3.1:latest
+    networks:
+      - backend_network
+      - crawler_network
 
   minio:
     image: minio/minio
