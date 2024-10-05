@@ -10,4 +10,5 @@ async def search_tool(
     input: Annotated[str, "A search query to search Tavily for."]
 ) -> StructuredTool:
     """This tool searches Tavily for information relevant to the user's query."""
-    return TavilySearchResults(query=input)
+    tavily_search = TavilySearchResults()
+    return tavily_search.invoke({"query": input})

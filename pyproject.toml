@@ -30,6 +30,7 @@ unstructured-ingest = "^0.0.23"
 pytest = "^8.3.2"
 ruff = "^0.6.9"
 pre-commit = "^3.8.0"
+debugpy = "^1.8.6"
 
 [tool.poetry.scripts]
 crawler = "crawler.crawler:main"

@@ -16,6 +16,7 @@ from crawler.config.config import CrawlerConfig
 
 class CrawlerGraph(BaseModel):
     graph: CompiledStateGraph
+    # TODO: Add a callback handler here if LangGraph doesn't support the AsyncStreamingCallbackHandler
 
     class Config:
         arbitrary_types_allowed = True

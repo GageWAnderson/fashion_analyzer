@@ -2,16 +2,14 @@ from functools import partial
 from typing import Annotated, Sequence, TypedDict
 import operator
 
-
+from pydantic import BaseModel
 from langchain.tools import StructuredTool
-from langchain.prompts import PromptTemplate
 from langchain_core.messages import ToolMessage, HumanMessage
 from langchain_core.language_models import BaseLanguageModel
 from langgraph.graph import StateGraph, START, END
-from langchain.schema import BaseMessage, SystemMessage
+from langchain.schema import BaseMessage
 from langgraph.prebuilt import ToolExecutor, ToolInvocation
 from langgraph.graph.state import CompiledStateGraph
-from backend.app.config.config import backend_config
 from common.utils.llm import get_llm_from_config
 from backend.app.config.config import BackendConfig
 
@@ -44,6 +42,7 @@ class AgentState(TypedDict):
 
 
 def should_continue(state: AgentState) -> str:
+    # TODO: Stream LLM end signal once callback handler is added to the config
     return "continue" if state["messages"][-1].tool_calls else "end"
 
 
@@ -62,17 +61,8 @@ async def agent(
     if not last_user_message:
         raise ValueError("No user message found in the conversation")
 
-    # Format the tool_call_prompt with the user's question and available tools
-    prompt = PromptTemplate(
-        template=backend_config.tool_call_prompt, input_variables=["question", "tools"]
-    )
-    formatted_prompt = prompt.format(
-        question=last_user_message.content,
-        tools="\n".join(f"- {tool.name}: {tool.description}" for tool in tools),
-    )
-
-    # Invoke the model with the formatted prompt
-    response = await model.ainvoke([SystemMessage(content=formatted_prompt)])
+    # TODO: Stream the tool selection, but not the text response from the agent
+    response = await model.ainvoke(state["messages"])
     return {"messages": state["messages"] + [response]}
 
 
@@ -103,7 +93,7 @@ async def action(executor: ToolExecutor, state: AgentState) -> AgentState:
     }
 
 
-class ChatGraph:
+class ChatGraph(BaseModel):
     """
     This graph implements a simle ReACT style agent.
     The tool calling LLM first selects the appropriate tool to call given the user's question.
@@ -112,6 +102,10 @@ class ChatGraph:
     """
 
     graph: CompiledStateGraph
+    # TODO: Add a callback handler here if LangGraph doesn't support the AsyncStreamingCallbackHandler
+
+    class Config:
+        arbitrary_types_allowed = True
 
     @classmethod
     def from_config(
@@ -124,7 +118,11 @@ class ChatGraph:
 
         graph.add_node(
             "agent",
-            partial(agent, get_llm_from_config(config).bind_tools(tools), tools),
+            partial(
+                agent,
+                get_llm_from_config(config, config.tool_call_llm).bind_tools(tools),
+                tools,
+            ),
         )
         graph.add_node("action", partial(action, ToolExecutor(tools)))
 
@@ -134,4 +132,4 @@ class ChatGraph:
             "agent", should_continue, path_map={"continue": "action", "end": END}
         )
 
-        return graph.compile()
+        return cls(graph=graph.compile())
