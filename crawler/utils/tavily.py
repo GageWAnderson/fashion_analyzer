@@ -22,7 +22,7 @@ def save_tavily_res_to_vector_db(
         "content"
     ]  # TODO: Find a better way to break the content down into finer chunks
     search_url = tavily_res.content[0]["url"]
-    
+
     metadata = VectorMetadata(
         query=search_msg,
         url=search_url,
@@ -30,8 +30,8 @@ def save_tavily_res_to_vector_db(
         chunk_id=chunk_id,
         timestamp=datetime.now().isoformat(),
         source_type="web_page",
-        content_summary="", # TODO: Generate a summary at crawl time with the LLM
-        relevance_score=0.85, # TODO: Generate a relevance score at crawl time with the LLM
+        content_summary="",  # TODO: Generate a summary at crawl time with the LLM
+        relevance_score=0.85,  # TODO: Generate a relevance score at crawl time with the LLM
     ).model_dump(mode="json")
     logger.debug(f"Metadata: {metadata}")
 
@@ -49,7 +49,11 @@ def extract_tavily_res_content(url: str) -> str:
     Extracts all images and other media from the Tavily search results and stores them in Minio.
     Returns a presigned URL to use in the metadata of the document the images etc. were extracted from.
     """
-    elements = partition_web_page(url)
+    try:
+        elements = partition_web_page(url)
+    except Exception:
+        logger.exception("Error partitioning web page:")
+        return ""
     res = []
     for element in elements:
         if isinstance(element, Image):

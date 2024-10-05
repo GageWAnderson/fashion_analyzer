@@ -17,7 +17,8 @@ def search_rephraser_tool(config: CrawlerConfig, state: WebCrawlerState):
     search_rephraser_prompt_template = PromptTemplate.from_template(
         config.search_rephraser_prompt
     )
-    llm = get_llm_from_config(config)
+    llm = get_llm_from_config(config, config.tool_call_llm)
+
     while retries < config.search_plan_retry_limit:
         try:
             new_search_categories = llm.invoke(

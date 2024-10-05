@@ -1,4 +1,4 @@
-
+from typing import Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
@@ -10,8 +10,15 @@ from common.config.base_config import BaseConfig
 
 def get_llm_from_config(
     config: BaseConfig,
+    llm: Optional[str] = None,
 ) -> BaseLanguageModel:
-    match config.llm:
+    """
+    Get a LLM from the config. If a LLM is not specified, the default LLM is used.
+    """
+    if llm is None:
+        llm = config.llm
+
+    match llm:
         case "gpt-4o":
             return ChatOpenAI(
                 model="gpt-4o",

@@ -1,5 +1,6 @@
 llm: llama3.1
 llm_temperature: 0.0
+tool_call_llm: llama3-groq-tool-use:latest
 embedding_model: nomic-embed-text
 vector_store_collection_name: fashion_trends
 search_plan_retry_limit: 3
@@ -110,3 +111,15 @@ chunk_format: |
     {page_content}
   Citation:
     {metadata}
+tool_call_prompt: |
+  You are a helpful assistant tasked with selecting the right tool to answer a user's question.
+  You have access to the following tools:
+
+  Tools:
+  {tools}
+
+  Select the tool that best fits the user's question.
+  User Question:
+  {question}
+
+  JSON Tool Call Output:
