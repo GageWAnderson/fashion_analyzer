@@ -1,4 +1,5 @@
 import yaml
+import os
 
 from pydantic_settings import BaseSettings
 from pydantic import Field
@@ -50,7 +51,15 @@ class BaseConfig(BaseSettings):
 
     @classmethod
     def from_yaml(cls, yaml_path: str):
-        load_dotenv()
+        load_dotenv(override=True)
         with open(yaml_path, "r") as file:
             yaml_data = yaml.safe_load(file)
-        return cls(**yaml_data)
+
+        env_vars = {
+            key: os.environ.get(key)
+            for key in cls.__annotations__
+            if key.isupper() and key in os.environ
+        }
+
+        config_data = {**yaml_data, **env_vars}
+        return cls(**config_data)

@@ -1,7 +1,6 @@
-import json
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, computed_field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
 
@@ -27,15 +26,6 @@ class VectorMetadata(BaseModel):
         default=None, description="Relevance score of this vector to the original query"
     )
 
-    @field_validator("image_urls")
-    def validate_image_urls(cls, v):
-        if v is not None:
-            try:
-                json.loads(v)
-            except json.JSONDecodeError:
-                raise ValueError("image_urls must be a valid JSON string")
-        return v
-
     @field_validator("source_type")
     def validate_source_type(cls, v):
         if v not in SourceType.__args__:
@@ -44,12 +34,16 @@ class VectorMetadata(BaseModel):
             )
         return v
 
-    @computed_field
-    @property
-    def media_urls(self) -> Optional[list[str]]:
-        if self.image_urls is None:
-            return None
-        return json.loads(self.image_urls)
+    # TODO: Expand this to support other media types
+    @field_validator("image_urls")
+    def validate_image_urls(cls, v):
+        if v is not None:
+            urls = v.split(",")
+            for url in urls:
+                url = url.strip()
+                if url and not url.startswith(("http://", "https://")):
+                    raise ValueError(f"Invalid URL: {url}")
+        return v
 
     class Config:
         populate_by_name = True
