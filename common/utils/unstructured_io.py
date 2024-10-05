@@ -1,5 +1,5 @@
 from unstructured.partition.html import partition_html
-from unstructured.documents.elements import Element, Image
+from unstructured.documents.elements import Element
 
 
 def partition_web_page(url: str) -> list[Element]:

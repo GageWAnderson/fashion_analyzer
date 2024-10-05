@@ -40,6 +40,12 @@ cd backend
 pip install -r requirements.txt
 ```
 
+#### Pre-commit Hooks
+To install pre-commit hooks, run:
+```bash
+poetry run pre-commit install
+```
+
 ### Running the Application
 
 #### Start the Frontend

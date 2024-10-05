@@ -57,6 +57,13 @@ const ConversationSidebar = () => {
               className="flex size-full max-h-[calc(96%-60px)] flex-col items-center
             gap-csm overflow-auto px-c2xs"
             >
+              <button
+                className="daisybtn daisybtn-square glass !w-full capitalize hover:daisybtn-accent"
+                onClick={handleCreateConversation}
+                data-cy={CONVERSATION_SIDEBAR_SELECTORS.collapsedAddChatButton}
+              >
+                <Icon.AiOutlinePlus className="text-fluid-cmd" />
+              </button>
               <Accordion
                 forceAccordionItemsToggle={true}
                 accordionID="conversation-list"
@@ -73,11 +80,10 @@ const ConversationSidebar = () => {
                           <div
                             key={conversation.id}
                             className={`group group flex w-full cursor-pointer
-                     flex-row justify-center rounded-lg border border-transparent p-0 py-csm hover:bg-accent dark:hover:bg-accent ${
-                       conversation.id === conversationStore.currentConversationId
-                         ? "border-gray-200 bg-accent font-medium text-neutral dark:bg-accent"
-                         : "dark:text-gray-300"
-                     }`}
+                     flex-row justify-center rounded-lg border border-transparent p-0 py-csm hover:bg-accent dark:hover:bg-accent ${conversation.id === conversationStore.currentConversationId
+                                ? "border-gray-200 bg-accent font-medium text-neutral dark:bg-accent"
+                                : "dark:text-gray-300"
+                              }`}
                             onClick={() => handleConversationSelect(conversation)}
                             data-cy={CONVERSATION_SIDEBAR_SELECTORS.collapsedChatListItem}
                           >
@@ -93,14 +99,6 @@ const ConversationSidebar = () => {
                   },
                 ]}
               />
-
-              <button
-                className="daisybtn daisybtn-square glass !w-full capitalize hover:daisybtn-accent"
-                onClick={handleCreateConversation}
-                data-cy={CONVERSATION_SIDEBAR_SELECTORS.collapsedAddChatButton}
-              >
-                <Icon.AiOutlinePlus className="text-fluid-cmd" />
-              </button>
             </div>
 
             <div className="w-full">
@@ -152,6 +150,14 @@ const ConversationSidebar = () => {
           className="my-clg flex w-full grow flex-col gap-clg"
           data-cy={CONVERSATION_SIDEBAR_SELECTORS.expandedSidebarWrapper}
         >
+          <button
+            className="daisybtn daisybtn-accent capitalize text-neutral"
+            onClick={handleCreateConversation}
+            data-cy={CONVERSATION_SIDEBAR_SELECTORS.expandedAddChatButton}
+          >
+            <Icon.AiOutlinePlus className="text-fluid-cmd" />
+            <>New chat</>
+          </button>
           <Accordion
             forceAccordionItemsToggle={true}
             accordionID="conversation-list"
@@ -168,11 +174,10 @@ const ConversationSidebar = () => {
                       <div
                         key={conversation.id}
                         className={`group group flex w-full cursor-pointer
-                     flex-row justify-center rounded-lg border border-transparent px-cxs py-csm hover:bg-accent dark:hover:bg-accent ${
-                       conversation.id === conversationStore.currentConversationId
-                         ? "border-gray-200 bg-accent font-medium text-neutral dark:bg-accent"
-                         : "dark:text-gray-300"
-                     }`}
+                     flex-row justify-center rounded-lg border border-transparent px-cxs py-csm hover:bg-accent dark:hover:bg-accent ${conversation.id === conversationStore.currentConversationId
+                            ? "border-gray-200 bg-accent font-medium text-neutral dark:bg-accent"
+                            : "dark:text-gray-300"
+                          }`}
                         onClick={() => handleConversationSelect(conversation)}
                         data-cy={CONVERSATION_SIDEBAR_SELECTORS.expandedChatListItem}
                       >
@@ -183,9 +188,8 @@ const ConversationSidebar = () => {
                         )}
 
                         <span
-                          className={`max-w-full grow truncate break-all group-hover:text-neutral ${
-                            conversation.id === conversationStore.currentConversationId ? "!text-neutral" : ""
-                          }`}
+                          className={`max-w-full grow truncate break-all group-hover:text-neutral ${conversation.id === conversationStore.currentConversationId ? "!text-neutral" : ""
+                            }`}
                         >
                           {conversation.title || "SmartSmileGuide"}
                         </span>
@@ -226,15 +230,6 @@ const ConversationSidebar = () => {
               },
             ]}
           />
-
-          <button
-            className="daisybtn daisybtn-accent capitalize text-neutral"
-            onClick={handleCreateConversation}
-            data-cy={CONVERSATION_SIDEBAR_SELECTORS.expandedAddChatButton}
-          >
-            <Icon.AiOutlinePlus className="text-fluid-cmd" />
-            <>New chat</>
-          </button>
         </div>
       </Drawer>
 

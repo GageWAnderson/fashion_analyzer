@@ -29,5 +29,5 @@ def main():
         logger.debug(f"Config: {config}")
         crawl()
         logger.info("Crawl process completed")
-    except Exception as e:
-        logger.exception(f"An error occurred during the crawl process")
+    except Exception:
+        logger.exception("An error occurred during the crawl process")

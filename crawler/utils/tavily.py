@@ -5,9 +5,8 @@ from datetime import datetime
 
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage
-from langchain_core.messages import AIMessage
 from langchain_community.vectorstores import VectorStore
-from unstructured.documents.elements import Element, Image
+from unstructured.documents.elements import Image
 
 from common.utils.minio import minio_put_object
 from common.utils.unstructured_io import partition_web_page

@@ -2,7 +2,6 @@ from functools import partial
 from typing import Annotated, Sequence, TypedDict
 import operator
 
-from pydantic import BaseModel
 
 from langchain.tools import StructuredTool
 from langchain.prompts import PromptTemplate
@@ -65,7 +64,7 @@ async def agent(
 
     # Format the tool_call_prompt with the user's question and available tools
     prompt = PromptTemplate(
-        template=config.tool_call_prompt, input_variables=["question", "tools"]
+        template=backend_config.tool_call_prompt, input_variables=["question", "tools"]
     )
     formatted_prompt = prompt.format(
         question=last_user_message.content,

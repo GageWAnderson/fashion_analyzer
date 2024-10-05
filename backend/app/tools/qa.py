@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from langchain_core.tools import tool
@@ -5,9 +6,8 @@ from langchain_core.tools import StructuredTool
 
 from common.utils.llm import get_llm_from_config
 from backend.app.config.config import backend_config
-from common.logging import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @tool

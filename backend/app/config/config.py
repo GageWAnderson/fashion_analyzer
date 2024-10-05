@@ -1,8 +1,3 @@
-import yaml
-import os
-from pydantic_settings import BaseSettings
-from pydantic import Field
-from dotenv import load_dotenv
 
 from common.config.base_config import BaseConfig
 

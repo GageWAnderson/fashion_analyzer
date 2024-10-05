@@ -1,4 +1,3 @@
-from typing import Optional
 
 from langchain_openai import ChatOpenAI
 from langchain_core.embeddings import Embeddings
@@ -6,7 +5,6 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_core.language_models import BaseLanguageModel
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 
-from common.schemas.llm import LLMType, EmbeddingModelType
 from common.config.base_config import BaseConfig
 
 

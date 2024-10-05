@@ -36,8 +36,8 @@ def search_planner_tool(config: CrawlerConfig, state: WebCrawlerState):
             logger.debug(f"Extracted JSON = {extracted_json}")
             search_plan = SearchPlans.model_validate_json(extracted_json)
             return {"messages": state["messages"], "search_plans": search_plan}
-        except Exception as e:
-            logger.exception(f"Retrying search plan extraction")
+        except Exception:
+            logger.exception("Retrying search plan extraction")
             retries += 1
 
     raise ValueError(

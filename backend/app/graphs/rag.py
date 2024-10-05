@@ -6,11 +6,8 @@ from pydantic import BaseModel
 
 from langchain.tools import StructuredTool
 from langchain.prompts import PromptTemplate
-from langchain_core.messages import ToolMessage, HumanMessage
 from langchain_core.language_models import BaseLanguageModel
 from langgraph.graph import StateGraph, START, END
-from langchain.schema import BaseMessage
-from langgraph.prebuilt import ToolExecutor, ToolInvocation
 from langgraph.graph.state import CompiledStateGraph
 from langchain_community.vectorstores import VectorStore
 from langchain_core.documents import Document
@@ -86,8 +83,8 @@ class RagGraph:
         graph = StateGraph(RagGraphState)
 
         graph.add_node("retrieve", partial(retrieve, vector_store.as_retriever()))
-        graph.add_node("grade_docs", partial(grade_docs, llm))
-        graph.add_node("generate", partial(generate, llm))
+        graph.add_node("grade_docs", partial(grade_docs, config.llm))
+        graph.add_node("generate", partial(generate, config.llm))
 
         graph.add_edge(START, "retrieve")
         graph.add_edge("retrieve", "grade_docs")

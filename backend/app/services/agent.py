@@ -3,7 +3,6 @@ import asyncio
 from typing import AsyncGenerator
 from backend.app.schemas.chat import Conversation
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler, StreamingData
-from backend.app.utils.functional import compose
 from backend.app.graphs.chat import ChatGraph
 
 

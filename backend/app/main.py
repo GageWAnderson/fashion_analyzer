@@ -11,7 +11,6 @@ from contextlib import asynccontextmanager
 from langchain.globals import set_llm_cache
 from langchain_community.cache import RedisCache
 from pydantic import ValidationError
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.config.config import backend_config
@@ -36,7 +35,7 @@ async def user_id_identifier(request: Request) -> str:
                 try:
                     payload = jwt.decode(
                         token,
-                        config.secret_key,
+                        backend_config.secret_key,
                         algorithms=["HS256"],
                     )
                 except (
