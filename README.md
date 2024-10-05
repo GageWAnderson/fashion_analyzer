@@ -78,3 +78,7 @@ TODO: Implement
 ## Contributing
 
 We welcome contributions to the Fashion Analyzer project! If you have any ideas or suggestions, please feel free to open an issue or submit a pull request.
+
+## References
+- [LangGraph](https://www.langchain.com/langgraph)
+- [Ollama + LangGraph](https://www.youtube.com/watch?v=Nfk99Fz8H9k)

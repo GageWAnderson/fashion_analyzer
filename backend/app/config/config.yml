@@ -1,0 +1,28 @@
+llm: llama3.1
+tool_call_llm: llama3-groq-tool-use
+embedding_model: nomic-embed-text
+vector_store_collection_name: fashion_trends
+search_plan_retry_limit: 3
+num_search_iterations: 5
+vector_search_type: mmr
+vector_search_k: 10
+vector_search_fetch_k: 5
+logging_dir: ../logs
+should_continue_prompt: |
+  Given the user's original question: "{original_question}"
+  and the last message in the conversation:
+  {last_message}
+
+  Is the agent's task complete? Answer with 'Yes' if the task is done, or 'No' if more actions or information are needed.
+tool_call_prompt: |
+  You are a helpful assistant tasked with selecting the right tool to answer a user's question.
+  You have access to the following tools:
+
+  Tools:
+  {tools}
+
+  Select the tool that best fits the user's question.
+  User Question:
+  {question}
+
+  JSON Tool Call Output:

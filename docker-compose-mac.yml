@@ -19,7 +19,7 @@ services:
       dockerfile: backend/Dockerfile
     ports:
       - "9090:9090"
-      # - "11434:11434"
+      - "11436:11434"
     depends_on:
       - redis
       - db
@@ -28,6 +28,8 @@ services:
       - .env
     networks:
       - backend_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   redis:
     image: redis:alpine

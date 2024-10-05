@@ -14,7 +14,7 @@ from pydantic import ValidationError
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
+from app.core.config import config
 from app.api.v1 import api
 from app.api.dependencies import get_redis_client, get_redis_client_sync
 
@@ -36,7 +36,7 @@ async def user_id_identifier(request: Request) -> str:
                 try:
                     payload = jwt.decode(
                         token,
-                        settings.SECRET_KEY,
+                        config.secret_key,
                         algorithms=["HS256"],
                     )
                 except (
@@ -92,10 +92,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.API_VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    docs_url=f"{settings.API_V1_STR}/docs",
+    title=config.project_name,
+    version=config.api_version,
+    openapi_url=f"{config.api_v1_str}/openapi.json",
+    docs_url=f"{config.api_v1_str}/docs",
     lifespan=lifespan,
 )
 
@@ -108,4 +108,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(api.router, prefix=settings.API_V1_STR)
+app.include_router(api.router, prefix=config.api_v1_str)

@@ -8,18 +8,19 @@ from app.schemas.chat import Conversation
 from app.utils.async_iteration import ajoin
 from app.graphs.chat import ChatGraph
 from app.services.agent import agent_chat
-from app.core.config import settings
+from app.core.config import config
 from app.services.llm import get_llm
 from app.tools.qa import qa_tool
 from app.tools.search import search_tool
+from app.tools.rag import rag_tool
 from app.utils.runs import stop_run
 
 agent_router = APIRouter()
 
 agent_chat = partial(
     agent_chat,
-    ChatGraph.from_dependencies(
-        get_llm(settings.OLLAMA_BASE_MODEL),
+    ChatGraph.from_config(
+        config,
         [qa_tool, search_tool, rag_tool],
     ),
 )

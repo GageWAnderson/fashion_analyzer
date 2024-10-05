@@ -16,6 +16,9 @@ from langchain_community.vectorstores import VectorStore
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import RunnableConfig
+from langchain_core.tools import tool
+
+from app.core.config import BackendConfig
 
 
 class RagGraphState(TypedDict):
@@ -75,9 +78,9 @@ class RagGraph:
     graph: CompiledStateGraph
 
     @classmethod
-    def from_dependencies(
+    def from_config(
         cls,
-        llm: BaseLanguageModel,
+        config: BackendConfig,
         vector_store: VectorStore,
     ) -> "RagGraph":
         graph = StateGraph(RagGraphState)
@@ -92,3 +95,17 @@ class RagGraph:
         graph.add_edge("generate", END)
 
         return graph.compile()
+
+
+@tool
+async def rag_tool(
+    graph: RagGraph,
+    input: Annotated[
+        str, "A basic question from the user that you can answer quickly from memory."
+    ],
+) -> StructuredTool:
+    """
+    Answers questions about the most current fashion trends you have gathered from the internet
+    in the past year. Use this tool when your user wants the most up-to-date advice and trends.
+    """
+    return graph.graph.ainvoke({"question": input})
