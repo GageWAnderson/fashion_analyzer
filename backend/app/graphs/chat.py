@@ -12,7 +12,7 @@ from langgraph.graph import StateGraph, START, END
 from langchain.schema import BaseMessage, SystemMessage
 from langgraph.prebuilt import ToolExecutor, ToolInvocation
 from langgraph.graph.state import CompiledStateGraph
-from app.core.config import config
+from app.config.config import config
 from app.services.llm import get_llm
 from app.schemas.config import BackendConfig
 

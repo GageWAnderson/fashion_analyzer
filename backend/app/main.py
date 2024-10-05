@@ -14,7 +14,7 @@ from pydantic import ValidationError
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import config
+from app.config.config import config
 from app.api.v1 import api
 from app.api.dependencies import get_redis_client, get_redis_client_sync
 

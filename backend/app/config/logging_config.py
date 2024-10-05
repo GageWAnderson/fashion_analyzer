@@ -2,7 +2,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 
-from crawler.schemas.config import CrawlerConfig, config
+from crawler.config.config import CrawlerConfig, config
 
 
 def setup_logging(config: CrawlerConfig):

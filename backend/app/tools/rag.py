@@ -5,7 +5,7 @@ from langchain_core.tools import StructuredTool
 
 from app.graphs.rag import RagGraph
 from app.services.llm import get_llm
-from app.core.config import config
+from app.config.config import config
 from app.db.vector_store import ChromaVectorStore
 
 

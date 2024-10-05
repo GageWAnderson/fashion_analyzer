@@ -8,7 +8,7 @@ from app.schemas.chat import Conversation
 from app.utils.async_iteration import ajoin
 from app.graphs.chat import ChatGraph
 from app.services.agent import agent_chat
-from app.core.config import config
+from app.config.config import config
 from app.services.llm import get_llm
 from app.tools.qa import qa_tool
 from app.tools.search import search_tool

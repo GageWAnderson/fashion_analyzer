@@ -2,7 +2,7 @@ from redis import Redis as RedisSync
 from redis import Redis
 from redis import asyncio as aioredis
 
-from app.core.config import config
+from app.config.config import config
 
 
 def get_redis_client_sync() -> RedisSync:

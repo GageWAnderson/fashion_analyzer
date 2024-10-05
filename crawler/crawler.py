@@ -3,7 +3,7 @@ import traceback
 from langchain_core.messages import HumanMessage
 
 from crawler.graphs.crawler_graph import CrawlerGraph
-from crawler.schemas.config import config
+from crawler.config.config import config
 from crawler.config.logging_config import setup_logging
 
 # Set up logging

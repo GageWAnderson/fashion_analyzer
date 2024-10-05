@@ -2,8 +2,8 @@ from datetime import timedelta
 from typing import BinaryIO
 import uuid
 
-from crawler.db.minio import get_minio_client, MinioResponse
-from crawler.schemas.config import config
+from common.db.minio import get_minio_client, MinioResponse
+from crawler.config.config import config
 
 
 def minio_presigned_get_object(bucket_name: str, object_name: str) -> str:

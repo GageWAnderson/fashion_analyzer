@@ -1,6 +1,6 @@
 from langchain_core.prompts import PromptTemplate
 
-from crawler.schemas.config import CrawlerConfig
+from crawler.config.config import CrawlerConfig
 from crawler.schemas.state import WebCrawlerState
 from crawler.schemas.search import SearchCategories
 from crawler.utils.json import extract_json_from_markdown

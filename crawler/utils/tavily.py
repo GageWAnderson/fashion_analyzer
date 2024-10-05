@@ -10,7 +10,7 @@ from langchain_community.vectorstores import VectorStore
 from unstructured.documents.elements import Element, Image
 
 from crawler.utils.minio import minio_put_object
-from crawler.utils.unstructured_io import partition_web_page
+from common.utils.unstructured_io import partition_web_page
 from crawler.schemas.vector_metadata import VectorMetadata
 
 logger = logging.getLogger(__name__)

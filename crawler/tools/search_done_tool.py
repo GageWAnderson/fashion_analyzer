@@ -1,9 +1,9 @@
-from crawler.schemas.config import CrawlerConfig
+from crawler.config.config import CrawlerConfig
 from crawler.schemas.state import WebCrawlerState
 from crawler.utils.llm import get_llm
 
 from langchain_core.prompts import PromptTemplate
-from crawler.utils.time import get_current_year_and_month
+from common.utils.time import get_current_year_and_month
 
 
 def search_done_tool(config: CrawlerConfig, state: WebCrawlerState) -> bool:

@@ -1,7 +1,7 @@
 import json
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, computed_field
 from typing import Optional
 
 
@@ -35,6 +35,21 @@ class VectorMetadata(BaseModel):
             except json.JSONDecodeError:
                 raise ValueError("image_urls must be a valid JSON string")
         return v
+
+    @field_validator("source_type")
+    def validate_source_type(cls, v):
+        if v not in SourceType.__args__:
+            raise ValueError(
+                f"Invalid source_type. Must be one of: {', '.join(SourceType.__args__)}"
+            )
+        return v
+
+    @computed_field
+    @property
+    def media_urls(self) -> Optional[list[str]]:
+        if self.image_urls is None:
+            return None
+        return json.loads(self.image_urls)
 
     class Config:
         allow_population_by_field_name = True

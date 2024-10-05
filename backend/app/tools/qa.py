@@ -5,7 +5,7 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import StructuredTool
 
 from app.services.llm import get_llm
-from app.core.config import config
+from app.config.config import config
 
 
 @tool

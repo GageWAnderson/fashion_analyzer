@@ -1,26 +1,17 @@
-import os
-import logging
-from typing import Optional, Literal
+from typing import Optional
 
 from langchain_openai import ChatOpenAI
-from langchain_core.language_models import BaseLanguageModel
-from langchain_ollama import ChatOllama
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.embeddings import OllamaEmbeddings
 from langchain_core.embeddings import Embeddings
+from langchain_openai import OpenAIEmbeddings
+from langchain_core.language_models import BaseLanguageModel
+from langchain_ollama import ChatOllama, OllamaEmbeddings
 
-from crawler.schemas.config import config
-
-LLMType = Literal["gpt-4o", "gpt-4o-mini", "llama3.1"]
-EmbeddingModelType = Literal["text-embedding-3-small", "nomic-embed-text"]
-
-logger = logging.getLogger(__name__)
+from common.schemas.llm import LLMType, EmbeddingModelType
+from common.config.base_config import base_config
 
 
 def get_llm(
-    llm: LLMType,
-    api_key: Optional[str] = None,
-    temperature: float = 0.0,
+    llm: LLMType, api_key: Optional[str] = None, temperature: float = 0.0
 ) -> BaseLanguageModel:
     match llm:
         case "gpt-4o":
@@ -31,9 +22,13 @@ def get_llm(
             )
         case "llama3.1":
             return ChatOllama(
-                base_url=config.ollama_url,
+                base_url=base_config.ollama_url,
                 model="llama3.1",
                 temperature=temperature,
+            )
+        case "llama3-groq-tool-use":
+            return ChatOllama(
+                model="llama3-groq-tool-use:latest", temperature=temperature
             )
         # TODO: Add more Ollama models
         # TODO: Add vLLM models
@@ -51,7 +46,7 @@ def get_embedding_model(
             return OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key)
         case "nomic-embed-text":
             return OllamaEmbeddings(
-                base_url=config.ollama_url,
+                base_url=base_config.ollama_url,
                 model="nomic-embed-text",
                 temperature=temperature,
             )
