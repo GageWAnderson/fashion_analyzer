@@ -1,11 +1,13 @@
 from typing import Annotated
 
 from langchain_core.tools import tool
-from langchain_core.language_models import BaseLanguageModel
 from langchain_core.tools import StructuredTool
 
-from app.services.llm import get_llm
-from app.config.config import config
+from common.utils.llm import get_llm_from_config
+from backend.app.config.config import backend_config
+from common.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 @tool
@@ -16,6 +18,6 @@ async def qa_tool(
 ) -> StructuredTool:
     """This tool answers user questions from your long term memory.
     Use this tool when the question doesn't require data from the past year"""
-    llm = get_llm(config.OLLAMA_BASE_MODEL)
-    print(f"qa_tool: {input}")
+    llm = get_llm_from_config(backend_config)
+    logger.info(f"qa_tool: {input}")
     return await llm.ainvoke(input)

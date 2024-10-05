@@ -18,7 +18,7 @@ from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
-from app.config.config import BackendConfig
+from backend.app.config.config import BackendConfig
 
 
 class RagGraphState(TypedDict):

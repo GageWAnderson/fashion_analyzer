@@ -1,4 +1,5 @@
 llm: llama3.1
+llm_temperature: 0.0
 embedding_model: nomic-embed-text
 vector_store_collection_name: fashion_trends
 search_plan_retry_limit: 3
@@ -7,7 +8,7 @@ vector_search_type: mmr
 vector_search_k: 10
 vector_search_fetch_k: 5
 minio_presigned_url_expiry_days: 365 # Images will be out of date after a year
-logging_dir: ../logs
+logging_dir: logs
 init_message: Search the internet for the latest trends in women's and men's fashion.
 men_fashion_categories:
   - Suits and Blazers

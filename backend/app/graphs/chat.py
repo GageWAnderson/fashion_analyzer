@@ -12,9 +12,9 @@ from langgraph.graph import StateGraph, START, END
 from langchain.schema import BaseMessage, SystemMessage
 from langgraph.prebuilt import ToolExecutor, ToolInvocation
 from langgraph.graph.state import CompiledStateGraph
-from app.config.config import config
-from app.services.llm import get_llm
-from app.schemas.config import BackendConfig
+from backend.app.config.config import backend_config
+from common.utils.llm import get_llm_from_config
+from backend.app.config.config import BackendConfig
 
 
 class AgentState(TypedDict):
@@ -125,7 +125,7 @@ class ChatGraph:
 
         graph.add_node(
             "agent",
-            partial(agent, get_llm(config.tool_call_llm).bind_tools(tools), tools),
+            partial(agent, get_llm_from_config(config).bind_tools(tools), tools),
         )
         graph.add_node("action", partial(action, ToolExecutor(tools)))
 

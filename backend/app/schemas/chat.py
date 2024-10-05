@@ -7,7 +7,7 @@ from uuid import UUID
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel, Field, StrictBool, StrictFloat, StrictInt
 
-from app.schemas.common import CamelCaseModel
+from backend.app.schemas.common import CamelCaseModel
 
 LangchainMessage = Union[
     AIMessage,

@@ -2,14 +2,11 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 
-from crawler.config.config import CrawlerConfig, config
-
+from crawler.config.config import CrawlerConfig
 
 def setup_logging(config: CrawlerConfig):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(os.path.dirname(script_dir))
-    log_dir = os.path.join(project_root, config.logging_dir)
-    
+    log_dir = os.path.abspath(config.logging_dir)
+
     os.makedirs(log_dir, exist_ok=True)
 
     root_logger = logging.getLogger()

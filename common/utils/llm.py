@@ -7,48 +7,53 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 
 from common.schemas.llm import LLMType, EmbeddingModelType
-from common.config.base_config import base_config
+from common.config.base_config import BaseConfig
 
 
-def get_llm(
-    llm: LLMType, api_key: Optional[str] = None, temperature: float = 0.0
+def get_llm_from_config(
+    config: BaseConfig,
 ) -> BaseLanguageModel:
-    match llm:
+    match config.llm:
         case "gpt-4o":
-            return ChatOpenAI(model="gpt-4o", api_key=api_key, temperature=temperature)
+            return ChatOpenAI(
+                model="gpt-4o",
+                api_key=config.openai_api_key,
+                temperature=config.llm_temperature,
+            )
         case "gpt-4o-mini":
             return ChatOpenAI(
-                model="gpt-4o-mini", api_key=api_key, temperature=temperature
+                model="gpt-4o-mini",
+                api_key=config.openai_api_key,
+                temperature=config.llm_temperature,
             )
         case "llama3.1":
             return ChatOllama(
-                base_url=base_config.ollama_url,
+                base_url=config.ollama_url,
                 model="llama3.1",
-                temperature=temperature,
+                temperature=config.llm_temperature,
             )
         case "llama3-groq-tool-use":
             return ChatOllama(
-                model="llama3-groq-tool-use:latest", temperature=temperature
+                model="llama3-groq-tool-use:latest", temperature=config.llm_temperature
             )
         # TODO: Add more Ollama models
         # TODO: Add vLLM models
         case _:
-            raise ValueError(f"Invalid LLM: {llm}")
+            raise ValueError(f"Invalid LLM: {config.llm}")
 
 
-def get_embedding_model(
-    embedding_model: EmbeddingModelType,
-    api_key: Optional[str] = None,
-    temperature: float = 0.0,
+def get_embedding_model_from_config(
+    config: BaseConfig,
 ) -> Embeddings:
-    match embedding_model:
+    match config.embedding_model:
         case "text-embedding-3-small":
-            return OpenAIEmbeddings(model="text-embedding-3-small", api_key=api_key)
+            return OpenAIEmbeddings(
+                model="text-embedding-3-small", api_key=config.openai_api_key
+            )
         case "nomic-embed-text":
             return OllamaEmbeddings(
-                base_url=base_config.ollama_url,
+                base_url=config.ollama_url,
                 model="nomic-embed-text",
-                temperature=temperature,
             )
         case _:
-            raise ValueError(f"Invalid embedding model: {embedding_model}")
+            raise ValueError(f"Invalid embedding model: {config.embedding_model}")

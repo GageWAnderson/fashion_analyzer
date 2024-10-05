@@ -1,10 +1,10 @@
 import asyncio
 
 from typing import AsyncGenerator
-from app.schemas.chat import Conversation
-from app.utils.streaming import AsyncStreamingCallbackHandler, StreamingData
-from app.utils.functional import compose
-from app.graphs.chat import ChatGraph
+from backend.app.schemas.chat import Conversation
+from backend.app.utils.streaming import AsyncStreamingCallbackHandler, StreamingData
+from backend.app.utils.functional import compose
+from backend.app.graphs.chat import ChatGraph
 
 
 def agent_chat(

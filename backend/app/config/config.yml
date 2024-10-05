@@ -1,5 +1,6 @@
 llm: llama3.1
 tool_call_llm: llama3-groq-tool-use
+llm_temperature: 0.0
 embedding_model: nomic-embed-text
 vector_store_collection_name: fashion_trends
 search_plan_retry_limit: 3

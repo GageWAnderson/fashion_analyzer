@@ -14,9 +14,9 @@ from pydantic import ValidationError
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config.config import config
-from app.api.v1 import api
-from app.api.dependencies import get_redis_client, get_redis_client_sync
+from backend.app.config.config import backend_config
+from backend.app.api.v1 import api
+from backend.app.api.dependencies import get_redis_client, get_redis_client_sync
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -48,10 +48,6 @@ async def user_id_identifier(request: Request) -> str:
                         detail="Could not validate credentials",
                     )
                 user_id = payload["sub"]
-                print(
-                    "here2",
-                    user_id,
-                )
                 return user_id
 
     if request.scope["type"] == "websocket":
@@ -92,10 +88,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(
-    title=config.project_name,
-    version=config.api_version,
-    openapi_url=f"{config.api_v1_str}/openapi.json",
-    docs_url=f"{config.api_v1_str}/docs",
+    title=backend_config.project_name,
+    version=backend_config.api_version,
+    openapi_url=f"{backend_config.api_v1_str}/openapi.json",
+    docs_url=f"{backend_config.api_v1_str}/docs",
     lifespan=lifespan,
 )
 
@@ -108,4 +104,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(api.router, prefix=config.api_v1_str)
+app.include_router(api.router, prefix=backend_config.api_v1_str)

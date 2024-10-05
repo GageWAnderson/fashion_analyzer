@@ -1,13 +1,15 @@
-import traceback
+import logging
 
 from langchain_core.prompts import PromptTemplate
 
 from crawler.config.config import CrawlerConfig
 from crawler.schemas.state import WebCrawlerState
 from crawler.schemas.search import SearchPlans
-from crawler.utils.json import extract_json_from_markdown
+from common.utils.json import extract_json_from_markdown
 from common.utils.time import get_current_year_and_month
-from crawler.utils.llm import get_llm
+from common.utils.llm import get_llm_from_config
+
+logger = logging.getLogger(__name__)
 
 
 # TODO Refactor into a LangChain tool with a from_config method
@@ -16,7 +18,7 @@ def search_planner_tool(config: CrawlerConfig, state: WebCrawlerState):
     search_planner_prompt_template = PromptTemplate.from_template(
         config.search_planner_prompt
     )
-    llm = get_llm(config.llm)
+    llm = get_llm_from_config(config)
 
     def search_planner_prompt(state: WebCrawlerState) -> PromptTemplate:
         current_year, current_month = get_current_year_and_month()
@@ -31,12 +33,11 @@ def search_planner_tool(config: CrawlerConfig, state: WebCrawlerState):
         raw_search_plan = llm.invoke(input=search_planner_prompt(state))
         try:
             extracted_json = extract_json_from_markdown(raw_search_plan.content)
-            print(f"Extracted JSON = {extracted_json}")
+            logger.debug(f"Extracted JSON = {extracted_json}")
             search_plan = SearchPlans.model_validate_json(extracted_json)
             return {"messages": state["messages"], "search_plans": search_plan}
         except Exception as e:
-            print(f"Retrying search plan extraction: {e}")
-            print(traceback.print_exc())
+            logger.exception(f"Retrying search plan extraction")
             retries += 1
 
     raise ValueError(

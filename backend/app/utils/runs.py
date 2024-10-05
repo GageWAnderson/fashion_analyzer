@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import Optional
 
-from app.api.dependencies import get_redis_client
+from backend.app.api.dependencies import get_redis_client
 
 
 async def is_running(run_id: Optional[str] = None) -> bool:

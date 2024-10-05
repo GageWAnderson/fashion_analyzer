@@ -9,9 +9,9 @@ from langchain_core.messages import AIMessage
 from langchain_community.vectorstores import VectorStore
 from unstructured.documents.elements import Element, Image
 
-from crawler.utils.minio import minio_put_object
+from common.utils.minio import minio_put_object
 from common.utils.unstructured_io import partition_web_page
-from crawler.schemas.vector_metadata import VectorMetadata
+from common.schemas.vector_metadata import VectorMetadata
 
 logger = logging.getLogger(__name__)
 

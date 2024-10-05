@@ -1,9 +1,23 @@
 import yaml
+import os
+
 from pydantic_settings import BaseSettings
 from pydantic import Field
 from dotenv import load_dotenv
 
+
 class BaseConfig(BaseSettings):
+    llm: str
+    llm_temperature: float
+    embedding_model: str
+    vector_store_collection_name: str
+    vector_search_type: str
+    vector_search_k: int
+    vector_search_fetch_k: int
+    search_plan_retry_limit: int
+    num_search_iterations: int
+    logging_dir: str
+
     openai_api_key: str = Field(..., env="OPENAI_API_KEY")
     openai_model: str = Field(..., env="OPENAI_MODEL")
     tavily_api_key: str = Field(..., env="TAVILY_API_KEY")
@@ -41,5 +55,3 @@ class BaseConfig(BaseSettings):
         with open(yaml_path, "r") as file:
             yaml_data = yaml.safe_load(file)
         return cls(**yaml_data)
-    
-base_config = BaseConfig.from_yaml("common/config/base_config.yaml")
