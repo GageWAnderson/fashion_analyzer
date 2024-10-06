@@ -1,21 +1,31 @@
-from typing import Annotated
+from typing import Annotated, Type
 
-from langchain_core.tools import tool
+from langchain_core.tools import BaseTool
+from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_community.tools.tavily_search import TavilySearchResults
-from langchain_core.tools import StructuredTool
 
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
 from backend.app.config.config import backend_config
 from common.utils.llm import get_llm_from_config
 
 
-@tool # TODO: Change this to a class rather than a function
-async def search_tool(
-    stream_handler: AsyncStreamingCallbackHandler,
-    input: Annotated[str, "A search query to search Tavily for."],
-) -> StructuredTool:
-    """This tool searches Tavily for information relevant to the user's query."""
-    tavily_search = TavilySearchResults()
-    search_results = tavily_search.invoke({"query": input})
-    llm = get_llm_from_config(backend_config)
-    return llm.ainvoke(search_results, callbacks=[stream_handler])
+class SearchToolInput(BaseModel):
+    input: Annotated[str, "A search query to search Tavily for."]
+
+
+class SearchTool(BaseTool):
+    name: str = "search_tool"
+    description: str = (
+        "This tool searches Tavily for information relevant to the user's query."
+    )
+    args_schema: Type[BaseModel] = SearchToolInput
+    stream_handler: AsyncStreamingCallbackHandler = Field(default=None, exclude=True)
+
+    def _run(self, input: str) -> str:
+        raise NotImplementedError("Search tool does not support sync.")
+
+    async def _arun(self, input: str) -> str:
+        tavily_search = TavilySearchResults()
+        search_results = tavily_search.invoke({"query": input})
+        llm = get_llm_from_config(backend_config)
+        return await llm.ainvoke(search_results, callbacks=[self.stream_handler])

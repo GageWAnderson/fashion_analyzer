@@ -17,7 +17,7 @@ agent_router = APIRouter()
 async def agent(
     conversation: Conversation, chat_graph: ChatGraph = Depends(get_chat_graph)
 ) -> StreamingResponse:
-    
+
     asyncio.create_task(
         chat_graph.ainvoke(
             {"messages": conversation.load_messages()},
@@ -27,7 +27,7 @@ async def agent(
     return StreamingResponse(
         ajoin(
             by="\n",
-            items=agent.process_queue(),
+            items=chat_graph.process_queue(),
         ),
         media_type="text/plain-text",
     )
