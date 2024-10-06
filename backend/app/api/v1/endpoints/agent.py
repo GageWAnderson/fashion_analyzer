@@ -1,36 +1,33 @@
 __all__ = ["agent_router"]
-from functools import partial
+import asyncio
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
 from backend.app.schemas.chat import Conversation
 from backend.app.utils.async_iteration import ajoin
 from backend.app.graphs.chat import ChatGraph
-from backend.app.services.agent import agent_chat
-from backend.app.config.config import backend_config
-from backend.app.tools.qa import qa_tool
-from backend.app.tools.search import search_tool
-from backend.app.tools.rag import rag_tool
 from backend.app.utils.runs import stop_run
+from backend.app.api.dependencies import get_chat_graph
 
 agent_router = APIRouter()
 
-agent_chat = partial(
-    agent_chat,
-    ChatGraph.from_config(
-        backend_config,
-        [qa_tool, search_tool, rag_tool],
-    ),
-)
-
 
 @agent_router.post("/agent")
-async def agent(conversation: Conversation) -> StreamingResponse:
+async def agent(
+    conversation: Conversation, chat_graph: ChatGraph = Depends(get_chat_graph)
+) -> StreamingResponse:
+    
+    asyncio.create_task(
+        chat_graph.ainvoke(
+            {"messages": conversation.load_messages()},
+        )
+    )
+
     return StreamingResponse(
         ajoin(
             by="\n",
-            items=agent_chat(conversation),
+            items=agent.process_queue(),
         ),
         media_type="text/plain-text",
     )

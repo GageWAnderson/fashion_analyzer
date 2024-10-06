@@ -6,7 +6,6 @@ import operator
 from typing import AsyncGenerator
 
 from pydantic import BaseModel, ConfigDict
-from langchain.tools import StructuredTool
 from langchain_core.messages import ToolMessage, HumanMessage
 from langchain_core.language_models import BaseLanguageModel
 from langgraph.graph import StateGraph, START, END
@@ -17,6 +16,9 @@ from langgraph.graph.state import CompiledStateGraph
 from common.utils.llm import get_llm_from_config
 from backend.app.config.config import BackendConfig
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler, StreamingData
+from backend.app.tools.qa import qa_tool
+from backend.app.tools.rag import rag_tool
+from backend.app.tools.search import search_tool
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +140,6 @@ class ChatGraph(BaseModel):
     def from_config(
         cls,
         config: BackendConfig,
-        tools: list[StructuredTool],
     ) -> "ChatGraph":
         queue = asyncio.Queue()
         stop_event = asyncio.Event()
@@ -147,6 +148,14 @@ class ChatGraph(BaseModel):
         )
         should_continue_fn = partial(should_continue, stream_handler)
         graph = StateGraph(AgentState)
+
+        # TODO: Turn tools into a class rather than a function
+        tools = list(
+            map(
+                lambda tool: partial(tool, stream_handler),
+                [qa_tool, rag_tool, search_tool],
+            )
+        )
 
         graph.add_node(
             "agent",
@@ -186,11 +195,11 @@ class ChatGraph(BaseModel):
         """
         await self.stream_handler.on_llm_start(serialized={}, prompts=[], **kwargs)
         try:
-            return await self.graph.ainvoke(
-                config={"callbacks": [self.stream_handler]}, *args, **kwargs
-            )  # TODO: Consider how the callbacks are used by the individual nodes
+            return await self.graph.ainvoke(*args, **kwargs)
         except Exception:
-            error_message = "I'm sorry, but there was an issue while processing your request."
+            error_message = (
+                "I'm sorry, but there was an issue while processing your request."
+            )
             await self.stream_handler.on_llm_error(error=error_message, **kwargs)
             logger.exception("There was an exception in the agent graph")
         finally:

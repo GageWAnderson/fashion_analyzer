@@ -1,10 +1,11 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from pydantic import BaseModel, Field
 
 from langchain_core.callbacks import AsyncCallbackHandler
+from langchain_core.outputs import LLMResult
 
 
 class DataTypes(Enum):
@@ -52,7 +53,9 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
             ).model_dump_json()
         )
 
-    async def on_llm_end(self, **kwargs: Any) -> None:
+    async def on_llm_end(
+        self, response: Optional[LLMResult] = None, **kwargs: Any
+    ) -> None:
         await self.streaming_function(
             StreamingData(
                 data=Signals.END.value, data_type=DataTypes.SIGNAL, metadata=kwargs

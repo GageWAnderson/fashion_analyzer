@@ -16,6 +16,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
 from backend.app.config.config import BackendConfig
+from backend.app.utils.streaming import AsyncStreamingCallbackHandler
 
 
 class RagGraphState(TypedDict):
@@ -66,9 +67,16 @@ async def grade_docs(
 
 
 async def generate(
-    llm: BaseLanguageModel, state: RagGraphState, config: RunnableConfig
+    llm: BaseLanguageModel,
+    state: RagGraphState,
+    config: RunnableConfig,
+    stream_handler: AsyncStreamingCallbackHandler,
 ) -> dict[Literal["generation"], str]:
-    return {"generation": await llm.astream(state["docs"], config)}
+    return {
+        "generation": await llm.astream(
+            state["docs"], config, callbacks=[stream_handler]
+        )
+    }
 
 
 class RagGraph:
@@ -79,12 +87,13 @@ class RagGraph:
         cls,
         config: BackendConfig,
         vector_store: VectorStore,
+        stream_handler: AsyncStreamingCallbackHandler,
     ) -> "RagGraph":
         graph = StateGraph(RagGraphState)
 
         graph.add_node("retrieve", partial(retrieve, vector_store.as_retriever()))
         graph.add_node("grade_docs", partial(grade_docs, config.llm))
-        graph.add_node("generate", partial(generate, config.llm))
+        graph.add_node("generate", partial(generate, config.llm, stream_handler))
 
         graph.add_edge(START, "retrieve")
         graph.add_edge("retrieve", "grade_docs")

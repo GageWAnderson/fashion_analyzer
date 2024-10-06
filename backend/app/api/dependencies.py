@@ -3,6 +3,7 @@ from redis import Redis
 from redis import asyncio as aioredis
 
 from backend.app.config.config import backend_config
+from backend.app.graphs.chat import ChatGraph
 
 
 def get_redis_client_sync() -> RedisSync:
@@ -23,4 +24,10 @@ async def get_redis_client() -> Redis:
         max_connections=10,
         encoding="utf8",
         decode_responses=True,
+    )
+
+
+def get_chat_graph():
+    return ChatGraph.from_config(
+        backend_config,
     )
