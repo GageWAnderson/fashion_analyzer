@@ -28,4 +28,4 @@ class SearchTool(BaseTool):
         tavily_search = TavilySearchResults()
         search_results = tavily_search.invoke({"query": input})
         llm = get_llm_from_config(backend_config)
-        return await llm.ainvoke(search_results, callbacks=[self.stream_handler])
+        return await llm.ainvoke(search_results)

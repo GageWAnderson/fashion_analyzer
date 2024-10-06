@@ -38,5 +38,4 @@ class QaTool(BaseTool):
         self, input: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
     ) -> str:
         llm = get_llm_from_config(backend_config)
-        logger.info(f"qa_tool: {input}")
-        return await llm.ainvoke(input, callbacks=[self.stream_handler])
+        return await llm.ainvoke(input, config={"callbacks": [self.stream_handler]})

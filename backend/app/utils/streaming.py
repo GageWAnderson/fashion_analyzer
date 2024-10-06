@@ -76,25 +76,24 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
             StreamingData(
                 data=(tool_name := serialized["name"]),
                 data_type=DataTypes.ACTION,
-                metadata=kwargs
-                | {"tool": tool_name, "step": 0, "time": datetime.now()},
+                metadata={"tool": tool_name, "step": 0, "time": datetime.now()},
             ).model_dump_json()
         )
 
-    async def on_tool_end(self, output: Any, **kwargs: Any) -> None:
+    async def on_tool_end(self, output: Optional[Any] = None, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
                 data=Signals.TOOL_END.value,
                 data_type=DataTypes.SIGNAL,
-                metadata=kwargs | {"tool": kwargs["name"]},
+                metadata={"tool": kwargs["name"]},
             ).model_dump_json()
         )
 
     async def on_tool_error(self, error: BaseException, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
-                data=repr(error),
+                data="error",
                 data_type=DataTypes.ACTION,
-                metadata=kwargs | {"tool": kwargs["name"]},
+                metadata={"tool": kwargs["name"], "step": 1, "error": repr(error)},
             ).model_dump_json()
         )

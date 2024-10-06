@@ -9,7 +9,6 @@ from langchain.prompts import PromptTemplate
 from langchain_core.language_models import BaseLanguageModel
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
-from langchain_community.vectorstores import VectorStore
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import RunnableConfig
@@ -17,6 +16,7 @@ from langchain_core.tools import tool
 
 from backend.app.config.config import BackendConfig
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
+from common.db.vector_store import ChromaVectorStore
 
 
 class RagGraphState(TypedDict):
@@ -86,7 +86,7 @@ class RagGraph:
     def from_config(
         cls,
         config: BackendConfig,
-        vector_store: VectorStore,
+        vector_store: ChromaVectorStore,
         stream_handler: AsyncStreamingCallbackHandler,
     ) -> "RagGraph":
         graph = StateGraph(RagGraphState)
