@@ -1,4 +1,4 @@
-from typing import Annotated, Type
+from typing import Type
 
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
@@ -7,10 +7,7 @@ from backend.app.graphs.rag import RagGraph
 from backend.app.config.config import backend_config
 from common.db.vector_store import ChromaVectorStore
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
-
-
-class RagToolInput(BaseModel):
-    input: Annotated[str, "A search query to search the vector database for."]
+from backend.app.schemas.rag import RagToolInput
 
 
 class RagTool(BaseTool):

@@ -1,5 +1,5 @@
 llm: llama3.1
-tool_call_llm: llama3.1
+tool_call_llm: llama3-groq-tool-use
 llm_temperature: 0.0
 embedding_model: nomic-embed-text
 vector_store_collection_name: fashion_trends
@@ -17,6 +17,7 @@ should_continue_prompt: |
   Is the agent's task complete? Answer with 'Yes' if the task is done, or 'No' if more actions or information are needed.
 tool_call_prompt: |
   You are a helpful assistant tasked with selecting the right tool to answer a user's question.
+  You must choose a tool to answer the user's question rather than providing a response yourself.
   You have access to the following tools:
 
   Tools:
@@ -25,5 +26,3 @@ tool_call_prompt: |
   Select the tool that best fits the user's question.
   User Question:
   {question}
-
-  JSON Tool Call Output:

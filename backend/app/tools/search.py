@@ -1,7 +1,7 @@
 from typing import Annotated, Type
+from pydantic import BaseModel, Field
 
 from langchain_core.tools import BaseTool
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_community.tools.tavily_search import TavilySearchResults
 
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
@@ -27,5 +27,5 @@ class SearchTool(BaseTool):
     async def _arun(self, input: str) -> str:
         tavily_search = TavilySearchResults()
         search_results = tavily_search.invoke({"query": input})
-        llm = get_llm_from_config(backend_config)
+        llm = get_llm_from_config(backend_config, callbacks=[self.stream_handler])
         return await llm.ainvoke(search_results)
