@@ -13,8 +13,7 @@ from backend.app.schemas.rag import RagToolInput
 class RagTool(BaseTool):
     name: str = "rag_tool"
     description: str = (
-        """This tool uses a RAG (Retrieval Augmented Generation) model to answer user's questions 
-        with stored information from the vector database."""
+        """Use this tool to search your database to answer the user's question."""
     )
     args_schema: Type[BaseModel] = RagToolInput
     stream_handler: AsyncStreamingCallbackHandler = Field(default=None, exclude=True)

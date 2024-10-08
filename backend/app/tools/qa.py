@@ -22,10 +22,7 @@ class QaToolInput(BaseModel):
 
 class QaTool(BaseTool):
     name: str = "qa_tool"
-    description: str = (
-        """This tool answers user questions from your long term memory.
-        Use this tool when the question doesn't require data from the past year"""
-    )
+    description: str = """Use this tool to answer all user questions."""
     args_schema: Type[BaseModel] = QaToolInput
     stream_handler: AsyncStreamingCallbackHandler = Field(default=None, exclude=True)
 
@@ -37,5 +34,5 @@ class QaTool(BaseTool):
     async def _arun(
         self, input: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
     ) -> str:
-        llm = get_llm_from_config(backend_config)
-        return await llm.ainvoke(input, config={"callbacks": [self.stream_handler]})
+        llm = get_llm_from_config(backend_config, callbacks=[self.stream_handler])
+        return await llm.ainvoke(input)

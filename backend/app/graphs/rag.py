@@ -1,6 +1,6 @@
 from typing import Union, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
@@ -17,6 +17,7 @@ from common.utils.llm import get_llm_from_config
 
 class RagGraph(BaseModel):
     graph: CompiledStateGraph
+    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
     def from_config(

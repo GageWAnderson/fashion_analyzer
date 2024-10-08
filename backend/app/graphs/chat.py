@@ -4,7 +4,7 @@ from functools import partial
 from typing import AsyncGenerator, Any, Union
 
 from pydantic import BaseModel, ConfigDict
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.prompts import PromptTemplate
@@ -113,7 +113,7 @@ class ChatGraph(BaseModel):
         await queue.put(data)
 
     @staticmethod
-    async def _should_continue(self, state: AgentState) -> str:
+    async def _should_continue(state: AgentState) -> str:
         continue_prompt = PromptTemplate(
             input_variables=["original_question", "last_message"],
             template=backend_config.should_continue_prompt,
@@ -139,15 +139,18 @@ class ChatGraph(BaseModel):
             original_question=original_question, last_message=last_message.content
         )
 
+        # llm = get_llm_from_config(
+        #     backend_config, backend_config.tool_call_llm
+        # ).with_structured_output(ShouldContinueResponse)
+
         llm = get_llm_from_config(
             backend_config, backend_config.tool_call_llm
-        ).with_structured_output(ShouldContinueResponse)
+        ).bind_tools([ShouldContinueResponse])
 
-        # TODO: Consider more robust output parsing with a tool calling LLM for structure
         try:
-            response = ShouldContinueResponse(
-                **(await llm.ainvoke([HumanMessage(content=prompt)]))
-            )
+            response = await llm.ainvoke([SystemMessage(content=prompt)])
+            logger.info(f"Should continue response: {response}")
+            response = ShouldContinueResponse(**response)
         except Exception:
             logger.exception("Error parsing should continue response")
             return "end"

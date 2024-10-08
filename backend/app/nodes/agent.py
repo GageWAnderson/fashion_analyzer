@@ -43,7 +43,15 @@ class AgentNode(Runnable[AgentState, AgentState]):
                 tools=self.tools, question=state["messages"][-1].content
             )
         )
-        tool_calls = response.tool_calls
+        # tool_calls = response.tool_calls TODO: Re-enable when I get a better tool calling LLM
+        tool_calls = [
+            {
+                "id": "1",
+                "name": "qa_tool",
+                "args": {"input": state["messages"][-1].content},
+            }
+        ]
+        response.tool_calls = tool_calls
         if not isinstance(response, AIMessage):
             raise ValueError("Agent response is not an AIMessage")
         if not tool_calls:
