@@ -131,7 +131,7 @@ class ChatGraph(BaseModel):
             return "continue"
 
         last_message = messages[-1]
-        
+
         if isinstance(last_message, ToolMessage) and last_message.status == "error":
             return "end"
 
@@ -143,20 +143,12 @@ class ChatGraph(BaseModel):
             backend_config, backend_config.tool_call_llm
         ).with_structured_output(ShouldContinueResponse)
 
-        # llm = get_llm_from_config(
-        #     backend_config, backend_config.tool_call_llm
-        # ).bind_tools([ShouldContinueResponse])
-
         try:
             response = await llm.ainvoke([SystemMessage(content=prompt)])
-            logger.debug(f"Should continue response: {response}")
-            if not response.tool_calls[0]["args"]:
-                logger.warning(
-                    "Should continue response is invalid, possibly ending chat prematurely"
-                )
-                return "end"
-            response = ShouldContinueResponse(**response.tool_calls[0]["args"])
             return "continue" if response.should_continue else "end"
         except Exception:
             logger.exception("Error parsing should continue response")
+            logger.warning(
+                "Should continue response is invalid, possibly ending chat prematurely"
+            )
             return "end"
