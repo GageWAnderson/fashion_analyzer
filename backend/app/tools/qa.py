@@ -38,5 +38,5 @@ class QaTool(BaseTool):
         llm = get_llm_from_config(backend_config, callbacks=[self.stream_handler])
         response = await llm.ainvoke(input)
         ai_message = AIMessage(content=response.content)
-        logger.info(f"QA tool response: {ai_message}")
+        logger.debug(f"QA tool response: {ai_message}")
         return ai_message.content

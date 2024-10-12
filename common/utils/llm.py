@@ -27,6 +27,7 @@ def get_llm_from_config(
                 api_key=config.openai_api_key,
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
+                streaming=True,
             )
         case "gpt-4o-mini":
             return ChatOpenAI(
@@ -34,6 +35,7 @@ def get_llm_from_config(
                 api_key=config.openai_api_key,
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
+                streaming=True,
             )
         case "llama3.1":
             return ChatOllama(

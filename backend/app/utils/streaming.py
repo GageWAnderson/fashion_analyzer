@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 from enum import Enum
 from typing import Any, Callable, Optional
 
@@ -6,6 +7,10 @@ from pydantic import BaseModel, Field
 
 from langchain_core.callbacks import AsyncCallbackHandler
 from langchain_core.outputs import LLMResult
+
+from backend.app.schemas.exceptions import LLMExecutionException
+
+logger = logging.getLogger(__name__)
 
 
 class DataTypes(Enum):
@@ -63,9 +68,13 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
         )
 
     async def on_llm_error(self, error: BaseException, **kwargs: Any) -> None:
+        logger.exception(f"LLM error: {error}")
+        raise LLMExecutionException(error)
+
+    async def on_text(self, text: str, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
-                data=repr(error), data_type=DataTypes.LLM, metadata=kwargs
+                data=text, data_type=DataTypes.LLM, metadata=kwargs
             ).model_dump_json()
         )
 

@@ -31,3 +31,16 @@ class UserFriendlyException(Exception):
         Retrieve the original exception if it exists.
         """
         return self.original_exception
+
+
+class LLMExecutionException(UserFriendlyException):
+    """
+    An exception class for errors occurring during LLM execution.
+    """
+
+    def __init__(self, original_exception: Exception):
+        super().__init__(
+            message="An error occurred during the AI model execution. Please try again.",
+            original_exception=original_exception
+        )
+
