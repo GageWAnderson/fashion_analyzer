@@ -7,6 +7,7 @@ from langchain_core.callbacks import (
     AsyncCallbackManagerForToolRun,
     CallbackManagerForToolRun,
 )
+from langchain_core.messages import AIMessage
 from common.utils.llm import get_llm_from_config
 from backend.app.config.config import backend_config
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
@@ -35,4 +36,7 @@ class QaTool(BaseTool):
         self, input: str, run_manager: Optional[AsyncCallbackManagerForToolRun] = None
     ) -> str:
         llm = get_llm_from_config(backend_config, callbacks=[self.stream_handler])
-        return await llm.ainvoke(input)
+        response = await llm.ainvoke(input)
+        ai_message = AIMessage(content=response.content)
+        logger.info(f"QA tool response: {ai_message}")
+        return ai_message.content

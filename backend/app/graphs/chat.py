@@ -150,9 +150,11 @@ class ChatGraph(BaseModel):
         try:
             response = await llm.ainvoke([SystemMessage(content=prompt)])
             logger.info(f"Should continue response: {response}")
-            response = ShouldContinueResponse(**response)
+            if not response.tool_calls[0]["args"]:
+                logger.warning("Should continue response is invalid, possibly ending chat prematurely")
+                return "end"
+            response = ShouldContinueResponse(**response.tool_calls[0]["args"])
+            return "continue" if response.should_continue else "end"
         except Exception:
             logger.exception("Error parsing should continue response")
             return "end"
-
-        return "continue" if response.should_continue else "end"

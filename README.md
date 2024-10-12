@@ -40,6 +40,13 @@ cd backend
 pip install -r requirements.txt
 ```
 
+### Installing required models on Ollama
+To leverage [Ollama](https://ollama.com/) for LLM inference, you need to install the required models. You can do this by running the following command:
+```bash
+ollama pull model_name
+```
+You will need to download `llama3.1` and `nomic-embed-text` models to get started.
+
 #### Pre-commit Hooks
 To install pre-commit hooks, run:
 ```bash
