@@ -11,12 +11,11 @@ from contextlib import asynccontextmanager
 from langchain.globals import set_llm_cache
 from langchain_community.cache import RedisCache
 from pydantic import ValidationError
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
-from app.api.v1 import api
-from app.api.dependencies import get_redis_client, get_redis_client_sync
+from backend.app.config.config import backend_config
+from backend.app.api.v1 import api
+from backend.app.api.dependencies import get_redis_client, get_redis_client_sync
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -36,7 +35,7 @@ async def user_id_identifier(request: Request) -> str:
                 try:
                     payload = jwt.decode(
                         token,
-                        settings.SECRET_KEY,
+                        backend_config.secret_key,
                         algorithms=["HS256"],
                     )
                 except (
@@ -48,10 +47,6 @@ async def user_id_identifier(request: Request) -> str:
                         detail="Could not validate credentials",
                     )
                 user_id = payload["sub"]
-                print(
-                    "here2",
-                    user_id,
-                )
                 return user_id
 
     if request.scope["type"] == "websocket":
@@ -92,10 +87,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.API_VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    docs_url=f"{settings.API_V1_STR}/docs",
+    title=backend_config.project_name,
+    version=backend_config.api_version,
+    openapi_url=f"{backend_config.api_v1_str}/openapi.json",
+    docs_url=f"{backend_config.api_v1_str}/docs",
     lifespan=lifespan,
 )
 
@@ -108,4 +103,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(api.router, prefix=settings.API_V1_STR)
+app.include_router(api.router, prefix=backend_config.api_v1_str)

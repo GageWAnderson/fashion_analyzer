@@ -1,105 +1,160 @@
+import asyncio
+import logging
 from functools import partial
-from typing import Annotated, Sequence, TypedDict
-import operator
+from typing import AsyncGenerator, Any, Union
 
-from pydantic import BaseModel
-
-from langchain.tools import StructuredTool
-from langchain.prompts import PromptTemplate
-from langchain_core.messages import ToolMessage, HumanMessage
-from langchain_core.language_models import BaseLanguageModel
+from pydantic import BaseModel, ConfigDict
+from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, START, END
-from langchain.schema import BaseMessage
-from langgraph.prebuilt import ToolExecutor, ToolInvocation
 from langgraph.graph.state import CompiledStateGraph
+from langchain_core.prompts import PromptTemplate
+from common.utils.llm import get_llm_from_config
+
+from backend.app.config.config import BackendConfig, backend_config
+from backend.app.utils.streaming import AsyncStreamingCallbackHandler, StreamingData
+from backend.app.tools.qa import QaTool
+from backend.app.tools.rag import RagTool
+from backend.app.tools.search import SearchTool
+from backend.app.schemas.exceptions import UserFriendlyException
+from backend.app.schemas.agent_state import AgentState
+from backend.app.nodes.agent import AgentNode
+from backend.app.nodes.action import ActionNode
+from backend.app.schemas.should_continue import ShouldContinueResponse
+
+logger = logging.getLogger(__name__)
 
 
-class AgentState(TypedDict):
-    messages: Annotated[Sequence[BaseMessage], operator.add]
+class ChatGraph(BaseModel):
+    """
+    This graph implements a simle ReACT style agent.
+    The tool calling LLM first selects the appropriate tool to call given the user's question.
+    Then, the appropriate tool is called and the results are streamed back to the user.
+    Note that the tools called can be graphs themselves, allowing for complex workflows.
 
+    This graph handles the streaming of the agent's response to the user through the callback handler.
+    """
 
-# TODO: Move this to a yaml config file
-SHOULD_CONTINUE_PROMPT = PromptTemplate(
-    input_variables=["original_question", "last_message"],
-    template="""Given the user's original question: "{original_question}"
-and the last message in the conversation:
-{last_message}
-
-Is the agent's task complete? Answer with 'Yes' if the task is done, or 'No' if more actions or information are needed.""",
-)
-
-
-# async def should_continue(llm: BaseLanguageModel, state: AgentState) -> str:
-#     messages = state.get("messages", [])
-#     if not messages:
-#         return "continue"
-
-#     original_question = messages[
-#         0
-#     ].content  # TODO: Come up with a better way to track the original question in state
-#     last_message = messages[-1]
-
-#     prompt = SHOULD_CONTINUE_PROMPT.format(
-#         original_question=original_question, last_message=last_message.content
-#     )
-
-#     response = await llm.ainvoke([HumanMessage(content=prompt)])
-#     print(response.content.strip().lower())
-#     return "end" if "yes" in response.content.strip().lower() else "continue"
-
-def should_continue(state: AgentState) -> str:
-    return "continue" if state["messages"][-1].tool_calls else "end"
-
-
-async def agent(model: BaseLanguageModel, state: AgentState) -> AgentState:
-    response = await model.ainvoke(state["messages"])
-    print(f"response: {response}")
-    return {"messages": [response]}
-
-
-async def action(executor: ToolExecutor, state: AgentState) -> AgentState:
-    last_message = state["messages"][-1]
-    if not hasattr(last_message, "tool_calls") or not last_message.tool_calls:
-        raise ValueError("Last message does not contain tool calls")
-
-    tool_call = last_message.tool_calls[0]
-    print(f"tool_call: {tool_call}")
-    return {
-        "messages": [
-            ToolMessage(
-                tool_call_id=tool_call["id"],
-                name=tool_call["name"],
-                content=str(
-                    await executor.ainvoke(
-                        ToolInvocation(
-                            tool=tool_call["name"], tool_input=tool_call["args"]
-                        )
-                    )
-                ),
-            )
-        ]
-    }
-
-
-class ChatGraph:
     graph: CompiledStateGraph
+    stream_handler: AsyncStreamingCallbackHandler
+    queue: asyncio.Queue
+    stop_event: asyncio.Event
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
-    def from_dependencies(
+    def from_config(
         cls,
-        llm: BaseLanguageModel,
-        tools: list[StructuredTool],
+        config: BackendConfig,
     ) -> "ChatGraph":
-        # should_continue_fn = partial(should_continue, llm)
+        queue = asyncio.Queue()
+        stop_event = asyncio.Event()
+        stream_handler = AsyncStreamingCallbackHandler(
+            streaming_function=partial(cls._streaming_function, queue)
+        )
         graph = StateGraph(AgentState)
 
-        graph.add_node("agent", partial(agent, llm.bind_tools(tools)))
-        graph.add_node("action", partial(action, ToolExecutor(tools)))
+        # TODO: Consider abstracting this into a function that takes a config
+        tools = [
+            QaTool(stream_handler=stream_handler),
+            RagTool(stream_handler=stream_handler),
+            SearchTool(stream_handler=stream_handler),
+        ]
+
+        graph.add_node(
+            "agent",
+            AgentNode(get_llm_from_config(config, config.tool_call_llm), tools),
+        )
+        graph.add_node("action", ActionNode(tools, stream_handler))
 
         graph.add_edge(START, "agent")
-        graph.add_edge("action", "agent")
+        graph.add_edge("agent", "action")
         graph.add_conditional_edges(
-            "agent", should_continue, path_map={"continue": "action", "end": END}
+            "action", cls._should_continue, path_map={"continue": "agent", "end": END}
         )
 
-        return graph.compile()
+        return cls(
+            graph=graph.compile(),
+            queue=queue,
+            stop_event=stop_event,
+            stream_handler=stream_handler,
+        )
+
+    async def ainvoke(self, *args, **kwargs) -> Union[dict[str, Any], Any]:
+        """
+        Wrapper function to invoke the graph with the streaming callback handler.
+        """
+        result = None
+        await self.stream_handler.on_llm_start(serialized={}, prompts=[], **kwargs)
+        try:
+            result = await self.graph.ainvoke(*args, **kwargs)
+        except Exception:
+            error_message = """I'm sorry, but there was an issue while processing your request.
+                Please rephrase and try again."""
+            await self.stream_handler.on_llm_error(
+                error=UserFriendlyException(error_message), **kwargs
+            )
+            logger.exception("There was an exception in the agent graph")
+        finally:
+            await self.stream_handler.on_llm_end()
+            self.stop_event.set()  # TODO: Is this the best way to stop the graph?
+
+        return result
+
+    async def process_queue(self) -> AsyncGenerator[str, None]:
+        while not self.stop_event.is_set():
+            try:
+                item = await asyncio.wait_for(self.queue.get(), timeout=0.1)
+                yield item
+                self.queue.task_done()
+            except asyncio.TimeoutError:
+                continue
+
+    @staticmethod
+    async def _streaming_function(queue: asyncio.Queue, data: StreamingData):
+        await queue.put(data)
+
+    @staticmethod
+    async def _should_continue(state: AgentState) -> str:
+        continue_prompt = PromptTemplate(
+            input_variables=["original_question", "last_message"],
+            template=backend_config.should_continue_prompt,
+        )
+        messages = state.get("messages", [])
+        if not messages:
+            return "continue"
+
+        original_question = next(
+            (
+                msg.content
+                for msg in reversed(messages)
+                if isinstance(msg, HumanMessage)
+            ),
+            None,
+        )
+        if original_question is None:
+            return "continue"
+
+        last_message = messages[-1]
+
+        prompt = continue_prompt.format(
+            original_question=original_question, last_message=last_message.content
+        )
+
+        # llm = get_llm_from_config(
+        #     backend_config, backend_config.tool_call_llm
+        # ).with_structured_output(ShouldContinueResponse)
+
+        llm = get_llm_from_config(
+            backend_config, backend_config.tool_call_llm
+        ).bind_tools([ShouldContinueResponse])
+
+        try:
+            response = await llm.ainvoke([SystemMessage(content=prompt)])
+            logger.info(f"Should continue response: {response}")
+            if not response.tool_calls[0]["args"]:
+                logger.warning("Should continue response is invalid, possibly ending chat prematurely")
+                return "end"
+            response = ShouldContinueResponse(**response.tool_calls[0]["args"])
+            return "continue" if response.should_continue else "end"
+        except Exception:
+            logger.exception("Error parsing should continue response")
+            return "end"

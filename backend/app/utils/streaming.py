@@ -1,11 +1,12 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from pydantic import BaseModel, Field
 
 from langchain_core.callbacks import AsyncCallbackHandler
-from langchain.schema import LLMResult
+from langchain_core.outputs import LLMResult
+
 
 class DataTypes(Enum):
     ACTION = "action"
@@ -52,7 +53,9 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
             ).model_dump_json()
         )
 
-    async def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
+    async def on_llm_end(
+        self, response: Optional[LLMResult] = None, **kwargs: Any
+    ) -> None:
         await self.streaming_function(
             StreamingData(
                 data=Signals.END.value, data_type=DataTypes.SIGNAL, metadata=kwargs
@@ -66,30 +69,31 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
             ).model_dump_json()
         )
 
-    async def on_tool_start(self, serialized: dict[str, Any], input_str: str, **kwargs: Any) -> None:
+    async def on_tool_start(
+        self, serialized: dict[str, Any], input_str: str, **kwargs: Any
+    ) -> None:
         await self.streaming_function(
             StreamingData(
                 data=(tool_name := serialized["name"]),
                 data_type=DataTypes.ACTION,
-                metadata=kwargs
-                | {"tool": tool_name, "step": 0, "time": datetime.now()},
+                metadata={"tool": tool_name, "step": 0, "time": datetime.now()},
             ).model_dump_json()
         )
 
-    async def on_tool_end(self, output: Any, **kwargs: Any) -> None:
+    async def on_tool_end(self, output: Optional[Any] = None, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
                 data=Signals.TOOL_END.value,
                 data_type=DataTypes.SIGNAL,
-                metadata=kwargs | {"tool": kwargs["name"]},
+                metadata={"tool": kwargs["name"]},
             ).model_dump_json()
         )
 
     async def on_tool_error(self, error: BaseException, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
-                data=repr(error),
+                data="error",
                 data_type=DataTypes.ACTION,
-                metadata=kwargs | {"tool": kwargs["name"]},
+                metadata={"tool": kwargs["name"], "step": 1, "error": repr(error)},
             ).model_dump_json()
         )

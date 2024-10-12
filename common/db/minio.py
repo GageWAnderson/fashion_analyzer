@@ -1,7 +1,7 @@
 from minio import Minio
 from pydantic import BaseModel
 
-from crawler.schemas.config import config
+from crawler.config.config import config
 
 
 class MinioResponse(BaseModel):

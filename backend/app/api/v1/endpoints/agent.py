@@ -1,36 +1,33 @@
 __all__ = ["agent_router"]
-from functools import partial
+import asyncio
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
-from app.schemas.chat import Conversation
-from app.utils.async_iteration import ajoin
-from app.graphs.chat import ChatGraph
-from app.services.agent import agent_chat
-from app.core.config import settings
-from app.services.llm import get_llm
-from app.tools.qa import qa_tool
-from app.tools.search import search_tool
-from app.utils.runs import stop_run
+from backend.app.schemas.chat import Conversation
+from backend.app.utils.async_iteration import ajoin
+from backend.app.graphs.chat import ChatGraph
+from backend.app.utils.runs import stop_run
+from backend.app.api.dependencies import get_chat_graph
 
 agent_router = APIRouter()
 
-agent_chat = partial(
-    agent_chat,
-    ChatGraph.from_dependencies(
-        get_llm(settings.OLLAMA_BASE_MODEL),
-        [qa_tool, search_tool, rag_tool],
-    ),
-)
-
 
 @agent_router.post("/agent")
-async def agent(conversation: Conversation) -> StreamingResponse:
+async def agent(
+    conversation: Conversation, chat_graph: ChatGraph = Depends(get_chat_graph)
+) -> StreamingResponse:
+
+    asyncio.create_task(
+        chat_graph.ainvoke(
+            {"messages": conversation.load_messages()}, # TODO: Do I need to pass a callback here?
+        )
+    )
+
     return StreamingResponse(
         ajoin(
             by="\n",
-            items=agent_chat(conversation),
+            items=chat_graph.process_queue(),
         ),
         media_type="text/plain-text",
     )

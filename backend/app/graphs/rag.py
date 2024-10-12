@@ -1,94 +1,48 @@
-from functools import partial
-from typing import Annotated, Literal, TypedDict, Optional, Union
-import operator
+from typing import Union, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
-from langchain.tools import StructuredTool
-from langchain.prompts import PromptTemplate
-from langchain_core.messages import ToolMessage, HumanMessage
-from langchain_core.language_models import BaseLanguageModel
 from langgraph.graph import StateGraph, START, END
-from langchain.schema import BaseMessage
-from langgraph.prebuilt import ToolExecutor, ToolInvocation
 from langgraph.graph.state import CompiledStateGraph
-from langchain_community.vectorstores import VectorStore
-from langchain_core.documents import Document
-from langchain_core.retrievers import BaseRetriever
-from langchain_core.runnables import RunnableConfig
+
+from backend.app.config.config import BackendConfig
+from backend.app.utils.streaming import AsyncStreamingCallbackHandler
+from common.db.vector_store import ChromaVectorStore
+from backend.app.schemas.rag import RagGraphState
+from backend.app.nodes.retrieve import RetrieveNode
+from backend.app.nodes.grade_docs import GradeDocsNode
+from backend.app.nodes.summarize_docs import SummarizeDocsNode
+from common.utils.llm import get_llm_from_config
 
 
-class RagGraphState(TypedDict):
-    question: Annotated[str, operator.add]
-    docs: Annotated[list[Document], operator.add]
-    answer: Annotated[str, operator.add]
-    search: Annotated[str, operator.add]
-
-
-class DocumentGrade(BaseModel):
-    grade: Literal["yes", "no"]
-    reason: Optional[str]
-
-
-async def retrieve(
-    retriever: BaseRetriever, query: str
-) -> dict[Literal["documents"], list[Document]]:
-    return {"documents": await retriever.aget_relevant_documents(query)}
-
-
-async def grade_docs(
-    llm: BaseLanguageModel, state: RagGraphState
-) -> dict[Literal["documents", "search"], Union[list[Document], bool]]:
-    grade_docs_prompt = PromptTemplate.from_template(
-        """
-        You are a helpful assistant that grades the relevance of documents to a user's question.
-        You are given a document and a user's question. You must determine if the document is relevant to the question.
-        You must return a grade of "yes" if the document is relevant, and "no" if the document is not relevant.
-        You must return a reason for your grade.
-        """
-    )
-
-    async def grade_doc(doc: Document) -> bool:
-        grading_chain = grade_docs_prompt | llm.with_structured_output(DocumentGrade)
-        return (
-            "yes"
-            == (  # TODO: Might need less stringent requirements for weaker LLMs
-                await grading_chain.ainvoke(
-                    {"question": state["question"], "doc": doc.page_content}
-                ).grade
-            )
-        )
-
-    return {
-        "documents": (filtered_docs := [*(filter(grade_doc, state["docs"]))]),
-        "search": len(filtered_docs) == len(state["docs"]),
-    }
-
-
-async def generate(
-    llm: BaseLanguageModel, state: RagGraphState, config: RunnableConfig
-) -> dict[Literal["generation"], str]:
-    return {"generation": await llm.astream(state["docs"], config)}
-
-
-class RagGraph:
+class RagGraph(BaseModel):
     graph: CompiledStateGraph
+    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
-    def from_dependencies(
+    def from_config(
         cls,
-        llm: BaseLanguageModel,
-        vector_store: VectorStore,
+        config: BackendConfig,
+        vector_store: ChromaVectorStore,
+        stream_handler: AsyncStreamingCallbackHandler,
     ) -> "RagGraph":
         graph = StateGraph(RagGraphState)
+        llm = get_llm_from_config(config)
 
-        graph.add_node("retrieve", partial(retrieve, vector_store.as_retriever()))
-        graph.add_node("grade_docs", partial(grade_docs, llm))
-        graph.add_node("generate", partial(generate, llm))
+        graph.add_node("retrieve", RetrieveNode(vector_store))
+        graph.add_node("grade_docs", GradeDocsNode(llm, stream_handler))
+        graph.add_node("summarize", SummarizeDocsNode(llm, stream_handler))
 
         graph.add_edge(START, "retrieve")
         graph.add_edge("retrieve", "grade_docs")
-        graph.add_edge("grade_docs", "generate")
-        graph.add_edge("generate", END)
+        graph.add_edge("grade_docs", "summarize")
+        graph.add_edge("summarize", END)
 
         return graph.compile()
+
+    async def ainvoke(self, *args, **kwargs) -> Union[dict[str, Any], Any]:
+        """
+        Answers questions about the most current fashion trends you have gathered from the internet
+        in the past year. Use this tool when your user wants the most up-to-date advice and trends.
+        """
+        return self.graph.ainvoke({"question": input})

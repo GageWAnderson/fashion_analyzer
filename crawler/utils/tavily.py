@@ -1,17 +1,15 @@
-import json
 import uuid
 import logging
 from datetime import datetime
 
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage
-from langchain_core.messages import AIMessage
 from langchain_community.vectorstores import VectorStore
-from unstructured.documents.elements import Element, Image
+from unstructured.documents.elements import Image
 
-from crawler.utils.minio import minio_put_object
-from crawler.utils.unstructured_io import partition_web_page
-from crawler.schemas.vector_metadata import VectorMetadata
+from common.utils.minio import minio_put_object
+from common.utils.unstructured_io import partition_web_page
+from common.schemas.vector_metadata import VectorMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -24,18 +22,22 @@ def save_tavily_res_to_vector_db(
         "content"
     ]  # TODO: Find a better way to break the content down into finer chunks
     search_url = tavily_res.content[0]["url"]
+
+    metadata = VectorMetadata(
+        query=search_msg,
+        url=search_url,
+        image_urls=extract_tavily_res_content(search_url),
+        chunk_id=chunk_id,
+        timestamp=datetime.now().isoformat(),
+        source_type="web_page",
+        content_summary="",  # TODO: Generate a summary at crawl time with the LLM
+        relevance_score=0.85,  # TODO: Generate a relevance score at crawl time with the LLM
+    ).model_dump(mode="json")
+    logger.debug(f"Metadata: {metadata}")
+
     doc = Document(
         page_content=search_msg,
-        metadata=VectorMetadata(
-            query=search_msg,
-            url=search_url,
-            image_urls=extract_tavily_res_content(search_url),
-            chunk_id=chunk_id,
-            timestamp=datetime.now().isoformat(),
-            source_type="web_page",
-            content_summary="Overview of spring/summer fashion trends for 2023",
-            relevance_score=0.85,
-        ).model_dump(),
+        metadata=metadata,
         id=chunk_id,
     )
 
@@ -47,11 +49,15 @@ def extract_tavily_res_content(url: str) -> str:
     Extracts all images and other media from the Tavily search results and stores them in Minio.
     Returns a presigned URL to use in the metadata of the document the images etc. were extracted from.
     """
-    elements = partition_web_page(url)
+    try:
+        elements = partition_web_page(url)
+    except Exception:
+        logger.exception("Error partitioning web page:")
+        return ""
     res = []
     for element in elements:
         if isinstance(element, Image):
             response = minio_put_object(element.get_content(), element.mime_type)
             res.append(response.url)
         # TODO: handle other element types
-    return json.dumps(res)
+    return ",".join(res)

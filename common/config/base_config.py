@@ -1,13 +1,16 @@
 import yaml
 import os
+
 from pydantic_settings import BaseSettings
 from pydantic import Field
 from dotenv import load_dotenv
-from typing import List
 
 
-class CrawlerConfig(BaseSettings):
+class BaseConfig(BaseSettings):
     llm: str
+    llm_temperature: float
+    tool_call_llm: str
+    tool_call_prompt: str
     embedding_model: str
     vector_store_collection_name: str
     vector_search_type: str
@@ -15,20 +18,16 @@ class CrawlerConfig(BaseSettings):
     vector_search_fetch_k: int
     search_plan_retry_limit: int
     num_search_iterations: int
-    init_message: str
-    men_fashion_categories: List[str]
-    women_fashion_categories: List[str]
-    search_rephraser_prompt: str
-    search_planner_prompt: str
-    is_done_prompt: str
-    fashion_summarizer_prompt: str
-    chunk_format: str
-    minio_presigned_url_expiry_days: int
+    logging_dir: str
 
     openai_api_key: str = Field(..., env="OPENAI_API_KEY")
     openai_model: str = Field(..., env="OPENAI_MODEL")
     tavily_api_key: str = Field(..., env="TAVILY_API_KEY")
     user_agent: str = Field(..., env="USER_AGENT")
+    secret_key: str = Field(..., env="SECRET_KEY")
+    project_name: str = Field(..., env="PROJECT_NAME")
+    api_version: str = Field(..., env="API_VERSION")
+    api_v1_str: str = Field(..., env="API_V1_STR")
     redis_host: str = Field(..., env="REDIS_HOST")
     redis_port: int = Field(..., env="REDIS_PORT")
     redis_db: int = Field(..., env="REDIS_DB")
@@ -53,13 +52,16 @@ class CrawlerConfig(BaseSettings):
         env_file_encoding = "utf-8"
 
     @classmethod
-    def from_yaml(cls, yaml_path: str) -> "CrawlerConfig":
-        load_dotenv()
+    def from_yaml(cls, yaml_path: str):
+        load_dotenv(override=True)
         with open(yaml_path, "r") as file:
             yaml_data = yaml.safe_load(file)
 
-        return cls(**yaml_data)
+        env_vars = {
+            key: os.environ.get(key)
+            for key in cls.__annotations__
+            if key.isupper() and key in os.environ
+        }
 
-
-# TODO: Refactor into a more robust yaml retrieval path
-config = CrawlerConfig.from_yaml("crawler/config/config.yml")
+        config_data = {**yaml_data, **env_vars}
+        return cls(**config_data)

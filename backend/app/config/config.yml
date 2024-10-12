@@ -1,0 +1,38 @@
+llm: gpt-4o-mini
+tool_call_llm: gpt-4o-mini
+llm_temperature: 0.0
+embedding_model: nomic-embed-text
+vector_store_collection_name: fashion_trends
+search_plan_retry_limit: 3
+num_search_iterations: 5
+vector_search_type: mmr
+vector_search_k: 10
+vector_search_fetch_k: 5
+logging_dir: ../logs
+should_continue_prompt: |
+  Given the user's original question: {original_question}
+  and the last message in the conversation: {last_message}
+
+  Is the agent's task complete? Answer with a boolean should_continue=False if the task is done, 
+  or should_continue=True if more actions or information are needed.
+
+  Example 1:
+  original_question: "What is the capital of the France?"
+  last_message: "The capital of France is Paris."
+  should_continue: False
+
+  Example 2:
+  original_question: "What is the capital of the France?"
+  last_message: "I don't know the capital of France."
+  should_continue: True
+tool_call_prompt: |
+  You are a helpful assistant tasked with selecting the right tool to answer a user's question.
+  You must choose a tool to answer the user's question rather than providing a response yourself.
+  You have access to the following tools:
+
+  Tools:
+  {tools}
+
+  Select the tool that best fits the user's question.
+  User Question:
+  {question}

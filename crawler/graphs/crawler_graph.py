@@ -10,12 +10,13 @@ from crawler.tools.search_tool import search_tool
 from crawler.tools.search_rephraser_tool import search_rephraser_tool
 from crawler.tools.search_planner_tool import search_planner_tool
 from crawler.tools.search_done_tool import search_done_tool
-from crawler.db.vector_store import ChromaVectorStore
-from crawler.schemas.config import CrawlerConfig
+from common.db.vector_store import ChromaVectorStore
+from crawler.config.config import CrawlerConfig
 
 
 class CrawlerGraph(BaseModel):
     graph: CompiledStateGraph
+    # TODO: Add a callback handler here if LangGraph doesn't support the AsyncStreamingCallbackHandler
 
     class Config:
         arbitrary_types_allowed = True

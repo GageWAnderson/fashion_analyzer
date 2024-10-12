@@ -1,20 +1,29 @@
-from typing import Annotated
+from typing import Type
 
-from langchain_core.tools import tool
-from langchain_core.tools import StructuredTool
+from langchain_core.tools import BaseTool
+from pydantic import BaseModel, Field
 
-from app.graphs.rag import RagGraph
-from app.services.llm import get_llm
-from app.core.config import settings
-from app.db.vector_store import ChromaVectorStore
+from backend.app.graphs.rag import RagGraph
+from backend.app.config.config import backend_config
+from common.db.vector_store import ChromaVectorStore
+from backend.app.utils.streaming import AsyncStreamingCallbackHandler
+from backend.app.schemas.rag import RagToolInput
 
 
-@tool
-async def rag_tool(
-    input: Annotated[str, "A search query to search Tavily for."]
-) -> StructuredTool:
-    """This tool uses a RAG (Retrieval Augmented Generation) model to answer a user's question using data in a vector database."""
-    llm = get_llm(settings.RAG_TOOL_LLM)
-    vector_store = ChromaVectorStore.from_config()
-    rag_graph = RagGraph.from_dependencies(llm, vector_store)
-    return rag_graph.ainvoke({"question": input})
+class RagTool(BaseTool):
+    name: str = "rag_tool"
+    description: str = (
+        """Use this tool to search your database to answer the user's question."""
+    )
+    args_schema: Type[BaseModel] = RagToolInput
+    stream_handler: AsyncStreamingCallbackHandler = Field(default=None, exclude=True)
+
+    def _run(self, input: str) -> str:
+        raise NotImplementedError("RAG tool does not support sync execution.")
+
+    async def _arun(self, input: str) -> str:
+        vector_store = ChromaVectorStore.from_config(backend_config)
+        rag_graph = RagGraph.from_config(
+            backend_config, vector_store, self.stream_handler
+        )
+        return await rag_graph.ainvoke({"question": input})

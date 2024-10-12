@@ -19,7 +19,7 @@ services:
       dockerfile: backend/Dockerfile
     ports:
       - "9090:9090"
-      # - "11434:11434"
+      - "11436:11434"
     depends_on:
       - redis
       - db
@@ -28,6 +28,8 @@ services:
       - .env
     networks:
       - backend_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   redis:
     image: redis:alpine
@@ -56,10 +58,6 @@ services:
     image: postgres:13
     env_file:
       - .env
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:

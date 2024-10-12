@@ -1,9 +1,14 @@
-from crawler.schemas.config import CrawlerConfig
+import logging
+
+from crawler.config.config import CrawlerConfig
 from crawler.schemas.state import WebCrawlerState
-from crawler.utils.llm import get_llm
+from common.utils.llm import get_llm_from_config
 
 from langchain_core.prompts import PromptTemplate
-from crawler.utils.time import get_current_year_and_month
+from common.utils.time import get_current_year_and_month
+
+
+logger = logging.getLogger(__name__)
 
 
 def search_done_tool(config: CrawlerConfig, state: WebCrawlerState) -> bool:
@@ -14,7 +19,7 @@ def search_done_tool(config: CrawlerConfig, state: WebCrawlerState) -> bool:
 
     # TODO: Fine-tune an LLM to check if a search is complete
     is_done_prompt_template = PromptTemplate.from_template(config.is_done_prompt)
-    llm = get_llm(config.llm)
+    llm = get_llm_from_config(config)
 
     def is_done_prompt(state: WebCrawlerState) -> PromptTemplate:
         current_year, current_month = get_current_year_and_month()
@@ -27,11 +32,11 @@ def search_done_tool(config: CrawlerConfig, state: WebCrawlerState) -> bool:
 
     res = llm.invoke(input=is_done_prompt(state)).content
     if "true" in res.lower():
-        print("AGENT DONE")
+        logger.debug("AGENT DONE")
         return "true"
     elif "false" in res.lower():
-        print("AGENT NOT DONE, STARTING NEXT SEARCH")
+        logger.debug("AGENT NOT DONE, STARTING NEXT SEARCH")
         return "false"
     else:
-        print(f"{res}")
+        logger.debug(f"{res}")
         raise ValueError("AI failed to decide if search was complete.")

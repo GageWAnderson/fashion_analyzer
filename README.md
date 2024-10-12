@@ -40,6 +40,19 @@ cd backend
 pip install -r requirements.txt
 ```
 
+### Installing required models on Ollama
+To leverage [Ollama](https://ollama.com/) for LLM inference, you need to install the required models. You can do this by running the following command:
+```bash
+ollama pull model_name
+```
+You will need to download `llama3.1` and `nomic-embed-text` models to get started.
+
+#### Pre-commit Hooks
+To install pre-commit hooks, run:
+```bash
+poetry run pre-commit install
+```
+
 ### Running the Application
 
 #### Start the Frontend
@@ -78,3 +91,7 @@ TODO: Implement
 ## Contributing
 
 We welcome contributions to the Fashion Analyzer project! If you have any ideas or suggestions, please feel free to open an issue or submit a pull request.
+
+## References
+- [LangGraph](https://www.langchain.com/langgraph)
+- [Ollama + LangGraph](https://www.youtube.com/watch?v=Nfk99Fz8H9k)
