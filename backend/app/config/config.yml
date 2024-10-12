@@ -1,5 +1,6 @@
-llm: gpt-4o-mini
+llm: llama3.1
 tool_call_llm: gpt-4o-mini
+max_tool_call_retries: 3
 llm_temperature: 0.0
 embedding_model: nomic-embed-text
 vector_store_collection_name: fashion_trends
