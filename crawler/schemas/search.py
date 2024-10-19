@@ -14,6 +14,10 @@ class SearchCategories(BaseModel):
     categories: list[str]
 
 
+class ShouldContinue(BaseModel):
+    should_continue: bool
+
+
 def update_search_plans(x: SearchPlans, y: SearchPlans) -> SearchPlans:
     return y if y else x
 

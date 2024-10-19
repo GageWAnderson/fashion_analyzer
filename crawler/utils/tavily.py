@@ -22,11 +22,16 @@ def save_tavily_res_to_vector_db(
         "content"
     ]  # TODO: Find a better way to break the content down into finer chunks
     search_url = tavily_res.content[0]["url"]
+    logger.debug(f"Search message: {search_msg}")
+    logger.debug(f"Searching URL: {search_url}")
+
+    image_urls = extract_tavily_res_content(search_url)
+    logger.debug(f"Image URLs: {image_urls}")
 
     metadata = VectorMetadata(
         query=search_msg,
         url=search_url,
-        image_urls=extract_tavily_res_content(search_url),
+        image_urls=image_urls,
         chunk_id=chunk_id,
         timestamp=datetime.now().isoformat(),
         source_type="web_page",
@@ -50,6 +55,7 @@ def extract_tavily_res_content(url: str) -> str:
     Returns a presigned URL to use in the metadata of the document the images etc. were extracted from.
     """
     try:
+        # TODO: Is there a better way to scrape images from the web page?
         elements = partition_web_page(url)
     except Exception:
         logger.exception("Error partitioning web page:")

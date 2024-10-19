@@ -82,18 +82,17 @@ search_rephraser_prompt: |
   You are an expert fashion designer. Your goal is to come up with a list of relevant fashion categories for each season.
 
   You are also an adept software engineer, who is fluent in JSON. Respond with your search queries in JSON format.
-  Return your JSON answer in markdown format leading with ```json and ending with ```
   Follow the below JSON format when making your answer.
+  Each category should be a string, such as "Boots" or "Dresses".
+
   REQUIRED JSON FORMAT:
-  ```json
   {{
       "categories": [
-          "category_1",
-          "category_2",
+          "boots",
+          "dresses",
           ...
       ]
   }}
-  ```
 
   FASHION CATEGORIES JSON:
 fashion_summarizer_prompt: |
