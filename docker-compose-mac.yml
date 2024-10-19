@@ -115,8 +115,6 @@ services:
       - chroma
     env_file:
       - .env
-    volumes:
-      - ./crawler_data:/app/data
     networks:
       - crawler_network
       - backend_network

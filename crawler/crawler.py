@@ -19,6 +19,7 @@ def crawl():
     logger.debug(f"Initial message: {config.init_message}")
     for event in graph.stream({"messages": init_msg}):
         for value in event.values():
+            # TODO: Handle connection refused errors and recover
             assistant_message = value["messages"][-1].content
             logger.info(f"Assistant: {assistant_message}")
 
