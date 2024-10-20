@@ -41,11 +41,19 @@ tool_call_prompt: |
   User Question:
   {question}
 summarize_docs_prompt: |
-  Summarize the following documents in relation to the question: {question}
+  Summarize the following documents in relation to the user's question.
+  Make sure to include the following sources of the information used to create the summary.
+
+  User Question:
+  {question}
+
+  Sources:
+  {sources}
 
   Documents:
   {docs}
 
   Please provide a concise and informative summary that directly addresses the question.
+  Provide the sources at the bottom in a separate sources section.
 
-  SUMMARY:
+  SUMMARY WITH SOURCES:

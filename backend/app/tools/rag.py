@@ -3,21 +3,16 @@ import logging
 
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
-from langchain_core.runnables import Runnable, RunnableConfig
-from langchain_core.language_models import BaseLanguageModel
 from langchain.schema import AIMessage
 from langchain_core.prompts import PromptTemplate
+from langchain_core.documents import Document
 
-from backend.app.graphs.rag import RagGraph
 from backend.app.config.config import backend_config
 from common.db.vector_store import ChromaVectorStore
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
 from backend.app.schemas.rag import RagToolInput
 from common.utils.llm import get_llm_from_config
-
-# from backend.app.nodes.retrieve import RetrieveNode
-# from backend.app.nodes.grade_docs import GradeDocsNode
-# from backend.app.nodes.summarize_docs import SummarizeDocsNode
+from common.schemas.vector_metadata import VectorMetadata
 
 
 logger = logging.getLogger(__name__)
@@ -34,22 +29,34 @@ class RagTool(BaseTool):
 
     async def _arun(self, input: str) -> str:
         vector_store = ChromaVectorStore.from_config(backend_config)
-        # TODO: Re-enable RAG graph once streaming performance is improved
+        # TODO: Re-enable RAG graph a a sub-graph once streaming performance is improved
         # rag_graph = RagGraph.from_config(
         #     backend_config, vector_store, self.stream_handler
         # )
         retriever = vector_store.as_retriever()
         docs = await retriever.ainvoke(input)
-        logger.info(f"Retrieved {len(docs)} documents")
+        metadatas = RagTool._get_metadatas(docs)
+        logger.debug(f"Retrieved {len(docs)} documents")
+
         prompt = PromptTemplate(
-            input_variables=["question", "docs"],
+            input_variables=["question", "docs", "sources"],
             template=backend_config.summarize_docs_prompt,
         )
         llm = get_llm_from_config(backend_config, callbacks=[self.stream_handler])
-        response = AIMessage.model_validate(
-            await llm.ainvoke(
-                prompt.format(question=input, docs=docs),
-            )
+        summarize_prompt = prompt.format(
+            question=input, docs=docs, sources=RagTool._get_urls(metadatas)
         )
-        logger.info(f"Summarized docs: {response.content}")
-        return response.content
+        logger.debug(f"Summarize prompt: {summarize_prompt}")
+
+        response = AIMessage.model_validate(await llm.ainvoke(summarize_prompt))
+        logger.debug(f"Summarized docs: {response.content}")
+
+        return response
+
+    @staticmethod
+    def _get_metadatas(docs: list[Document]) -> list[VectorMetadata]:
+        return [VectorMetadata.model_validate(doc.metadata) for doc in docs]
+
+    @staticmethod
+    def _get_urls(metadatas: list[VectorMetadata]) -> str:
+        return "\n".join([metadata.url for metadata in metadatas if metadata.url])
