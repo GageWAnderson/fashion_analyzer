@@ -1,5 +1,5 @@
 import logging
-from typing import Annotated, Type, Optional
+from typing import Annotated, Type, Optional, ClassVar
 
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
@@ -22,8 +22,8 @@ class QaToolInput(BaseModel):
 
 
 class QaTool(BaseTool):
-    name: str = "qa_tool"
-    description: str = """Use this tool to answer all user questions."""
+    name: ClassVar[str] = "qa_tool"
+    description: ClassVar[str] = """Use this tool to answer all user questions."""
     args_schema: Type[BaseModel] = QaToolInput
     stream_handler: AsyncStreamingCallbackHandler = Field(default=None, exclude=True)
 

@@ -1,4 +1,4 @@
-llm: llama3.1
+llm: gpt-4o-mini
 tool_call_llm: gpt-4o-mini
 max_tool_call_retries: 3
 llm_temperature: 0.0
@@ -34,6 +34,26 @@ tool_call_prompt: |
   Tools:
   {tools}
 
+  Examples:
+  {examples}
+
   Select the tool that best fits the user's question.
   User Question:
   {question}
+summarize_docs_prompt: |
+  Summarize the following documents in relation to the user's question.
+  Make sure to include the following sources of the information used to create the summary.
+
+  User Question:
+  {question}
+
+  Sources:
+  {sources}
+
+  Documents:
+  {docs}
+
+  Please provide a concise and informative summary that directly addresses the question.
+  Provide the sources at the bottom in a separate sources section.
+
+  SUMMARY WITH SOURCES:

@@ -6,10 +6,8 @@ from crawler.config.config import CrawlerConfig
 
 
 def setup_logging(config: CrawlerConfig):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(os.path.dirname(script_dir))
-    log_dir = os.path.join(project_root, config.logging_dir)
-    
+    log_dir = os.path.abspath(config.logging_dir)
+
     os.makedirs(log_dir, exist_ok=True)
 
     root_logger = logging.getLogger()
@@ -23,7 +21,7 @@ def setup_logging(config: CrawlerConfig):
     console_handler.setFormatter(console_formatter)
 
     file_handler = RotatingFileHandler(
-        os.path.join(log_dir, "crawler.log"),
+        os.path.join(log_dir, "backend.log"),
         maxBytes=10 * 1024 * 1024,  # 10MB
         backupCount=5,
     )

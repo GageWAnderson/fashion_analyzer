@@ -1,4 +1,6 @@
-from langchain_core.runnables import Runnable
+from typing import Optional
+
+from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
@@ -17,7 +19,11 @@ class GradeDocsNode(Runnable[RagGraphState, RagGraphState]):
     def invoke(self, state: RagGraphState) -> RagGraphState:
         raise NotImplementedError("GradeDocsNode does not support sync invoke")
 
-    async def ainvoke(self, state: RagGraphState) -> RagGraphState:
+    async def ainvoke(
+        self,
+        state: RagGraphState,
+        config: Optional[RunnableConfig] = None,
+    ) -> RagGraphState:
         grade_docs_prompt = PromptTemplate.from_template(
             """
             You are a helpful assistant that grades the relevance of documents to a user's question.
