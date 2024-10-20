@@ -1,8 +1,9 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, ValidationError
 from typing import Optional
 
+from common.schemas.image_metadata import ImageMetadata
 
 SourceType = Literal["web_page"]
 
@@ -10,9 +11,8 @@ SourceType = Literal["web_page"]
 class VectorMetadata(BaseModel):
     query: str = Field(..., description="The search query associated with this vector")
     url: str = Field(..., description="The URL of the source content")
-    image_urls: Optional[str] = Field(
-        default=None,
-        description="JSON-formatted string containing a list of URLs for images extracted from the content",
+    image_metadata: Optional[list[dict]] = Field(
+        default=None, description="Metadata for images extracted from the content"
     )
     chunk_id: str = Field(..., description="Unique identifier for this vector chunk")
     timestamp: str = Field(..., description="Timestamp of when this vector was created")
@@ -36,12 +36,12 @@ class VectorMetadata(BaseModel):
         return v
 
     # TODO: Expand this to support other media types
-    @field_validator("image_urls")
-    def validate_image_urls(cls, v):
-        if v is not None:
-            urls = v.split(",")
-            for url in urls:
-                url = url.strip()
-                if url and not url.startswith(("http://", "https://")):
-                    raise ValueError(f"Invalid URL: {url}")
+    @field_validator("image_metadata")
+    def validate_image_metadata(cls, v):
+        # Validate that each element in v is a valid ImageMetadata object
+        for image_metadata in v:
+            try:
+                ImageMetadata(**image_metadata)
+            except ValidationError as e:
+                raise ValueError(f"Invalid image_metadata: {e}")
         return v

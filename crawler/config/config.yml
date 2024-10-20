@@ -1,6 +1,7 @@
 llm: gpt-4o-mini
 llm_temperature: 0.0
 tool_call_llm: gpt-4o-mini
+vision_llm: gpt-4o
 embedding_model: nomic-embed-text
 vector_store_collection_name: fashion_trends
 search_plan_retry_limit: 3
@@ -122,3 +123,5 @@ tool_call_prompt: |
   {question}
 
   JSON Tool Call Output:
+summarize_image_prompt: |
+  Give a concise, 1 sentence summary of this image.
