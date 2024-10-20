@@ -80,10 +80,11 @@ const ConversationSidebar = () => {
                           <div
                             key={conversation.id}
                             className={`group group flex w-full cursor-pointer
-                     flex-row justify-center rounded-lg border border-transparent p-0 py-csm hover:bg-accent dark:hover:bg-accent ${conversation.id === conversationStore.currentConversationId
-                                ? "border-gray-200 bg-accent font-medium text-neutral dark:bg-accent"
-                                : "dark:text-gray-300"
-                              }`}
+                     flex-row justify-center rounded-lg border border-transparent p-0 py-csm hover:bg-accent dark:hover:bg-accent ${
+                       conversation.id === conversationStore.currentConversationId
+                         ? "border-gray-200 bg-accent font-medium text-neutral dark:bg-accent"
+                         : "dark:text-gray-300"
+                     }`}
                             onClick={() => handleConversationSelect(conversation)}
                             data-cy={CONVERSATION_SIDEBAR_SELECTORS.collapsedChatListItem}
                           >
@@ -174,10 +175,11 @@ const ConversationSidebar = () => {
                       <div
                         key={conversation.id}
                         className={`group group flex w-full cursor-pointer
-                     flex-row justify-center rounded-lg border border-transparent px-cxs py-csm hover:bg-accent dark:hover:bg-accent ${conversation.id === conversationStore.currentConversationId
-                            ? "border-gray-200 bg-accent font-medium text-neutral dark:bg-accent"
-                            : "dark:text-gray-300"
-                          }`}
+                     flex-row justify-center rounded-lg border border-transparent px-cxs py-csm hover:bg-accent dark:hover:bg-accent ${
+                       conversation.id === conversationStore.currentConversationId
+                         ? "border-gray-200 bg-accent font-medium text-neutral dark:bg-accent"
+                         : "dark:text-gray-300"
+                     }`}
                         onClick={() => handleConversationSelect(conversation)}
                         data-cy={CONVERSATION_SIDEBAR_SELECTORS.expandedChatListItem}
                       >
@@ -188,8 +190,9 @@ const ConversationSidebar = () => {
                         )}
 
                         <span
-                          className={`max-w-full grow truncate break-all group-hover:text-neutral ${conversation.id === conversationStore.currentConversationId ? "!text-neutral" : ""
-                            }`}
+                          className={`max-w-full grow truncate break-all group-hover:text-neutral ${
+                            conversation.id === conversationStore.currentConversationId ? "!text-neutral" : ""
+                          }`}
                         >
                           {conversation.title || "SmartSmileGuide"}
                         </span>

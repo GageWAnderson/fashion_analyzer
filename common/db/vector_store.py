@@ -15,7 +15,7 @@ class ChromaVectorStore(BaseModel):
 
     @classmethod
     def from_config(cls, config: BaseConfig) -> "ChromaVectorStore":
-        persistent_client = chromadb.PersistentClient()
+        persistent_client = chromadb.HttpClient(config.chroma_host, config.chroma_port)
         persistent_client.get_or_create_collection(config.vector_store_collection_name)
         vector_store_from_client = Chroma(
             client=persistent_client,

@@ -18,6 +18,7 @@ from common.utils.llm import get_llm_from_config
 class RagGraph(BaseModel):
     graph: CompiledStateGraph
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
+    stream_handler: AsyncStreamingCallbackHandler
 
     @classmethod
     def from_config(
@@ -27,15 +28,16 @@ class RagGraph(BaseModel):
         stream_handler: AsyncStreamingCallbackHandler,
     ) -> "RagGraph":
         graph = StateGraph(RagGraphState)
-        llm = get_llm_from_config(config)
 
         graph.add_node("retrieve", RetrieveNode(vector_store))
-        graph.add_node("grade_docs", GradeDocsNode(llm, stream_handler))
-        graph.add_node("summarize", SummarizeDocsNode(llm, stream_handler))
+        # graph.add_node("grade_docs", GradeDocsNode(stream_handler))
+        graph.add_node("summarize", SummarizeDocsNode(stream_handler))
 
         graph.add_edge(START, "retrieve")
-        graph.add_edge("retrieve", "grade_docs")
-        graph.add_edge("grade_docs", "summarize")
+        graph.add_edge("retrieve", "summarize")
+        # TODO: Re-enable doc grading once RAG performance is improved
+        # graph.add_edge("retrieve", "grade_docs")
+        # graph.add_edge("grade_docs", "summarize")
         graph.add_edge("summarize", END)
 
         return graph.compile()
@@ -45,4 +47,6 @@ class RagGraph(BaseModel):
         Answers questions about the most current fashion trends you have gathered from the internet
         in the past year. Use this tool when your user wants the most up-to-date advice and trends.
         """
-        return self.graph.ainvoke({"question": input})
+        return self.graph.ainvoke(
+            {"question": input}, config={"callbacks": [self.stream_handler]}
+        )
