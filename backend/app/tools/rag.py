@@ -8,7 +8,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.documents import Document
 
 from backend.app.config.config import backend_config
-from common.db.vector_store import ChromaVectorStore
+from common.db.vector_store import PgVectorStore
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
 from backend.app.schemas.rag import RagToolInput
 from common.utils.llm import get_llm_from_config
@@ -28,7 +28,7 @@ class RagTool(BaseTool):
         raise NotImplementedError("RAG tool does not support sync execution.")
 
     async def _arun(self, input: str) -> str:
-        vector_store = ChromaVectorStore.from_config(backend_config)
+        vector_store = PgVectorStore.from_config(backend_config)
         # TODO: Re-enable RAG graph a a sub-graph once streaming performance is improved
         # rag_graph = RagGraph.from_config(
         #     backend_config, vector_store, self.stream_handler

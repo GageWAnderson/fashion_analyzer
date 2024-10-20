@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Optional
 
 
@@ -25,6 +25,7 @@ class VectorMetadata(BaseModel):
     relevance_score: Optional[float] = Field(
         default=None, description="Relevance score of this vector to the original query"
     )
+    model_config: ConfigDict = ConfigDict(populate_by_name=True)
 
     @field_validator("source_type")
     def validate_source_type(cls, v):
@@ -44,6 +45,3 @@ class VectorMetadata(BaseModel):
                 if url and not url.startswith(("http://", "https://")):
                     raise ValueError(f"Invalid URL: {url}")
         return v
-
-    class Config:
-        populate_by_name = True

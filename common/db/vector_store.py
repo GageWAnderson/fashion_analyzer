@@ -1,28 +1,30 @@
 from pydantic import BaseModel
 
-import chromadb
-from langchain_chroma import Chroma
 from langchain_core.vectorstores.base import VectorStoreRetriever
+from langchain_postgres import PGVector
+from langchain_postgres.vectorstores import PGVector
 from common.config.base_config import BaseConfig
 from common.utils.llm import get_embedding_model_from_config
 
 
-class ChromaVectorStore(BaseModel):
-    vector_store: Chroma
+class PgVectorStore(BaseModel):
+    vector_store: PGVector
 
     class Config:
         arbitrary_types_allowed = True
 
     @classmethod
-    def from_config(cls, config: BaseConfig) -> "ChromaVectorStore":
-        persistent_client = chromadb.HttpClient(config.chroma_host, config.chroma_port)
-        persistent_client.get_or_create_collection(config.vector_store_collection_name)
-        vector_store_from_client = Chroma(
-            client=persistent_client,
+    def from_config(cls, config: BaseConfig) -> "PgVectorStore":
+        vector_store_from_client = PGVector(
+            embeddings=get_embedding_model_from_config(config),
             collection_name=config.vector_store_collection_name,
-            embedding_function=get_embedding_model_from_config(config),
+            connection=cls._get_connection_string_from_config(config),
         )
         return cls(vector_store=vector_store_from_client)
+
+    @staticmethod
+    def _get_connection_string_from_config(config: BaseConfig) -> str:
+        return f"postgresql+psycopg://{config.postgres_user}:{config.postgres_password}@{config.postgres_host}:{config.postgres_port}/{config.postgres_db}"
 
     def as_retriever(self) -> VectorStoreRetriever:
         return self.vector_store.as_retriever()

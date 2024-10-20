@@ -22,8 +22,7 @@ services:
       - "11436:11434"
     depends_on:
       - redis
-      - db
-      - chroma
+      - database
     env_file:
       - .env
     networks:
@@ -54,21 +53,17 @@ services:
       - frontend_network
       - backend_network
 
-  db:
-    image: postgres:13
+  database:
+    image: ankane/pgvector:v0.4.1
+    restart: always
     env_file:
       - .env
+    user: root
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - backend_network
-
-  chroma:
-    image: ghcr.io/chroma-core/chroma:latest
+      - postgres_data:/var/lib/postgresql
+      - ./scripts/create_dbs.sql:/docker-entrypoint-initdb.d/create_dbs.sql
     ports:
-      - "8080:8000"
-    volumes:
-      - chroma_data:/chroma/chroma
+      - "5432:5432"
     networks:
       - backend_network
       - crawler_network
@@ -108,11 +103,11 @@ services:
   crawler:
     platform: linux/arm64
     command: "poetry run crawler"
-    build: 
+    build:
       context: .
       dockerfile: crawler/Dockerfile
     depends_on:
-      - chroma
+      - database
     env_file:
       - .env
     networks:
@@ -125,9 +120,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.000'
+          cpus: "0.000"
         reservations:
-          cpus: '0.000'
+          cpus: "0.000"
 
   crawler-scheduler:
     image: mcuadros/ofelia:latest
@@ -146,7 +141,6 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
-  chroma_data:
   minio_data:
   ollama_data:
 

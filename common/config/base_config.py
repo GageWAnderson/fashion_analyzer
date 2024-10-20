@@ -35,6 +35,8 @@ class BaseConfig(BaseSettings):
     postgres_user: str = Field(..., env="POSTGRES_USER")
     postgres_password: str = Field(..., env="POSTGRES_PASSWORD")
     postgres_db: str = Field(..., env="POSTGRES_DB")
+    postgres_port: int = Field(..., env="POSTGRES_PORT")
+    postgres_host: str = Field(..., env="POSTGRES_HOST")
     minio_root_user: str = Field(..., env="MINIO_ROOT_USER")
     minio_root_password: str = Field(..., env="MINIO_ROOT_PASSWORD")
     minio_host: str = Field(..., env="MINIO_HOST")
@@ -43,8 +45,6 @@ class BaseConfig(BaseSettings):
     minio_backend_user: str = Field(..., env="MINIO_BACKEND_USER")
     minio_backend_password: str = Field(..., env="MINIO_BACKEND_PASSWORD")
     ollama_url: str = Field(..., env="OLLAMA_URL")
-    chroma_host: str = Field(..., env="CHROMA_HOST")
-    chroma_port: int = Field(..., env="CHROMA_PORT")
     unstructured_api_key: str = Field(..., env="UNSTRUCTURED_API_KEY")
 
     class Config:
