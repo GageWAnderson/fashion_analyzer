@@ -125,3 +125,7 @@ tool_call_prompt: |
   JSON Tool Call Output:
 summarize_image_prompt: |
   Give a concise, 1 sentence summary of this image.
+summarize_content_prompt: |
+  Give a concise, 1 sentence summary of this content.
+  Content:
+  {content}

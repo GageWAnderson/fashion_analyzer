@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 # TODO: Improve model consistency at outputting JSON search plans
-def search_tool(vector_store: VectorStore, state: WebCrawlerState):
+async def search_tool(vector_store: VectorStore, state: WebCrawlerState):
     logger.debug(f"State at start of search_tool: {state}")
     search_plan = state[
         "search_plans"
@@ -28,7 +28,7 @@ def search_tool(vector_store: VectorStore, state: WebCrawlerState):
             )  # TODO: make res more readable
             if "HTTPError" in res.content:
                 raise ValueError(f"HTTP exception in calling Tavily API: {res}")
-            save_tavily_res_to_vector_db(res, vector_store)
+            await save_tavily_res_to_vector_db(query, res, vector_store)
             add_messages(state["messages"], res)
 
     return {

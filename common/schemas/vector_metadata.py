@@ -1,5 +1,5 @@
 from typing import Literal
-
+from uuid import uuid4 as uuid
 from pydantic import BaseModel, Field, field_validator, ConfigDict, ValidationError
 from typing import Optional
 
@@ -14,7 +14,11 @@ class VectorMetadata(BaseModel):
     image_metadata: Optional[list[dict]] = Field(
         default=None, description="Metadata for images extracted from the content"
     )
-    chunk_id: str = Field(..., description="Unique identifier for this vector chunk")
+    chunk_id: str = Field(
+        ...,
+        default_factory=lambda: str(uuid()),
+        description="Unique identifier for this vector chunk",
+    )
     timestamp: str = Field(..., description="Timestamp of when this vector was created")
     source_type: str = Field(
         ..., description="Type of source (e.g., 'web_page', 'pdf', 'image')"

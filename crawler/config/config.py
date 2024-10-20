@@ -13,6 +13,7 @@ class CrawlerConfig(BaseConfig):
     chunk_format: str
     minio_presigned_url_expiry_days: int
     summarize_image_prompt: str
+    summarize_content_prompt: str
     vision_llm: str
 
 # TODO: Update the path if necessary
