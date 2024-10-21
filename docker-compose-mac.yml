@@ -71,20 +71,21 @@ services:
   minio:
     image: minio/minio
     ports:
-      - "9000:9000"
+      - "9002:9002"
       - "9001:9001"
     volumes:
       - minio_data:/data
     env_file:
       - .env
-    command: server /data --console-address ":9001"
+    command: server /data --console-address ":9001" --address ":9002"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "curl", "-f", "http://localhost:9002/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
     networks:
       - backend_network
+      - crawler_network
 
   minio-setup:
     image: minio/mc

@@ -16,5 +16,5 @@ def get_minio_client():
         endpoint=minio_url,
         access_key=config.minio_backend_user,
         secret_key=config.minio_backend_password,
-        secure=True,
+        secure=False,
     )

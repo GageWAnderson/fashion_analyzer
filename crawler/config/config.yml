@@ -9,7 +9,7 @@ num_search_iterations: 5
 vector_search_type: mmr
 vector_search_k: 10
 vector_search_fetch_k: 5
-minio_presigned_url_expiry_days: 365 # Images will be out of date after a year
+minio_presigned_url_expiry_days: 7 # TODO: figure out how to get the URL to be valid for longer
 logging_dir: logs
 init_message: Search the internet for the latest trends in women's and men's fashion.
 men_fashion_categories:

@@ -73,16 +73,29 @@ async def extract_tavily_res_images(url: str) -> list[ImageMetadata]:
 
     res: list[ImageMetadata] = []
     for image_url in image_urls:
-        # TODO: Replace requests with httpx
-        image_response = PILImage.open(requests.get(image_url, stream=True).raw)
-        minio_url = await minio_put_object(image_response)
+        try:
+            image = PILImage.open(requests.get(image_url, stream=True).raw)
+        except Exception:
+            logger.exception(f"Error opening image: {image_url}")
+            logger.warning(f"Skipping image: {image_url}")
+            continue
+        content_type = (
+            "image/jpeg"
+            if image.format.lower() == "jpeg" or image.format.lower() == "jpg"
+            else "image/png"
+        )
+        # Save the image to a BytesIO object to preserve format and metadata
+        image_bytes_io = BytesIO()
+        image.save(image_bytes_io, format=image.format)
+        image_bytes_io.seek(0)
+        minio_response = minio_put_object(image_bytes_io, content_type)
         res.append(
-            ImageMetadata(url=minio_url, summary=await summarize_image(image_response))
+            ImageMetadata(url=minio_response.url, summary=await summarize_image(image))
         )
     return res
 
 
-def summarize_image(image: PILImage.Image) -> str:
+async def summarize_image(image: PILImage.Image) -> str:
     """
     Uses a powerful LLM to generate a 1-sentence summary of an image
     """
@@ -109,7 +122,7 @@ def summarize_image(image: PILImage.Image) -> str:
             ],
         )
     ]
-    return llm.ainvoke(messages)
+    return AIMessage.model_validate(await llm.ainvoke(messages)).content
 
 
 async def summarize_content(content: str) -> str:
