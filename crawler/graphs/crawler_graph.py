@@ -10,7 +10,7 @@ from crawler.tools.search_tool import search_tool
 from crawler.tools.search_rephraser_tool import search_rephraser_tool
 from crawler.tools.search_planner_tool import search_planner_tool
 from crawler.tools.search_done_tool import search_done_tool
-from common.db.vector_store import ChromaVectorStore
+from common.db.vector_store import PgVectorStore
 from crawler.config.config import CrawlerConfig
 
 
@@ -25,7 +25,7 @@ class CrawlerGraph(BaseModel):
     def from_config(cls, config: CrawlerConfig) -> "CrawlerGraph":
         graph_builder = StateGraph(WebCrawlerState)
 
-        vector_store = ChromaVectorStore.from_config(config).vector_store
+        vector_store = PgVectorStore.from_config(config).vector_store
 
         # TODO: Refactor tools to be LangChain Tool objects that have a .from_config method
         graph_builder.add_node("search_planner", partial(search_planner_tool, config))

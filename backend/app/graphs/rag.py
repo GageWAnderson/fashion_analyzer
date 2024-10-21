@@ -7,7 +7,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from backend.app.config.config import BackendConfig
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
-from common.db.vector_store import ChromaVectorStore
+from common.db.vector_store import PgVectorStore
 from backend.app.schemas.rag import RagGraphState
 from backend.app.nodes.retrieve import RetrieveNode
 from backend.app.nodes.grade_docs import GradeDocsNode
@@ -24,7 +24,7 @@ class RagGraph(BaseModel):
     def from_config(
         cls,
         config: BackendConfig,
-        vector_store: ChromaVectorStore,
+        vector_store: PgVectorStore,
         stream_handler: AsyncStreamingCallbackHandler,
     ) -> "RagGraph":
         graph = StateGraph(RagGraphState)

@@ -8,7 +8,7 @@ Fashion Analyzer is a web application that uses a FastAPI backend and a React fr
 - **Docker Compose**: Simplifies the setup and management of the application by coordinating multiple containers.
 - **Redis**: Used for caching and session management.
 - **Caddy**: Used as a reverse proxy to manage incoming requests and route them to the appropriate backend service.
-- **Chroma**: Used for storing and querying embeddings.
+- **PGAdmin**: Used for storing and querying embeddings as well as other database management.
 - **Web Crawler**: Used to crawl the web for fashion images.
 
 ## Prerequisites

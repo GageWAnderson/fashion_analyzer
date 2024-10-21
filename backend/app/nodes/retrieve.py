@@ -4,13 +4,13 @@ import logging
 from langchain_core.runnables import Runnable, RunnableConfig
 
 from backend.app.schemas.rag import RagGraphState
-from common.db.vector_store import ChromaVectorStore
+from common.db.vector_store import PgVectorStore
 
 logger = logging.getLogger(__name__)
 
 
 class RetrieveNode(Runnable[RagGraphState, RagGraphState]):
-    def __init__(self, vector_store: ChromaVectorStore):
+    def __init__(self, vector_store: PgVectorStore):
         self.retriever = vector_store.as_retriever()
 
     def invoke(self, state: RagGraphState) -> RagGraphState:

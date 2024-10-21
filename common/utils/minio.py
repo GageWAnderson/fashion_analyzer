@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import BinaryIO
+from io import BytesIO
 import uuid
 
 from common.db.minio import get_minio_client, MinioResponse
@@ -15,7 +15,7 @@ def minio_presigned_get_object(bucket_name: str, object_name: str) -> str:
     )
 
 
-def minio_put_object(file_data: BinaryIO, content_type: str) -> MinioResponse:
+def minio_put_object(file_data: BytesIO, content_type: str) -> MinioResponse:
     """
     Uploads a file to Minio and returns a presigned URL to the file.
     """
@@ -25,7 +25,7 @@ def minio_put_object(file_data: BinaryIO, content_type: str) -> MinioResponse:
         bucket_name=config.minio_bucket,
         object_name=file_id,
         data=file_data,
-        length=len(file_data),
+        length=file_data.getbuffer().nbytes,
         content_type=content_type,
     )
     return MinioResponse(
