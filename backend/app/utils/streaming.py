@@ -26,9 +26,7 @@ class Signals(Enum):
     END = "END"
     TOOL_END = "TOOL_END"
     LLM_END = "LLM_END"
-    CHAIN_START = "CHAIN_START"
-    CHAIN_END = "CHAIN_END"
-    STOP = "STOP"
+    METADATA = "METADATA"
 
 
 class StreamingData(BaseModel):
@@ -104,5 +102,14 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
                 data="error",
                 data_type=DataTypes.ACTION,
                 metadata={"tool": kwargs["name"], "step": 1, "error": repr(error)},
+            ).model_dump_json()
+        )
+
+    async def on_tool_metadata(self, metadata: dict[str, Any], **kwargs: Any) -> None:
+        await self.streaming_function(
+            StreamingData(
+                data=Signals.METADATA.value,
+                data_type=DataTypes.SIGNAL,
+                metadata=metadata,
             ).model_dump_json()
         )

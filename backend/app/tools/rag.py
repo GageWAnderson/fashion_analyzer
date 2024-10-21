@@ -34,9 +34,14 @@ class RagTool(BaseTool):
         #     backend_config, vector_store, self.stream_handler
         # )
         retriever = vector_store.as_retriever()
-        docs = await retriever.ainvoke(input)
+        docs = retriever.invoke(input)
+        if not docs:
+            logger.error(f"No documents found for query: {input}")
+            raise ValueError("No documents found")
         metadatas = RagTool._get_metadatas(docs)
         logger.debug(f"Retrieved {len(docs)} documents")
+
+        # TODO: If the images exist, include their URLs in the response
 
         prompt = PromptTemplate(
             input_variables=["question", "docs", "sources"],
@@ -49,6 +54,10 @@ class RagTool(BaseTool):
         logger.debug(f"Summarize prompt: {summarize_prompt}")
 
         response = AIMessage.model_validate(await llm.ainvoke(summarize_prompt))
+        # TODO: Should Doc ID be used to track metadata on the frontend?
+        await self.stream_handler.on_tool_metadata(
+            metadata={"sources": [doc.id for doc in docs]}
+        )
         logger.debug(f"Summarized docs: {response.content}")
 
         return response
