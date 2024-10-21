@@ -178,6 +178,9 @@ const ConversationView = () => {
                   metadata: {},
                 })
                 message.content = ""
+              } else if (data === StreamingSignalsEnum.METADATA) {
+                // TODO: Handle metadata and display on right sidebar
+                console.log(`Metadata: ${metadata}`)
               } else {
                 message.events.push(value)
               }

@@ -7,7 +7,7 @@ from langchain_community.vectorstores import VectorStore
 
 from crawler.schemas.state import WebCrawlerState
 from crawler.schemas.search import increment_search_iterations
-from crawler.utils.tavily import SearchResultProcessor
+from crawler.utils.search_results_processor import SearchResultProcessor
 
 logger = logging.getLogger(__name__)
 

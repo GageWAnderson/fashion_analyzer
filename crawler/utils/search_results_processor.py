@@ -4,7 +4,7 @@ from datetime import datetime
 import base64
 from io import BytesIO
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from PIL import Image as PILImage
 from langchain_core.documents import Document
 from langchain_core.messages import AIMessage, HumanMessage
@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 class SearchResultProcessor(BaseModel):
     vector_store: VectorStore
+    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
     def from_vector_store(cls, vector_store: VectorStore):
@@ -55,8 +56,8 @@ class SearchResultProcessor(BaseModel):
         ]  # TODO: Find a better way to break the content down into finer chunks
         # TODO: Break down the content into chunks with unstructured.io
         res_url = tavily_res.content[0]["url"]
-        logger.debug(f"Query: {query}")
-        logger.debug(f"Searching URL: {res_url}")
+        logger.info(f"Query: {query}")
+        logger.info(f"Searching URL: {res_url}")
 
         image_metadata = await self.extract_tavily_res_images(res_url)
 
@@ -69,7 +70,7 @@ class SearchResultProcessor(BaseModel):
             content_summary=await self.summarize_content(res_content),
             relevance_score=0.85,  # TODO: Generate a relevance score at crawl time with the LLM
         ).model_dump(mode="json")
-        logger.debug(f"Metadata: {metadata}")
+        logger.info(f"Metadata: {metadata}")
 
         # TODO: Should we embed by page content or by summary?
         # text_chunks = partition_web_page(res_url)
@@ -77,7 +78,7 @@ class SearchResultProcessor(BaseModel):
             page_content=res_content,
             metadata=metadata,
         )
-
+        logger.info(f"Adding document to vector store: {doc}")
         self.vector_store.add_documents(documents=[doc])
 
     async def extract_tavily_res_images(self, url: str) -> list[ImageMetadata]:
@@ -174,8 +175,8 @@ class SearchResultProcessor(BaseModel):
         summarize_prompt = PromptTemplate(
             template=config.summarize_content_prompt, input_variables=["content"]
         )
-        return await AIMessage.model_validate(
-            llm.ainvoke(summarize_prompt.format(content=content))
+        return AIMessage.model_validate(
+            await llm.ainvoke(summarize_prompt.format(content=content))
         ).content
 
     async def scrape_images_from_page(self, url: str) -> list[str]:
