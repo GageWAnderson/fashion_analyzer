@@ -81,7 +81,7 @@ class SearchResultProcessor(BaseModel):
         logger.info(f"Adding document to vector store: {doc}")
         self.vector_store.add_documents(documents=[doc])
 
-    async def extract_tavily_res_images(self, url: str) -> list[ImageMetadata]:
+    async def extract_tavily_res_images(self, url: str) -> list[dict]:
         """
         Extracts all images and other media from the Tavily search results and stores them in Minio.
         Returns presigned URLs to use in the metadata of the document the images etc. were extracted from.
@@ -124,7 +124,7 @@ class SearchResultProcessor(BaseModel):
                     url=minio_response.url, summary=await self.summarize_image(image)
                 )
             )
-        return res
+        return [metadata.model_dump() for metadata in res]
 
     async def summarize_image(self, image: PILImage.Image) -> str:
         """

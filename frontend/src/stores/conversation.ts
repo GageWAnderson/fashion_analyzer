@@ -22,6 +22,7 @@ interface ConversationState {
   getConversationById: (conversationId: Id | undefined) => Conversation | undefined
   updateConversation: (conversationId: Id, conversation: Partial<Conversation>) => void
   clearConversation: (filter: (conversation: Conversation) => boolean) => void
+  getImagesForConversation: (conversationId: Id) => string[]
 }
 
 export const useConversationStore = create<ConversationState>()(
@@ -29,6 +30,7 @@ export const useConversationStore = create<ConversationState>()(
     (set, get) => ({
       getState: () => get(),
       conversationList: [],
+      currentImageLinks: [],
       createConversation: (connectionId?: Id, databaseName?: string) => {
         const conversation: Conversation = {
           ...getDefaultConversation(),
@@ -61,6 +63,9 @@ export const useConversationStore = create<ConversationState>()(
           ...state,
           conversationList: state.conversationList.filter(filter),
         }))
+      },
+      getImagesForConversation: (conversationId: Id) => {
+        return get().conversationList.find((item) => item.id === conversationId)?.imageLinks || []
       },
     }),
     {

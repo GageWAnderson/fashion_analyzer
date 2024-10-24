@@ -57,7 +57,10 @@ class RagTool(BaseTool):
 
         # TODO: Should Doc ID be used to track metadata on the frontend?
         await self.stream_handler.on_tool_metadata(
-            metadata={"sources": [doc.id for doc in docs]}
+            metadata={
+                "sources": [doc.id for doc in docs],
+                "image_links": [metadata.url for metadata in metadatas if metadata.url],
+            }
         )
         logger.debug(f"Summarized docs: {response.content}")
 

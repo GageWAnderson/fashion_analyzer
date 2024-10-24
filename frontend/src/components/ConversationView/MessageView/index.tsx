@@ -22,7 +22,6 @@ import {
 import { groupBy } from "~/utils"
 
 import FeedbackView from "./FeedbackView"
-import { MessageEvent } from "./MessageEvents/MessageEvent"
 import { LLMResponse } from "./MessageEvents/MessageEvent/LLMResponse"
 import { MessageEvents } from "./MessageEvents/MessageEvents"
 import ThreeDotsLoader from "../../CustomIcons/ThreeDotsLoader"
@@ -203,9 +202,6 @@ const MessageView = (props: Props) => {
                       </div>
                     </Collapse>
                   </div>
-                  {otherEvents.map((event) => (
-                    <MessageEvent key={`${event.data}-${event.data_type}`} event={event} message={message} />
-                  ))}
                   <LLMResponse text={message.content} messageId={message.id} conversationId={conversationId} />
                   {message.status === "DONE" &&
                     showFeedback &&

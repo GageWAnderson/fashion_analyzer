@@ -28,7 +28,6 @@ def get_llm_from_config(
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
                 streaming=True,
-                cache=True,
             )
         case "gpt-4o-mini":
             return ChatOpenAI(
