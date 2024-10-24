@@ -24,15 +24,15 @@ class SummaryService(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
-    def from_config(cls, config: BackendConfig) -> "SummaryService":
-        vector_store = PgVectorStore.from_config(config)
+    async def from_config(cls, config: BackendConfig) -> "SummaryService":
+        vector_store = await PgVectorStore.from_config(config)
         return cls(llm=get_llm_from_config(config), vector_store=vector_store)
 
     async def generate_summary(self, weeks: int, days: int) -> WeeklySummaryResponse:
         retriever = self.vector_store.as_retriever(
-            filter=self._get_age_filter(weeks, days)
+            # filter=self._get_age_filter(weeks, days)
         )
-        docs = await retriever.ainvoke(backend_config.summarize_weekly_prompt)
+        docs = retriever.invoke(backend_config.summarize_weekly_prompt)
 
         if not docs:
             raise NotEnoughSourcesException(
@@ -42,7 +42,7 @@ class SummaryService(BaseModel):
         metadatas = RagTool.get_metadatas(docs)
         image_urls = RagTool.get_image_urls(metadatas)
         sources = RagTool.get_source_urls(metadatas)
-        if not SummaryService._has_enough_sources_for_summary(sources):
+        if not self._has_enough_sources_for_summary(sources):
             raise NotEnoughSourcesException("Not enough sources found")
         prompt = PromptTemplate(
             input_variables=["question", "docs", "sources", "image_links"],
@@ -61,11 +61,21 @@ class SummaryService(BaseModel):
             text=str(summary), sources=sources, images=image_urls
         )
 
-    @staticmethod
-    def _get_age_filter(weeks: int, days: int) -> dict:
-        return {
-            "timestamp": {"$gte": datetime.now() - timedelta(weeks=weeks, days=days)}
-        }
+    # @staticmethod
+    # def _get_age_filter(weeks: int, days: int) -> dict:
+    #     one_week_ago = datetime.now() - timedelta(weeks=weeks, days=days)
+    #     # TODO: Think of the correct way to use metadata filtering with PGVector
+    #     return {
+    #         "query": """
+    #             SELECT * FROM langchain_pg_embedding 
+    #             WHERE cmetadata->>'timestamp' < %s 
+    #             AND cmetadata->>'timestamp' > %s
+    #         """,
+    #         "params": (
+    #             datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f"),
+    #             one_week_ago.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+    #         ),
+    #     }
 
     @staticmethod
     def _has_enough_sources_for_summary(sources: list[str]) -> bool:

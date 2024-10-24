@@ -20,7 +20,7 @@
     "start": "next start",
     "analyze": "ANALYZE=true next build",
     "prisma:generate": "prisma generate",
-    "generate-api": "openapi -i http://localhost/api/v1/openapi.json -o src/api-client -c axios",
+    "generate-api": "openapi -i http://localhost:9090/api/v1/openapi.json -o src/api-client -c axios",
     "prepare": "cd ../ && husky install ./frontend/.husky",
     "preinstall": "npx npm-only-allow@latest --PM pnpm",
     "cypress:open": "cypress open",

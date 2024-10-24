@@ -2,21 +2,22 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { WeeklySummaryResponse } from "../models/WeeklySummaryResponse"
+
 import type { CancelablePromise } from "../core/CancelablePromise"
 import { OpenAPI } from "../core/OpenAPI"
 import { request as __request } from "../core/request"
 
-export class DefaultService {
+export class SummaryService {
   /**
-   * Root
-   * An example "Hello world" FastAPI route.
-   * @returns string Successful Response
+   * Get Weekly Summary Text
+   * @returns WeeklySummaryResponse Successful Response
    * @throws ApiError
    */
-  public static rootGet(): CancelablePromise<Record<string, string>> {
+  public static getWeeklySummaryTextApiV1SummaryWeeklyTextGet(): CancelablePromise<WeeklySummaryResponse> {
     return __request(OpenAPI, {
       method: "GET",
-      url: "/",
+      url: "/api/v1/summary/weekly/text",
     })
   }
 }

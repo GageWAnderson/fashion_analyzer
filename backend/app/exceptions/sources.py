@@ -1,7 +1,5 @@
-from pydantic import BaseModel
-
-
-class NotEnoughSourcesException(BaseModel, Exception):
+class NotEnoughSourcesException(Exception):
     """Exception raised when there are not enough sources for a summary."""
 
-    message: str = "Not enough sources found"
+    def __init__(self, message: str):
+        super().__init__(message)

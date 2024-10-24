@@ -91,20 +91,20 @@ export const Tabs: FC<TabsProps> = ({ children, forcedActiveTab, classNames, fix
           })}
         </div>
       </div>
-      <div className="!overflow-y-auto lg:mt-[40px]">
+      <div className="h-full !overflow-y-auto lg:mt-[40px]">
         {tabItems.map((tabItem: TabItemProps) => {
           const { label, children } = tabItem
 
           if (label === activeTab) {
             return (
-              <div key={label} className="visible">
+              <div key={label} className="visible h-full">
                 {children}
               </div>
             )
           }
 
           return (
-            <div key={label} className="hidden">
+            <div key={label} className="hidden h-full">
               {children}
             </div>
           )

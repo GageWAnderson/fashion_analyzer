@@ -15,7 +15,7 @@ class PgVectorStore(BaseModel):
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
-    def from_config(cls, config: BaseConfig) -> "PgVectorStore":
+    async def from_config(cls, config: BaseConfig) -> "PgVectorStore":
         vector_store_from_client = PGVector(
             embeddings=get_embedding_model_from_config(config),
             collection_name=config.vector_store_collection_name,
@@ -30,7 +30,7 @@ class PgVectorStore(BaseModel):
 
     @staticmethod
     def _get_connection_string_from_config(config: BaseConfig) -> str:
-        return f"postgresql+psycopg://{config.postgres_user}:{config.postgres_password}@{config.postgres_host}:{config.postgres_port}/{config.postgres_db}"
+        return f"postgresql://{config.postgres_user}:{config.postgres_password}@{config.postgres_host}:{config.postgres_port}/{config.postgres_db}"
 
     def as_retriever(self, filter: dict = {}) -> VectorStoreRetriever:
         return self.vector_store.as_retriever(

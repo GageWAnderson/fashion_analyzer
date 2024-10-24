@@ -12,5 +12,4 @@ export enum StreamingDataTypeEnum {
   APPENDIX = "appendix",
   ACTION = "action",
   SIGNAL = "signal",
-  METADATA = "metadata",
 }

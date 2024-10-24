@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 async def crawl():
-    graph = CrawlerGraph.from_config(config).graph
+    graph = await CrawlerGraph.from_config(config).graph
 
     init_msg = [HumanMessage(content=config.init_message)]
     logger.debug(f"Initial message: {config.init_message}")

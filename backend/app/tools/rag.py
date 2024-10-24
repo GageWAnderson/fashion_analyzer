@@ -28,7 +28,7 @@ class RagTool(BaseTool):
         raise NotImplementedError("RAG tool does not support sync execution.")
 
     async def _arun(self, input: str) -> str:
-        vector_store = PgVectorStore.from_config(backend_config)
+        vector_store = await PgVectorStore.from_config(backend_config)
         # TODO: Re-enable RAG graph a a sub-graph once streaming performance is improved
         # rag_graph = RagGraph.from_config(
         #     backend_config, vector_store, self.stream_handler

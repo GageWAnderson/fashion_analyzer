@@ -20,7 +20,7 @@ const Home: NextPage = () => {
           <TopWarningBanner />
         </div>
 
-        <Tabs>
+        <Tabs classNames="pb-10 h-full">
           <TabItem label="Chat">
             <ChatLanding />
           </TabItem>
