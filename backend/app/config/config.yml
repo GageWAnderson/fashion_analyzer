@@ -7,8 +7,9 @@ vector_store_collection_name: fashion_trends
 search_plan_retry_limit: 3
 num_search_iterations: 5
 vector_search_type: mmr
-vector_search_k: 10
-vector_search_fetch_k: 5
+vector_search_k: 5
+vector_search_fetch_k: 20
+min_sources_for_summary: 1
 logging_dir: ../logs
 should_continue_prompt: |
   Given the user's original question: {original_question}
@@ -61,3 +62,8 @@ summarize_docs_prompt: |
   Provide the sources at the bottom in a separate sources section.
 
   SUMMARY WITH SOURCES:
+summarize_weekly_prompt: |
+  You are an expert fashion blogger writing an article to describe the last week's fashion trends.
+  It is currently {current_month} {current_day}, {current_year}.
+
+  Create a balanced summary of men's and women's fashion trends for all clothing types.
