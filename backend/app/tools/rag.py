@@ -44,12 +44,15 @@ class RagTool(BaseTool):
         # TODO: If the images exist, include their URLs in the response
 
         prompt = PromptTemplate(
-            input_variables=["question", "docs", "sources"],
+            input_variables=["question", "docs", "sources", "image_links"],
             template=backend_config.summarize_docs_prompt,
         )
         llm = get_llm_from_config(backend_config, callbacks=[self.stream_handler])
         summarize_prompt = prompt.format(
-            question=input, docs=docs, sources=RagTool._get_urls(metadatas)
+            question=input,
+            docs=docs,
+            sources="\n".join(RagTool._get_source_urls(metadatas)),
+            image_links="\n".join(RagTool._get_image_urls(metadatas)),
         )
         logger.debug(f"Summarize prompt: {summarize_prompt}")
 
@@ -59,7 +62,7 @@ class RagTool(BaseTool):
         await self.stream_handler.on_tool_metadata(
             metadata={
                 "sources": [doc.id for doc in docs],
-                "image_links": [metadata.url for metadata in metadatas if metadata.url],
+                "image_links": RagTool._get_image_urls(metadatas),
             }
         )
         logger.debug(f"Summarized docs: {response.content}")
@@ -71,5 +74,20 @@ class RagTool(BaseTool):
         return [VectorMetadata.model_validate(doc.metadata) for doc in docs]
 
     @staticmethod
-    def _get_urls(metadatas: list[VectorMetadata]) -> str:
-        return "\n".join([metadata.url for metadata in metadatas if metadata.url])
+    def _get_source_urls(metadatas: list[VectorMetadata]) -> list[str]:
+        return [metadata.url for metadata in metadatas if metadata.url]
+
+    @staticmethod
+    def _get_image_urls(source_metadatas: list[VectorMetadata]) -> list[str]:
+        # TODO: Return only the most relevant image URLs
+        try:
+            image_urls = []
+            for source_metadata in source_metadatas:
+                if source_metadata.image_metadata:
+                    for image_metadata in source_metadata.image_metadata:
+                        image_urls.append(image_metadata["url"])
+            return image_urls
+        except Exception:
+            logger.exception("Error getting image URLs")
+            logger.warning("No image URLs found for query")
+            return ["No image URLs found"]

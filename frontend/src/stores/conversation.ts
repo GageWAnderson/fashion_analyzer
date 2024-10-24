@@ -9,6 +9,7 @@ const getDefaultConversation = (): Conversation => {
     id: generateUUID(),
     agentId: "gpt-4",
     title: dayjs().format("LTS"),
+    imageLinks: [],
     createdAt: Date.now(),
   }
 }
@@ -22,7 +23,7 @@ interface ConversationState {
   getConversationById: (conversationId: Id | undefined) => Conversation | undefined
   updateConversation: (conversationId: Id, conversation: Partial<Conversation>) => void
   clearConversation: (filter: (conversation: Conversation) => boolean) => void
-  getImagesForConversation: (conversationId: Id) => string[]
+  getImagesForConversation: (conversationId: Id | undefined) => string[]
 }
 
 export const useConversationStore = create<ConversationState>()(
@@ -64,8 +65,12 @@ export const useConversationStore = create<ConversationState>()(
           conversationList: state.conversationList.filter(filter),
         }))
       },
-      getImagesForConversation: (conversationId: Id) => {
-        return get().conversationList.find((item) => item.id === conversationId)?.imageLinks || []
+      getImagesForConversation: (conversationId: Id | undefined): string[] => {
+        if (!conversationId) {
+          return []
+        } else {
+          return get().conversationList.find((item) => item.id === conversationId)?.imageLinks || []
+        }
       },
     }),
     {

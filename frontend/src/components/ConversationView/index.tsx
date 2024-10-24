@@ -31,7 +31,6 @@ const ConversationView = () => {
     ? messageStore.messageList.filter((message) => message.conversationId === currentConversation.id)
     : []
   const lastMessage = last(messageList)
-  console.log(`Conversation Images: ${JSON.stringify(currentConversation?.imageLinks)}`)
 
   useEffect(() => {
     messageStore.messageList.map((message) => {

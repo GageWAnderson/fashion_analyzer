@@ -43,6 +43,7 @@ tool_call_prompt: |
 summarize_docs_prompt: |
   Summarize the following documents in relation to the user's question.
   Make sure to include the following sources of the information used to create the summary.
+  Include the markdown-formatted URLs of the images used to create the summary in your response.
 
   User Question:
   {question}
@@ -52,6 +53,9 @@ summarize_docs_prompt: |
 
   Documents:
   {docs}
+
+  Image URLs:
+  {image_links}
 
   Please provide a concise and informative summary that directly addresses the question.
   Provide the sources at the bottom in a separate sources section.
