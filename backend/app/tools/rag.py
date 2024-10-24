@@ -54,6 +54,7 @@ class RagTool(BaseTool):
         logger.debug(f"Summarize prompt: {summarize_prompt}")
 
         response = AIMessage.model_validate(await llm.ainvoke(summarize_prompt))
+
         # TODO: Should Doc ID be used to track metadata on the frontend?
         await self.stream_handler.on_tool_metadata(
             metadata={"sources": [doc.id for doc in docs]}

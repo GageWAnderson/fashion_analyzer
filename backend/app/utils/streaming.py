@@ -26,6 +26,9 @@ class Signals(Enum):
     END = "END"
     TOOL_END = "TOOL_END"
     LLM_END = "LLM_END"
+    CHAIN_START = "CHAIN_START"
+    CHAIN_END = "CHAIN_END"
+    STOP = "STOP"
     METADATA = "METADATA"
 
 
