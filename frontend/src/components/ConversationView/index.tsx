@@ -31,6 +31,7 @@ const ConversationView = () => {
     ? messageStore.messageList.filter((message) => message.conversationId === currentConversation.id)
     : []
   const lastMessage = last(messageList)
+  console.log(`Conversation Images: ${JSON.stringify(currentConversation?.imageLinks)}`)
 
   useEffect(() => {
     messageStore.messageList.map((message) => {
@@ -178,6 +179,12 @@ const ConversationView = () => {
                   metadata: {},
                 })
                 message.content = ""
+              } else if (data === StreamingSignalsEnum.METADATA) {
+                // TODO: Handle metadata and display on right sidebar
+                console.log(`Metadata: ${JSON.stringify(metadata)}`)
+                conversationStore.updateConversation(currentConversation.id, {
+                  imageLinks: metadata?.image_links || [],
+                })
               } else {
                 message.events.push(value)
               }

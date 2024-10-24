@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from langchain_core.vectorstores.base import VectorStoreRetriever
 from langchain_postgres import PGVector
@@ -9,9 +9,7 @@ from common.utils.llm import get_embedding_model_from_config
 
 class PgVectorStore(BaseModel):
     vector_store: PGVector
-
-    class Config:
-        arbitrary_types_allowed = True
+    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
     def from_config(cls, config: BaseConfig) -> "PgVectorStore":

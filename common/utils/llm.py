@@ -36,6 +36,7 @@ def get_llm_from_config(
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
                 streaming=True,
+                cache=False, # Cache is disabled to always render responses
             )
         case "llama3.1":
             return ChatOllama(
