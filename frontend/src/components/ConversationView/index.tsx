@@ -165,7 +165,6 @@ const ConversationView = () => {
       let done = false
       while (!done) {
         const { value, done: readerDone } = await reader.read()
-        console.log(`Value: ${JSON.stringify(value)}`)
         if (value) {
           const { data_type, data, metadata } = value
           if (data && data.length > 0) {
