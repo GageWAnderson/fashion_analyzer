@@ -104,6 +104,8 @@ class SearchResultProcessor(BaseModel):
         res: list[ImageMetadata] = []
         for image_url in image_urls:
             try:
+                # TODO: Consider the security implications of opening images from the internet into memory here
+                # TODO: Come up with a method for filtering out EMPTY and DUPLICATE images
                 image = PILImage.open(requests.get(image_url, stream=True).raw)
             except Exception:
                 logger.exception(f"Error opening image: {image_url}")
@@ -115,6 +117,7 @@ class SearchResultProcessor(BaseModel):
                 else "image/png"
             )
             # Save the image to a BytesIO object to preserve format and metadata
+            # TODO: Come up with a method for filtering out EMPTY and DUPLICATE images
             image_bytes_io = BytesIO()
             image.save(image_bytes_io, format=image.format)
             image_bytes_io.seek(0)

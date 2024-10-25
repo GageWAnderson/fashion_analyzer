@@ -26,6 +26,7 @@ def search_planner_tool(config: CrawlerConfig, state: WebCrawlerState):
             state=state,
             current_year=current_year,
             current_month=current_month,
+            search_gender=config.search_gender,
             categories=",\n".join(state["search_categories"]),
         )
 

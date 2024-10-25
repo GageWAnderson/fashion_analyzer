@@ -11,7 +11,8 @@ vector_search_k: 10
 vector_search_fetch_k: 5
 minio_presigned_url_expiry_days: 7 # TODO: figure out how to get the URL to be valid for longer
 logging_dir: logs
-init_message: Search the internet for the latest trends in women's and men's fashion.
+search_gender: men
+init_message: Search the internet for the latest trends in fashion.
 men_fashion_categories:
   - Suits and Blazers
   - Shirts (Casual and Dress)
@@ -51,7 +52,7 @@ is_done_prompt: |
 
   ANSWER:
 search_planner_prompt: |
-  You are an expert fashion designer and data scientist. Your goal is to search the internet for the latest fashion trends to summarize them.
+  You are an expert fashion designer and data scientist. Your goal is to search the internet for the latest {search_gender}'s fashion trends to summarize them.
   The current year is {current_year} and the month is {current_month}. 
   Your goal is to come up with a some JSON-formatted internet search queries to learn about the following categories.
 

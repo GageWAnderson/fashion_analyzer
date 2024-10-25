@@ -8,6 +8,7 @@ class CrawlerConfig(BaseConfig):
     women_fashion_categories: List[str]
     search_rephraser_prompt: str
     search_planner_prompt: str
+    search_gender: str
     is_done_prompt: str
     fashion_summarizer_prompt: str
     chunk_format: str

@@ -25,7 +25,7 @@ class CrawlerGraph(BaseModel):
     async def from_config(cls, config: CrawlerConfig) -> "CrawlerGraph":
         graph_builder = StateGraph(WebCrawlerState)
 
-        vector_store = await PgVectorStore.from_config(config).vector_store
+        vector_store = (await PgVectorStore.from_config(config)).vector_store
 
         # TODO: Refactor tools to be LangChain Tool objects that have a .from_config method
         graph_builder.add_node("search_planner", partial(search_planner_tool, config))
