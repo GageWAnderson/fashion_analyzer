@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react"
 import { type NextPage } from "next"
-import { SummaryService } from "~/api-client/services/SummaryService"
+import React, { useEffect, useState } from "react"
 import { type WeeklySummaryResponse } from "~/api-client/models/WeeklySummaryResponse"
-import { ResponseState } from "~/utils/response"
+import { SummaryService } from "~/api-client/services/SummaryService"
 import { Markdown } from "~/components/CodeView/Markdown"
 import Icon from "~/components/CustomIcons/Icon"
+import { ResponseState } from "~/utils/response"
 
 const SummaryText: React.FC<{ text: string }> = ({ text }) => {
   return (
     <div className="h-full overflow-y-auto">
-      <h1>Summary</h1>
+      <h1 className="mb-4 text-3xl font-bold">Summary of trends last week</h1>
       <Markdown text={text} />
     </div>
   )
@@ -67,7 +67,7 @@ const Summary: NextPage = () => {
   } else {
     return (
       <div className="flex size-full flex-row !overflow-hidden">
-        <div className="w-1/2 p-4">
+        <div className="w-1/2 border-r border-gray-300 p-4">
           <SummaryText text={summary?.text ?? ""} />
         </div>
         <div className="w-1/2 p-4">

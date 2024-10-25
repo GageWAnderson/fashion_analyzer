@@ -1,8 +1,8 @@
 import { type NextPage } from "next"
 import Head from "next/head"
 
-import { TopWarningBanner } from "~/components/Common"
 import { TabItem, Tabs } from "~/components/Common"
+import Header from "~/components/Header/Header"
 import { APPLICATION_TITLE } from "~/utils"
 import ChatLanding from "./chat"
 import Summary from "./summary"
@@ -16,11 +16,8 @@ const Home: NextPage = () => {
         {/* <link rel="icon" href="/favicon.ico" TODO: Uncomment when you make an icon /> */}
       </Head>
       <main className="flex size-full flex-col bg-neutral dark:bg-base-300">
-        <div className="sticky top-0 z-1 flex w-full flex-col items-start justify-start bg-accent dark:bg-accent dark:text-neutral">
-          <TopWarningBanner />
-        </div>
-
-        <Tabs classNames="pb-10 h-full">
+        <Header />
+        <Tabs classNames="pb-10 pt-16 h-full">
           <TabItem label="Chat">
             <ChatLanding />
           </TabItem>

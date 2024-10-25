@@ -11,4 +11,5 @@ export enum StreamingSignalsEnum {
   END = "END",
   TOOL_END = "TOOL_END",
   LLM_END = "LLM_END",
+  METADATA = "METADATA",
 }

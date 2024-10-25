@@ -74,6 +74,14 @@ const actions = {
     icon: () => <Icon.BiCommentAdd className="text-bcg-green-light mb-1 mr-2 h-auto w-6" />,
     text: () => "Clarifying the user request...",
   },
+  qa_tool: {
+    icon: () => <Icon.IoChatbubbleOutline className="text-bcg-green-light mb-1 mr-2 h-auto w-6" />,
+    text: () => "Answering questions...",
+  },
+  rag_tool: {
+    icon: () => <Icon.BsDatabase className="text-bcg-green-light mb-1 mr-2 h-auto w-6" />,
+    text: () => "Retrieving relevant information... ",
+  },
 }
 
 export default actions

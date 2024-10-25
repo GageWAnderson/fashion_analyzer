@@ -45,14 +45,13 @@ class SummaryService(BaseModel):
         if not self._has_enough_sources_for_summary(sources):
             raise NotEnoughSourcesException("Not enough sources found")
         prompt = PromptTemplate(
-            input_variables=["question", "docs", "sources", "image_links"],
-            template=backend_config.summarize_docs_prompt,
+            input_variables=["question", "docs", "sources"],
+            template=backend_config.summarize_docs_prompt_no_images,
         )
         summarize_prompt = prompt.format(
             question=backend_config.summarize_weekly_prompt,
             docs=docs,
             sources="\n".join(sources),
-            image_links="\n".join(image_urls),
         )
         summary = AIMessage.model_validate(
             await self.llm.ainvoke(summarize_prompt)
