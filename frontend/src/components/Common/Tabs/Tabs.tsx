@@ -61,13 +61,9 @@ export const Tabs: FC<TabsProps> = ({ children, forcedActiveTab, classNames, fix
     )
 
   return (
-    <div className={`mx-auto w-full ${classNames}`}>
-      <div className="w-full bg-transparent pb-csm">
-        <div
-          className={`w-fullbg-transparent flex max-h-[40px] w-[96%] border-gray-300 lg:max-h-[50px] 2xl:w-[97%] ${
-            fixed ? "absolute z-[1000]" : "relative"
-          }`}
-        >
+    <div className={`w-full ${classNames}`}>
+      <div className="fixed  w-full bg-transparent pb-csm">
+        <div className="flex max-h-[40px] w-full border-gray-300 bg-transparent lg:max-h-[50px]">
           {tabItems.map((tabItem: TabItemProps, index) => {
             const { label, showTooltip, hideLabel, icon } = tabItem
 
@@ -95,24 +91,20 @@ export const Tabs: FC<TabsProps> = ({ children, forcedActiveTab, classNames, fix
           })}
         </div>
       </div>
-      <div
-        className={`max-h-[calc(100vh-170px-3rem)] !overflow-y-auto py-4 pr-cxs md:!max-h-[calc(100vh-270px-3rem)] lg:!max-h-[calc(100vh-350px-3rem)] ${
-          fixed ? "mt-12" : ""
-        }`}
-      >
+      <div className="h-full !overflow-y-auto lg:mt-[40px]">
         {tabItems.map((tabItem: TabItemProps) => {
           const { label, children } = tabItem
 
           if (label === activeTab) {
             return (
-              <div key={label} className="visible">
+              <div key={label} className="visible h-full">
                 {children}
               </div>
             )
           }
 
           return (
-            <div key={label} className="hidden">
+            <div key={label} className="hidden h-full">
               {children}
             </div>
           )

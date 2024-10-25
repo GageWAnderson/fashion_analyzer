@@ -23,6 +23,3 @@ export type { UserSettings } from "./models/UserSettings"
 export type { ValidationError } from "./models/ValidationError"
 
 export { ChatService } from "./services/ChatService"
-export { DefaultService } from "./services/DefaultService"
-export { SqlService } from "./services/SqlService"
-export { StatisticsService } from "./services/StatisticsService"

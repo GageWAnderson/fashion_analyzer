@@ -1,17 +1,20 @@
 import { useState } from "react"
 
 import { type ExecutionResult } from "~/api-client"
+import { Markdown } from "~/components/CodeView/Markdown"
 import { Drawer } from "~/components/Common"
 import Icon from "~/components/CustomIcons/Icon"
+import { useConversationStore } from "~/stores"
 import { checkStatementIsSelect, getMessageFromExecutionResult } from "~/utils"
 
 const SideDrawer = () => {
   const [executionResult, setExecutionResult] = useState<ExecutionResult | undefined>(undefined)
   const [statement, setStatement] = useState<string>("")
   const [isLoading, setIsLoading] = useState(false)
-  const [images, setImages] = useState<Image[]>([])
+  const conversationStore = useConversationStore()
   const executionMessage = executionResult ? getMessageFromExecutionResult(executionResult) : ""
   const showExecutionWarningBanner = statement.trim() && !checkStatementIsSelect(statement)
+  const images = conversationStore.getImagesForConversation(conversationStore.currentConversationId)
 
   return (
     <Drawer
@@ -57,7 +60,9 @@ const SideDrawer = () => {
                 {images.length > 0 ? (
                   <div className="grid w-full grid-cols-2 gap-4">
                     {images.map((image, index) => (
-                      <img key={index} src={image.url} alt={image.description} className="h-auto w-full rounded-lg" />
+                      <div key={index} className="markdown-image">
+                        <Markdown text={`![${image}](${image})`} />
+                      </div>
                     ))}
                   </div>
                 ) : (

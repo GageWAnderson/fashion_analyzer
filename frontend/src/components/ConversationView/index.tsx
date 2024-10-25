@@ -15,7 +15,6 @@ import { generateUUID } from "~/utils"
 import CancelMessageButton from "./CancelMessageButton"
 import ClearConversationButton from "./ClearConversationButton"
 import EmptyView from "./EmptyView"
-import Header from "./Header"
 import MessageTextarea from "./MessageTextarea"
 import MessageView from "./MessageView"
 
@@ -31,7 +30,6 @@ const ConversationView = () => {
     ? messageStore.messageList.filter((message) => message.conversationId === currentConversation.id)
     : []
   const lastMessage = last(messageList)
-  console.log(`Conversation Images: ${JSON.stringify(currentConversation?.imageLinks)}`)
 
   useEffect(() => {
     messageStore.messageList.map((message) => {
@@ -217,8 +215,6 @@ const ConversationView = () => {
 
   return (
     <div className="relative flex size-full max-h-full flex-col items-start justify-start bg-neutral dark:bg-base-300">
-      <Header />
-
       <div
         ref={conversationViewRef}
         className="relative flex size-full !max-h-[calc(100%-150px)] flex-col items-start justify-start overflow-y-auto bg-neutral dark:bg-base-300"
