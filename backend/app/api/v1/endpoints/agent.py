@@ -8,19 +8,22 @@ from backend.app.schemas.chat import Conversation
 from backend.app.utils.async_iteration import ajoin
 from backend.app.graphs.chat import ChatGraph
 from backend.app.utils.runs import stop_run
-from backend.app.api.dependencies import get_chat_graph
+from backend.app.api.dependencies import get_chat_graph_dependency
 
 agent_router = APIRouter()
 
 
 @agent_router.post("/agent")
 async def agent(
-    conversation: Conversation, chat_graph: ChatGraph = Depends(get_chat_graph)
+    conversation: Conversation,
+    chat_graph: ChatGraph = Depends(get_chat_graph_dependency),
 ) -> StreamingResponse:
 
     asyncio.create_task(
         chat_graph.ainvoke(
-            {"messages": conversation.load_messages()}, # TODO: Do I need to pass a callback here?
+            {
+                "messages": conversation.load_messages()
+            },  # TODO: Do I need to pass a callback here?
         )
     )
 

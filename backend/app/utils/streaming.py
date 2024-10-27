@@ -119,6 +119,13 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
             ).model_dump_json()
         )
 
+    async def on_graph_end(self, **kwargs: Any) -> None:
+        await self.streaming_function(
+            StreamingData(
+                data=Signals.END.value, data_type=DataTypes.SIGNAL, metadata=kwargs
+            ).model_dump_json()
+        )
+
     async def on_extracted_item(self, item: ClothingItem, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(

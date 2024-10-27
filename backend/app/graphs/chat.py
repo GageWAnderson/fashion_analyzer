@@ -7,18 +7,19 @@ from pydantic import BaseModel, ConfigDict
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
+from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 from common.utils.llm import get_llm_from_config
 
 from backend.app.config.config import BackendConfig, backend_config
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler, StreamingData
-from backend.app.tools.qa import QaTool
-from backend.app.tools.rag import RagTool
-from backend.app.tools.search import SearchTool
 from backend.app.schemas.agent_state import AgentState
-from backend.app.nodes.agent import AgentNode
-from backend.app.nodes.action import ActionNode
+from backend.app.schemas.subgraph import Subgraph, SubgraphSelectionResponse
+from backend.app.graphs.rag import RagGraph
+from backend.app.graphs.clothing_search import ClothingSearchGraph
 from backend.app.schemas.should_continue import ShouldContinueResponse
+from backend.app.nodes.end import EndNode
+from common.db.vector_store import PgVectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ class ChatGraph(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
-    def from_config(
+    async def from_config(
         cls,
         config: BackendConfig,
     ) -> "ChatGraph":
@@ -50,24 +51,29 @@ class ChatGraph(BaseModel):
             streaming_function=partial(cls._streaming_function, queue)
         )
         graph = StateGraph(AgentState)
+        vector_store = await PgVectorStore.from_config(config)
 
         # TODO: Consider abstracting this into a function that takes a config
-        tools = [
-            QaTool(stream_handler=stream_handler),
-            RagTool(stream_handler=stream_handler),
-            SearchTool(stream_handler=stream_handler),
+        subgraphs: list[Subgraph] = [
+            RagGraph.from_config(config, vector_store, stream_handler),
+            ClothingSearchGraph.from_config(config, stream_handler),
         ]
 
-        graph.add_node(
-            "agent",
-            AgentNode(get_llm_from_config(config, config.tool_call_llm), tools),
-        )
-        graph.add_node("action", ActionNode(tools, stream_handler))
+        # TODO: Refactor chat graph to have the available tools as sub-graphs
+        graph.add_node(EndNode.get_name(), EndNode.from_handler(stream_handler))
+        graph.add_edge(EndNode.get_name(), END)
+        for subgraph in subgraphs:
+            graph.add_node(subgraph.get_name(), subgraph)
+            graph.add_edge(subgraph.get_name(), EndNode.get_name())
 
-        graph.add_edge(START, "agent")
-        graph.add_edge("agent", "action")
         graph.add_conditional_edges(
-            "action", cls._should_continue, path_map={"continue": "agent", "end": END}
+            START,
+            partial(
+                ChatGraph.select_subgraph,
+                llm=get_llm_from_config(config, config.tool_call_llm),
+                subgraphs=subgraphs,
+            ),
+            [subgraph.get_name() for subgraph in subgraphs],
         )
 
         return cls(
@@ -104,6 +110,33 @@ class ChatGraph(BaseModel):
                 self.queue.task_done()
             except asyncio.TimeoutError:
                 continue
+
+    @staticmethod
+    async def select_subgraph(
+        llm: BaseLanguageModel,
+        subgraphs: list[Subgraph],
+        state: AgentState,
+    ) -> str:
+        """
+        Selects the appropriate action plan for the user's question.
+        """
+        prompt = PromptTemplate(
+            input_variables=["user_question", "subgraph_descriptions"],
+            template=backend_config.select_action_plan_prompt,
+        ).format(
+            user_question=state["user_question"],
+            subgraph_descriptions="\n".join(
+                [subgraph.get_description() for subgraph in subgraphs]
+            ),
+        )
+        # TODO: Consider using .with_structured_output() to add structured output to subgraph selection
+        subgraph_choice_llm = llm.with_structured_output(SubgraphSelectionResponse)
+        raw_selected_subgraph = await subgraph_choice_llm.ainvoke(
+            [SystemMessage(content=prompt)]
+        )
+        return SubgraphSelectionResponse.model_validate(
+            raw_selected_subgraph
+        ).subgraph_name
 
     @staticmethod
     async def _streaming_function(queue: asyncio.Queue, data: StreamingData):
