@@ -9,7 +9,12 @@ from langchain_core.language_models import BaseLanguageModel
 from backend.app.schemas.summary import WeeklySummaryResponse
 from backend.app.config.config import BackendConfig, backend_config
 from backend.app.exceptions.sources import NotEnoughSourcesException
-from backend.app.nodes.summarize_docs import SummarizeDocsNode
+from backend.app.utils.rag import (
+    summarize_docs,
+    get_metadatas,
+    get_image_urls,
+    get_source_urls,
+)
 from common.utils.llm import get_llm_from_config
 from common.db.vector_store import PgVectorStore
 
@@ -39,15 +44,15 @@ class SummaryService(BaseModel):
                 f"Not enough documents found, found {len(docs)} documents"
             )
 
-        metadatas = SummarizeDocsNode.get_metadatas(docs)
-        image_urls = SummarizeDocsNode.get_image_urls(metadatas)
-        sources = SummarizeDocsNode.get_source_urls(metadatas)
+        metadatas = get_metadatas(docs)
+        image_urls = get_image_urls(metadatas)
+        sources = get_source_urls(metadatas)
 
         if not self._has_enough_sources_for_summary(sources):
             raise NotEnoughSourcesException("Not enough sources found")
 
         summary = (
-            await SummarizeDocsNode.summarize_docs(
+            await summarize_docs(
                 backend_config.summarize_weekly_prompt, metadatas, self.llm
             )
         ).content
