@@ -1,6 +1,7 @@
 from redis import Redis as RedisSync
 from redis import Redis
 from redis import asyncio as aioredis
+from fastapi import Depends
 
 from backend.app.config.config import backend_config
 from backend.app.graphs.chat import ChatGraph
@@ -27,7 +28,9 @@ async def get_redis_client() -> Redis:
     )
 
 
-def get_chat_graph():
-    return ChatGraph.from_config(
-        backend_config,
-    )
+async def get_chat_graph() -> ChatGraph:
+    return await ChatGraph.from_config(backend_config)
+
+
+async def get_chat_graph_dependency(chat_graph: ChatGraph = Depends(get_chat_graph)):
+    return chat_graph

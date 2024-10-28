@@ -78,9 +78,13 @@ const actions = {
     icon: () => <Icon.IoChatbubbleOutline className="text-bcg-green-light mb-1 mr-2 h-auto w-6" />,
     text: () => "Answering questions...",
   },
-  rag_tool: {
+  rag_graph: {
     icon: () => <Icon.BsDatabase className="text-bcg-green-light mb-1 mr-2 h-auto w-6" />,
     text: () => "Retrieving relevant information... ",
+  },
+  clothing_search_graph: {
+    icon: () => <Icon.FaSearch className="text-bcg-green-light mb-1 mr-2 h-auto w-6" />,
+    text: () => "Searching the web for clothing items...",
   },
 }
 

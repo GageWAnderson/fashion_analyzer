@@ -37,7 +37,7 @@ import {
   BiX,
 } from "react-icons/bi"
 import { BsBox2, BsBoxArrowDown, BsCode, BsDatabase, BsGraphUp, BsTable } from "react-icons/bs"
-import { FaFileImage, FaSignInAlt } from "react-icons/fa"
+import { FaFileImage, FaSearch, FaSignInAlt } from "react-icons/fa"
 import { FiEdit3, FiMoon, FiMoreHorizontal, FiSave, FiSettings, FiThumbsDown, FiThumbsUp, FiX } from "react-icons/fi"
 import { GoDatabase } from "react-icons/go"
 import { GrDocumentStore } from "react-icons/gr"
@@ -167,6 +167,7 @@ const Icon = {
   // Fa icons
   FaSignInAlt,
   FaFileImage,
+  FaSearch,
 }
 
 // Icon is a collection of all icons from react-icons.

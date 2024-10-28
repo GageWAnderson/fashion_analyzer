@@ -1,24 +1,26 @@
+import re
 import asyncio
 import logging
 from functools import partial
 from typing import AsyncGenerator, Any, Union
 
 from pydantic import BaseModel, ConfigDict
-from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
+from langchain_core.language_models import BaseLanguageModel
 from langchain_core.prompts import PromptTemplate
 from common.utils.llm import get_llm_from_config
 
 from backend.app.config.config import BackendConfig, backend_config
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler, StreamingData
-from backend.app.tools.qa import QaTool
-from backend.app.tools.rag import RagTool
-from backend.app.tools.search import SearchTool
 from backend.app.schemas.agent_state import AgentState
-from backend.app.nodes.agent import AgentNode
-from backend.app.nodes.action import ActionNode
-from backend.app.schemas.should_continue import ShouldContinueResponse
+from backend.app.schemas.subgraph import Subgraph, SubgraphSelectionResponse
+from backend.app.graphs.rag import RagGraph
+from backend.app.graphs.clothing_search import ClothingSearchGraph
+from backend.app.nodes.end import EndNode
+from backend.app.nodes.subgraph_start import SubgraphStartNode
+from common.db.vector_store import PgVectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +42,7 @@ class ChatGraph(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
-    def from_config(
+    async def from_config(
         cls,
         config: BackendConfig,
     ) -> "ChatGraph":
@@ -50,24 +52,41 @@ class ChatGraph(BaseModel):
             streaming_function=partial(cls._streaming_function, queue)
         )
         graph = StateGraph(AgentState)
+        vector_store = await PgVectorStore.from_config(config)
 
         # TODO: Consider abstracting this into a function that takes a config
-        tools = [
-            QaTool(stream_handler=stream_handler),
-            RagTool(stream_handler=stream_handler),
-            SearchTool(stream_handler=stream_handler),
+        subgraphs: list[Subgraph] = [
+            RagGraph.from_config(config, vector_store, stream_handler),
+            ClothingSearchGraph.from_config(config, stream_handler),
         ]
 
-        graph.add_node(
-            "agent",
-            AgentNode(get_llm_from_config(config, config.tool_call_llm), tools),
-        )
-        graph.add_node("action", ActionNode(tools, stream_handler))
+        # TODO: Refactor chat graph to have the available tools as sub-graphs
+        end_node = EndNode.from_handler(stream_handler)
+        graph.add_node(end_node.name, end_node)
+        graph.add_edge(end_node.name, END)
+        for subgraph in subgraphs:
+            graph.add_node(
+                ChatGraph.get_subgraph_start_node_name(subgraph.name),
+                SubgraphStartNode.from_handler(subgraph.name, stream_handler),
+            )
+            graph.add_node(subgraph.name, subgraph.graph)
+            graph.add_edge(
+                ChatGraph.get_subgraph_start_node_name(subgraph.name),
+                subgraph.name,
+            )
+            graph.add_edge(subgraph.name, end_node.name)
 
-        graph.add_edge(START, "agent")
-        graph.add_edge("agent", "action")
         graph.add_conditional_edges(
-            "action", cls._should_continue, path_map={"continue": "agent", "end": END}
+            START,
+            partial(
+                ChatGraph.select_subgraph,
+                get_llm_from_config(config, config.tool_call_llm),
+                subgraphs,
+            ),
+            [
+                ChatGraph.get_subgraph_start_node_name(subgraph.name)
+                for subgraph in subgraphs
+            ],
         )
 
         return cls(
@@ -84,15 +103,15 @@ class ChatGraph(BaseModel):
         result = None
         await self.stream_handler.on_llm_start(serialized={}, prompts=[], **kwargs)
         try:
+            # TODO: Pass streaming=True to ainvoke when streaming_handler is removed
             result = await self.graph.ainvoke(*args, **kwargs)
         except Exception:
-            error_message = """I'm sorry, but there was an issue while processing your request.
+            error_message = """\nI'm sorry, but there was an issue while processing your request.
                 Please rephrase and try again."""
             await self.stream_handler.on_text(text=error_message, **kwargs)
             logger.exception("There was an exception in the agent graph")
         finally:
-            await self.stream_handler.on_llm_end()
-            self.stop_event.set()  # TODO: Is this the best way to stop the graph?
+            self.stop_event.set()
 
         return result
 
@@ -106,49 +125,68 @@ class ChatGraph(BaseModel):
                 continue
 
     @staticmethod
+    async def select_subgraph(
+        llm: BaseLanguageModel,
+        subgraphs: list[Subgraph],
+        state: AgentState,
+    ) -> str:
+        """
+        Selects the appropriate subgraph to answer the user's question.
+        The agent can call one subgraph per user question before returning.
+        """
+        prompt = PromptTemplate(
+            input_variables=["user_question", "subgraph_descriptions"],
+            template=backend_config.select_action_plan_prompt,
+        ).format(
+            user_question=state["user_question"],
+            subgraph_descriptions="\n".join(
+                [
+                    f"Name: {subgraph.name}:\nDescription: {subgraph.description}\n"
+                    for subgraph in subgraphs
+                ]
+            ),
+        )
+        logger.info(f"Subgraph selection prompt: {prompt}")
+        # TODO: Consider using .with_structured_output() to add structured output to subgraph selection
+        # subgraph_choice_llm = llm.with_structured_output(SubgraphSelectionResponse)
+        # return SubgraphSelectionResponse.model_validate(
+        #     raw_selected_subgraph
+        # ).subgraph_name
+
+        # TODO: Consider using structured output if given a more powerful LLM
+        # TODO: Build a switch on the LLM type that changes parsing mode depending on model power
+        raw_selected_subgraph = AIMessage.model_validate(
+            await llm.ainvoke([SystemMessage(content=prompt)])
+        ).content
+        selected_subgraph = ChatGraph.parse_subgraph_response(
+            raw_selected_subgraph, [subgraph.name for subgraph in subgraphs]
+        )
+        logger.info(f"Selected subgraph: {selected_subgraph}")
+        return ChatGraph.get_subgraph_start_node_name(selected_subgraph)
+
+    @staticmethod
+    def parse_subgraph_response(
+        raw_selected_subgraph: str,
+        subgraph_names: list[str],
+    ) -> str:
+        # Create regex pattern that matches any of the subgraph names
+        pattern = "|".join(map(re.escape, subgraph_names))
+
+        # Search for first match of any subgraph name
+        match = re.search(pattern, raw_selected_subgraph)
+
+        if not match:
+            raise ValueError(
+                f"Could not find any valid subgraph names in response. "
+                f"Expected one of: {', '.join(subgraph_names)}"
+            )
+
+        return match.group(0)
+
+    @staticmethod
     async def _streaming_function(queue: asyncio.Queue, data: StreamingData):
         await queue.put(data)
 
     @staticmethod
-    async def _should_continue(state: AgentState) -> str:
-        continue_prompt = PromptTemplate(
-            input_variables=["original_question", "last_message"],
-            template=backend_config.should_continue_prompt,
-        )
-        messages = state.get("messages", [])
-        if not messages:
-            return "continue"
-
-        original_question = next(
-            (
-                msg.content
-                for msg in reversed(messages)
-                if isinstance(msg, HumanMessage)
-            ),
-            None,
-        )
-        if original_question is None:
-            return "continue"
-
-        last_message = messages[-1]
-
-        if isinstance(last_message, ToolMessage) and last_message.status == "error":
-            return "end"
-
-        prompt = continue_prompt.format(
-            original_question=original_question, last_message=last_message.content
-        )
-
-        llm = get_llm_from_config(
-            backend_config, backend_config.tool_call_llm
-        ).with_structured_output(ShouldContinueResponse)
-
-        try:
-            response = await llm.ainvoke([SystemMessage(content=prompt)])
-            return "continue" if response.should_continue else "end"
-        except Exception:
-            logger.exception("Error parsing should continue response")
-            logger.warning(
-                "Should continue response is invalid, possibly ending chat prematurely"
-            )
-            return "end"
+    def get_subgraph_start_node_name(subgraph_name: str) -> str:
+        return f"start_{subgraph_name}"

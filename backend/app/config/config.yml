@@ -9,6 +9,8 @@ num_search_iterations: 5
 vector_search_type: mmr
 vector_search_k: 5
 vector_search_fetch_k: 20
+max_clothing_search_retries: 3
+max_search_results: 10
 min_sources_for_summary: 1
 logging_dir: ../logs
 should_continue_prompt: |
@@ -27,20 +29,20 @@ should_continue_prompt: |
   original_question: "What is the capital of the France?"
   last_message: "I don't know the capital of France."
   should_continue: True
-tool_call_prompt: |
+select_action_plan_prompt: |
   You are a helpful assistant tasked with selecting the right tool to answer a user's question.
   You must choose a tool to answer the user's question rather than providing a response yourself.
   You have access to the following tools:
 
   Tools:
-  {tools}
 
-  Examples:
-  {examples}
+  {subgraph_descriptions}
+
+  Remember to respond with the name of the tool you want to call and nothing else.
 
   Select the tool that best fits the user's question.
   User Question:
-  {question}
+  {user_question}
 summarize_docs_prompt: |
   Summarize the following documents in relation to the user's question.
   Make sure to include the following sources of the information used to create the summary.
@@ -52,16 +54,13 @@ summarize_docs_prompt: |
   Sources:
   {sources}
 
-  Documents:
-  {docs}
-
   Image URLs:
   {image_links}
 
   Please provide a concise and informative summary that directly addresses the question.
   Provide the sources at the bottom in a separate sources section.
 
-  SUMMARY WITH SOURCES:
+  SUMMARY WITH SOURCES AND IMAGES:
 summarize_docs_prompt_no_images: |
   Summarize the following documents in relation to the user's question.
   Make sure to include the following sources of the information used to create the summary.
@@ -84,3 +83,30 @@ summarize_weekly_prompt: |
   It is currently {current_month} {current_day}, {current_year}.
 
   Create a balanced summary of men's and women's fashion trends for all clothing types.
+question_filter_prompt: |
+  You are a helpful assistant. Your job is to filter user questions to make sure the user is asking about clothing.
+  If the user is asking about clothing, return "True". If the user is not asking about clothing, return "False".
+
+  User Question:
+  {user_question}
+
+  Make sure to only return "True" or "False" and nothing else.
+
+  ANSWER:
+clothing_extractor_prompt: |
+  You are an expert fashion blogger and stylist.
+  Your goal is to rephrase your client's search query into an optimal web search for clothing to match their request.
+
+  User Question:
+  {user_question}
+
+  Search Query:
+clothing_search_result_parser_prompt: |
+  You are an expert fashion blogger and stylist and software engineer.
+  Your goal is to parse the content of a web page to extract information about a clothing item displayed on the page.
+  Return only the parsed clothing item and nothing else.
+
+  Web Page Content:
+  {content}
+
+  Parsed Clothing Item:

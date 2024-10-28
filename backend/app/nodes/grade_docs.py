@@ -5,25 +5,26 @@ from langchain_core.language_models import BaseLanguageModel
 from langchain_core.documents import Document
 from langchain_core.prompts import PromptTemplate
 
-from backend.app.schemas.rag import RagGraphState, DocumentGrade
+from backend.app.schemas.rag import RagState
+from backend.app.schemas.rag import DocumentGrade
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
 
 
-class GradeDocsNode(Runnable[RagGraphState, RagGraphState]):
+class GradeDocsNode(Runnable[RagState, RagState]):
     def __init__(
         self, llm: BaseLanguageModel, stream_handler: AsyncStreamingCallbackHandler
     ):
         self.llm = llm
         self.stream_handler = stream_handler
 
-    def invoke(self, state: RagGraphState) -> RagGraphState:
+    def invoke(self, state: RagState) -> RagState:
         raise NotImplementedError("GradeDocsNode does not support sync invoke")
 
     async def ainvoke(
         self,
-        state: RagGraphState,
+        state: RagState,
         config: Optional[RunnableConfig] = None,
-    ) -> RagGraphState:
+    ) -> RagState:
         grade_docs_prompt = PromptTemplate.from_template(
             """
             You are a helpful assistant that grades the relevance of documents to a user's question.
@@ -44,7 +45,10 @@ class GradeDocsNode(Runnable[RagGraphState, RagGraphState]):
                     DocumentGrade(
                         **(
                             await grading_chain.ainvoke(
-                                {"question": state["question"], "doc": doc.page_content}
+                                {
+                                    "question": state["user_question"],
+                                    "doc": doc.page_content,
+                                }
                             )
                         )
                     ).grade

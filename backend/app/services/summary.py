@@ -7,9 +7,14 @@ from langchain.schema import AIMessage
 from langchain_core.language_models import BaseLanguageModel
 
 from backend.app.schemas.summary import WeeklySummaryResponse
-from backend.app.tools.rag import RagTool
 from backend.app.config.config import BackendConfig, backend_config
 from backend.app.exceptions.sources import NotEnoughSourcesException
+from backend.app.utils.rag import (
+    summarize_docs,
+    get_metadatas,
+    get_image_urls,
+    get_source_urls,
+)
 from common.utils.llm import get_llm_from_config
 from common.db.vector_store import PgVectorStore
 
@@ -30,7 +35,7 @@ class SummaryService(BaseModel):
 
     async def generate_summary(self, weeks: int, days: int) -> WeeklySummaryResponse:
         retriever = self.vector_store.as_retriever(
-            # filter=self._get_age_filter(weeks, days)
+            # filter=self._get_age_filter(weeks, days) TODO: Re-enable metadata filtering
         )
         docs = retriever.invoke(backend_config.summarize_weekly_prompt)
 
@@ -39,22 +44,17 @@ class SummaryService(BaseModel):
                 f"Not enough documents found, found {len(docs)} documents"
             )
 
-        metadatas = RagTool.get_metadatas(docs)
-        image_urls = RagTool.get_image_urls(metadatas)
-        sources = RagTool.get_source_urls(metadatas)
+        metadatas = get_metadatas(docs)
+        image_urls = get_image_urls(metadatas)
+        sources = get_source_urls(metadatas)
+
         if not self._has_enough_sources_for_summary(sources):
             raise NotEnoughSourcesException("Not enough sources found")
-        prompt = PromptTemplate(
-            input_variables=["question", "docs", "sources"],
-            template=backend_config.summarize_docs_prompt_no_images,
-        )
-        summarize_prompt = prompt.format(
-            question=backend_config.summarize_weekly_prompt,
-            docs=docs,
-            sources="\n".join(sources),
-        )
-        summary = AIMessage.model_validate(
-            await self.llm.ainvoke(summarize_prompt)
+
+        summary = (
+            await summarize_docs(
+                backend_config.summarize_weekly_prompt, metadatas, self.llm
+            )
         ).content
         return WeeklySummaryResponse(
             text=str(summary), sources=sources, images=image_urls
@@ -66,8 +66,8 @@ class SummaryService(BaseModel):
     #     # TODO: Think of the correct way to use metadata filtering with PGVector
     #     return {
     #         "query": """
-    #             SELECT * FROM langchain_pg_embedding 
-    #             WHERE cmetadata->>'timestamp' < %s 
+    #             SELECT * FROM langchain_pg_embedding
+    #             WHERE cmetadata->>'timestamp' < %s
     #             AND cmetadata->>'timestamp' > %s
     #         """,
     #         "params": (

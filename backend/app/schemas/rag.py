@@ -1,21 +1,17 @@
-from typing import TypedDict, Annotated, Literal, Optional
+from typing import Annotated, Sequence, Literal, Optional, TypedDict
 import operator
-
-from langchain_core.documents import Document
 from pydantic import BaseModel
 
+from langchain.schema import BaseMessage
+from langchain_core.documents import Document
 
-class RagToolInput(BaseModel):
-    input: Annotated[str, "A search query to search the vector database for."]
+
+class RagState(TypedDict):
+    user_question: Annotated[str, operator.add]
+    messages: Annotated[Sequence[BaseMessage], operator.add]
+    docs: Annotated[list[Document], operator.add]
 
 
 class DocumentGrade(BaseModel):
     grade: Literal["yes", "no"]
     reason: Optional[str]
-
-
-class RagGraphState(TypedDict):
-    question: Annotated[str, operator.add]
-    docs: Annotated[list[Document], operator.add]
-    answer: Annotated[str, operator.add]
-    search: Annotated[str, operator.add]

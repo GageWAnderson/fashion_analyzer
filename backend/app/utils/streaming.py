@@ -9,6 +9,7 @@ from langchain_core.callbacks import AsyncCallbackHandler
 from langchain_core.outputs import LLMResult
 
 from backend.app.schemas.exceptions import LLMExecutionException
+from backend.app.schemas.clothing import ClothingItem
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ class Signals(Enum):
     CHAIN_END = "CHAIN_END"
     STOP = "STOP"
     METADATA = "METADATA"
+    EXTRACTED_ITEM = "EXTRACTED_ITEM"
 
 
 class StreamingData(BaseModel):
@@ -79,23 +81,21 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
             ).model_dump_json()
         )
 
-    async def on_tool_start(
-        self, serialized: dict[str, Any], input_str: str, **kwargs: Any
-    ) -> None:
+    async def on_tool_start(self, tool_name: str, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
-                data=(tool_name := serialized["name"]),
+                data=tool_name,
                 data_type=DataTypes.ACTION,
                 metadata={"tool": tool_name, "step": 0, "time": datetime.now()},
             ).model_dump_json()
         )
 
-    async def on_tool_end(self, output: Optional[Any] = None, **kwargs: Any) -> None:
+    async def on_tool_end(self, tool_name: str, **kwargs: Any) -> None:
         await self.streaming_function(
             StreamingData(
                 data=Signals.TOOL_END.value,
                 data_type=DataTypes.SIGNAL,
-                metadata={"tool": kwargs["name"]},
+                metadata={"tool": tool_name},
             ).model_dump_json()
         )
 
@@ -114,5 +114,21 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
                 data=Signals.METADATA.value,
                 data_type=DataTypes.SIGNAL,
                 metadata=metadata,
+            ).model_dump_json()
+        )
+
+    async def on_graph_end(self, **kwargs: Any) -> None:
+        await self.streaming_function(
+            StreamingData(
+                data=Signals.END.value, data_type=DataTypes.SIGNAL, metadata=kwargs
+            ).model_dump_json()
+        )
+
+    async def on_extracted_item(self, item: ClothingItem, **kwargs: Any) -> None:
+        await self.streaming_function(
+            StreamingData(
+                data=Signals.EXTRACTED_ITEM.value,
+                data_type=DataTypes.SIGNAL,
+                metadata=item.model_dump(),
             ).model_dump_json()
         )
