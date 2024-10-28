@@ -29,8 +29,8 @@ class ClothingSearchGraph(Subgraph):
         graph = StateGraph(AgentState)
 
         return cls(
-            name=cls.get_name(),
-            description=cls.get_description(),
+            # name=cls.get_name(),
+            # description=cls.get_description(),
             graph=graph.compile(),
             stream_handler=stream_handler,
         )

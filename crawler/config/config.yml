@@ -112,18 +112,6 @@ chunk_format: |
     {page_content}
   Citation:
     {metadata}
-tool_call_prompt: |
-  You are a helpful assistant tasked with selecting the right tool to answer a user's question.
-  You have access to the following tools:
-
-  Tools:
-  {tools}
-
-  Select the tool that best fits the user's question.
-  User Question:
-  {question}
-
-  JSON Tool Call Output:
 summarize_image_prompt: |
   Give a concise, 1 sentence summary of this image.
 summarize_content_prompt: |
