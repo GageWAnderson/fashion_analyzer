@@ -7,7 +7,7 @@ from backend.app.schemas.agent_state import AgentState
 from backend.app.config.config import backend_config
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
 from common.utils.llm import get_llm_from_config
-from backend.app.utils.rag import summarize_docs, get_metadatas
+from backend.app.utils.rag import summarize_docs, get_metadatas, get_image_urls
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class SummarizeDocsNode(Runnable[RagState, RagState]):
         await self.stream_handler.on_tool_metadata(
             metadata={
                 "sources": [doc.id for doc in state["docs"]],
-                "image_links": self.get_image_urls(metadatas),
+                "image_links": get_image_urls(metadatas),
             }
         )
         logger.info(f"Summarized docs: {response.content}")
