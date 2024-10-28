@@ -23,7 +23,10 @@ class ClothingSearchGraph(Subgraph):
 
     name: str = "clothing_search_graph"
     description: str = (
-        "Searches the web for clothing items similar to the one the user is asking about."
+        """
+        Searches the web for clothing items similar to the one the user is asking about.
+        Use this tool when your user is asking about a specific clothing item.
+        """
     )
     stream_handler: AsyncStreamingCallbackHandler
 
@@ -78,7 +81,7 @@ class ClothingSearchGraph(Subgraph):
             template=backend_config.question_filter_prompt,
         )
         raw_response = AIMessage.model_validate(
-            await llm.ainvoke(prompt.format(user_question=state["user_question"]))
+            await llm.ainvoke(prompt.format(user_question=state.user_question))
         ).content
         return ClothingSearchGraph.parse_raw_response(raw_response)
 
@@ -88,9 +91,9 @@ class ClothingSearchGraph(Subgraph):
         Checks the parsed clothing items found to make sure they are
         properly formatted, exist, and have the required metadata to display on the frontend.
         """
-        if state["search_retries"] > backend_config.max_clothing_search_retries:
+        if state.search_retries > backend_config.max_clothing_search_retries:
             return False
-        return len(state["parsed_results"]) > 0
+        return len(state.parsed_results) > 0
 
     @staticmethod
     def parse_raw_response(raw_response: str) -> bool:

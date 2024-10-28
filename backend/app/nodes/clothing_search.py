@@ -22,10 +22,8 @@ class ClothingSearchNode(Runnable[ClothingGraphState, ClothingGraphState]):
         tavily_search = TavilySearchResults(
             max_results=backend_config.max_search_results
         )
-        response = AIMessage.model_validate(
-            await tavily_search.ainvoke({"query": state["search_item"].query})
-        )
+        search_results = await tavily_search.ainvoke({"query": state.search_item.query})
         return {
-            "search_results": response.content,
-            "search_retries": state["search_retries"] + 1,
+            "search_results": search_results,
+            "search_retries": state.search_retries + 1,
         }

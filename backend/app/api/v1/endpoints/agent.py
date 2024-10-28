@@ -22,7 +22,9 @@ async def agent(
     asyncio.create_task(
         chat_graph.ainvoke(
             {
-                "messages": conversation.load_messages()
+                "user_question": conversation.load_messages()[-1].content,
+                "messages": conversation.load_messages(),
+                "search_item": None,
             },  # TODO: Do I need to pass a callback here?
         )
     )

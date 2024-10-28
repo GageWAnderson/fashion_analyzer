@@ -5,7 +5,7 @@ from datetime import date
 
 from langchain.schema import BaseMessage
 
-from common.utils.reducer import reduce_dict, reduce_clothing_search_query
+from common.utils.reducer import reduce_dict
 
 
 class ClothingSearchQuery(BaseModel):
@@ -98,11 +98,15 @@ class ClothingGraphState(BaseModel):
     user_question: Annotated[str, operator.add]
     messages: Annotated[Sequence[BaseMessage], operator.add]
     selected_tool: Annotated[str, operator.add]
-    search_item: Annotated[ClothingSearchQuery, reduce_clothing_search_query]
-    search_results: Annotated[dict, reduce_dict] = Field(
-        ..., description="The raw results from Tavily search."
+    search_item: Annotated[Optional[ClothingSearchQuery], reduce_dict] = Field(
+        default=None, description="The search query for the web."
     )
-    parsed_results: Annotated[list[ClothingItem], operator.add]
+    search_results: Annotated[list[dict], operator.add] = Field(
+        default_factory=list, description="The raw results from Tavily search."
+    )
+    parsed_results: Annotated[list[ClothingItem], operator.add] = Field(
+        default_factory=list, description="The parsed results from the search."
+    )
     search_retries: Annotated[int, operator.add] = Field(
         -1, description="Number of times the search has been retried."
     )

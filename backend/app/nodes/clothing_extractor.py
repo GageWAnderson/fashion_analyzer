@@ -22,17 +22,20 @@ class ClothingExtractorNode(Runnable[ClothingGraphState, ClothingGraphState]):
         self, state: ClothingGraphState, config: Optional[RunnableConfig] = None
     ) -> ClothingGraphState:
         # TODO: Consider disabling structured output for some LLMs
-        llm = get_llm_from_config(backend_config).with_structured_output(
-            ClothingSearchQuery
-        )
+        # llm = get_llm_from_config(backend_config).with_structured_output(
+        #     ClothingSearchQuery
+        # )
+        llm = get_llm_from_config(backend_config)
         prompt = PromptTemplate(
             input_variables=["user_question"],
             template=backend_config.clothing_extractor_prompt,
         )
-        raw_response = await llm.ainvoke(
-            prompt.format(user_question=state["user_question"])
+        raw_response = AIMessage.model_validate(
+            await llm.ainvoke(prompt.format(user_question=state.user_question))
         )
-        parsed_response = ClothingSearchQuery.model_validate(raw_response)
+        
+        # TODO: Put some thought into breaking down web pages to get the different clothing items
+        # This is a challenging task, should be done in its own PR
         return {
-            "search_item": parsed_response.query,
+            "search_item": ClothingSearchQuery(query=str(raw_response.content)),
         }

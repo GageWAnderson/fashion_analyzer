@@ -20,7 +20,7 @@ class ClothingParserNode(Runnable[ClothingGraphState, ClothingGraphState]):
     async def ainvoke(
         self, state: ClothingGraphState, config: Optional[RunnableConfig] = None
     ) -> ClothingGraphState:
-        raw_search_results = state["search_results"]
+        raw_search_results = state.search_results
         res = []
         for raw_res in raw_search_results:
             try:
@@ -37,7 +37,7 @@ class ClothingParserNode(Runnable[ClothingGraphState, ClothingGraphState]):
 
     async def parse_raw_res(self, raw_res: dict) -> ClothingItem:
         llm = get_llm_from_config(backend_config).with_structured_output(ClothingItem)
-        
+
         # TODO: Figure out how to extract multiple clothing items per page
         # Will require a clever prompting/chunking strategy
         prompt = PromptTemplate(
