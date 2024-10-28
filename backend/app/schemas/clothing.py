@@ -1,6 +1,22 @@
+from typing import Optional, TypedDict, Annotated, Sequence
+import operator
 from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import date
+
+from langchain.schema import BaseMessage
+
+from common.utils.reducer import reduce_dict, reduce_clothing_search_query
+
+
+class ClothingSearchQuery(BaseModel):
+    """
+    Key information for querying the web to search for clothing items.
+    """
+
+    query: str = Field(
+        ..., description="The user's query rephrased for searching the web for clothes."
+    )
+
 
 # TODO: May need to have fewer fields to not confuse the LLM on extraction
 class ClothingItem(BaseModel):
@@ -75,4 +91,18 @@ class ClothingItem(BaseModel):
     )
     sustainability_info: Optional[str] = Field(
         None, description="Information about eco-friendly or ethical production"
+    )
+
+
+class ClothingGraphState(BaseModel):
+    user_question: Annotated[str, operator.add]
+    messages: Annotated[Sequence[BaseMessage], operator.add]
+    selected_tool: Annotated[str, operator.add]
+    search_item: Annotated[ClothingSearchQuery, reduce_clothing_search_query]
+    search_results: Annotated[dict, reduce_dict] = Field(
+        ..., description="The raw results from Tavily search."
+    )
+    parsed_results: Annotated[list[ClothingItem], operator.add]
+    search_retries: Annotated[int, operator.add] = Field(
+        -1, description="Number of times the search has been retried."
     )

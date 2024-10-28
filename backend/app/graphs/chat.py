@@ -18,7 +18,6 @@ from backend.app.schemas.agent_state import AgentState
 from backend.app.schemas.subgraph import Subgraph, SubgraphSelectionResponse
 from backend.app.graphs.rag import RagGraph
 from backend.app.graphs.clothing_search import ClothingSearchGraph
-from backend.app.schemas.should_continue import ShouldContinueResponse
 from backend.app.nodes.end import EndNode
 from backend.app.nodes.subgraph_start import SubgraphStartNode
 from common.db.vector_store import PgVectorStore

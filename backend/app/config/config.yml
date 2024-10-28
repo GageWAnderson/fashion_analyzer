@@ -9,6 +9,8 @@ num_search_iterations: 5
 vector_search_type: mmr
 vector_search_k: 5
 vector_search_fetch_k: 20
+max_clothing_search_retries: 3
+max_search_results: 10
 min_sources_for_summary: 1
 logging_dir: ../logs
 should_continue_prompt: |
@@ -81,3 +83,30 @@ summarize_weekly_prompt: |
   It is currently {current_month} {current_day}, {current_year}.
 
   Create a balanced summary of men's and women's fashion trends for all clothing types.
+question_filter_prompt: |
+  You are a helpful assistant. Your job is to filter user questions to make sure the user is asking about clothing.
+  If the user is asking about clothing, return "True". If the user is not asking about clothing, return "False".
+
+  User Question:
+  {user_question}
+
+  Make sure to only return "True" or "False" and nothing else.
+
+  ANSWER:
+clothing_extractor_prompt: |
+  You are an expert fashion blogger and stylist.
+  Your goal is to rephrase your client's search query into an optimal web search for clothing to match their request.
+
+  User Question:
+  {user_question}
+
+  Search Query:
+clothing_search_result_parser_prompt: |
+  You are an expert fashion blogger and stylist and software engineer.
+  Your goal is to parse the content of a web page to extract information about a clothing item displayed on the page.
+  Return only the parsed clothing item and nothing else.
+
+  Web Page Content:
+  {content}
+
+  Parsed Clothing Item:
