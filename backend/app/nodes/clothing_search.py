@@ -3,7 +3,6 @@ import logging
 
 from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_community.tools.tavily_search import TavilySearchResults
-from langchain_core.messages import AIMessage
 
 from backend.app.schemas.clothing import ClothingGraphState
 from backend.app.config.config import backend_config
