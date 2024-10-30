@@ -1,0 +1,1 @@
+clothing_items=[SimpleClothingItem(name='WOOL/MOHAIR/SILK 184 SUIT GREY STRIPE', price=770.0, image_url='https://www.supplyandadvise.com/cdn/shop/products/RING-JACKET-WOOL-MOHAIR-SILK-184-SUIT-GREY-STRIPE-1_large.jpg?v=1676005697', link='https://www.supplyandadvise.com/products/ring-jacket-wool-mohair-silk-184-suit-grey-stripe')]
