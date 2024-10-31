@@ -166,6 +166,7 @@ const ConversationView = () => {
         const { value, done: readerDone } = await reader.read()
         if (value) {
           const { data_type, data, metadata } = value
+          console.log(`Streaming data: ${JSON.stringify(value)}`)
           if (data && data.length > 0) {
             if (data_type === StreamingDataTypeEnum.SIGNAL) {
               if (data === StreamingSignalsEnum.START) {
@@ -183,6 +184,9 @@ const ConversationView = () => {
                 conversationStore.updateConversation(currentConversation.id, {
                   imageLinks: metadata?.image_links || [],
                 })
+              } else if (data === StreamingSignalsEnum.EXTRACTED_ITEM) {
+                // TODO: Handle extracted item and display on right sidebar
+                console.log(`Extracted item: ${JSON.stringify(metadata)}`)
               } else {
                 message.events.push(value)
               }

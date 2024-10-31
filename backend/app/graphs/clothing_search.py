@@ -36,10 +36,18 @@ class ClothingSearchGraph(Subgraph):
         config: BackendConfig,
         stream_handler: AsyncStreamingCallbackHandler,
     ) -> "ClothingSearchGraph":
+        llm = get_llm_from_config(config)
+        fast_llm = get_llm_from_config(config, config.fast_llm)
+
         graph = StateGraph(ClothingGraphState)
         graph.add_node("clothing_extractor", ClothingExtractorNode())
         graph.add_node("search", ClothingSearchNode())
-        graph.add_node("clothing_parser", ClothingParserNode())
+        graph.add_node(
+            "clothing_parser",
+            ClothingParserNode.from_llm_and_handler(
+                llm=llm, fast_llm=fast_llm, stream_handler=stream_handler
+            ),
+        )
 
         graph.add_conditional_edges(
             START,
