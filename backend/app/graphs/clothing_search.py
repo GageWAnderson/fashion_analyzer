@@ -40,27 +40,31 @@ class ClothingSearchGraph(Subgraph):
         fast_llm = get_llm_from_config(config, config.fast_llm)
 
         graph = StateGraph(ClothingGraphState)
-        graph.add_node("clothing_extractor", ClothingExtractorNode())
-        graph.add_node("search", ClothingSearchNode())
         graph.add_node(
-            "clothing_parser",
-            ClothingParserNode.from_llm_and_handler(
-                llm=llm, fast_llm=fast_llm, stream_handler=stream_handler
-            ),
+            "clothing_extractor",
+            ClothingExtractorNode.from_handler(stream_handler=stream_handler),
         )
+        # graph.add_node("search", ClothingSearchNode())
+        # graph.add_node(
+        #     "clothing_parser",
+        #     ClothingParserNode.from_llm_and_handler(
+        #         llm=llm, fast_llm=fast_llm, stream_handler=stream_handler
+        #     ),
+        # )
 
         graph.add_conditional_edges(
             START,
             ClothingSearchGraph.filter_question,
             {True: "clothing_extractor", False: END},
         )
-        graph.add_edge("clothing_extractor", "search")
-        graph.add_edge("search", "clothing_parser")
-        graph.add_conditional_edges(
-            "clothing_parser",
-            ClothingSearchGraph.check_results,
-            {True: END, False: "search"},
-        )
+        graph.add_edge("clothing_extractor", END)
+        # graph.add_edge("clothing_extractor", "search")
+        # graph.add_edge("search", "clothing_parser")
+        # graph.add_conditional_edges(
+        #     "clothing_parser",
+        #     ClothingSearchGraph.check_results,
+        #     {True: END, False: "search"},
+        # )
         # TODO: Add a checking loop into the result checker to re-run the search if the results are not good enough
         return cls(
             graph=graph.compile(),

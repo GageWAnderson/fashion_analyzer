@@ -4,7 +4,7 @@ import { CSVLink } from "react-csv"
 import { toast } from "react-hot-toast"
 import { useCurrentPng } from "recharts-to-png"
 import { type ExecutionResult } from "~/api-client"
-import { CodeBlock } from "~/components/CodeView/CodeBlock"
+import { Markdown } from "~/components/CodeView/Markdown"
 import { Tooltip } from "~/components/Common/Tooltip/Tooltip"
 import Icon from "~/components/CustomIcons/Icon"
 import { env } from "~/env.mjs"
@@ -217,22 +217,10 @@ const CodeFlipCard = (props: Props) => {
   return (
     <div className="relative w-full">
       <div className="relative left-[calc(-30vw+50%)] w-screen sm:w-[calc(80vw)] lg:w-[calc(60vw)] 2xl:w-[calc(60vw)]">
-        <div className="rounded-lg bg-slate-200 px-4 py-2 dark:bg-slate-200">
+        <div className="mb-4 rounded-lg bg-base-100 px-4 py-2 dark:bg-base-100">
           <div className="mb-2 flex">
             <div className="align-text-center flex h-auto text-center">{title}</div>
-            <div className="ml-auto">
-              {!isHidden && (
-                <Tooltip content={showCode ? ResultTitle : "Show code"} position="daisytooltip-top">
-                  <button
-                    className="flex size-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100"
-                    onClick={() => setShowCode(!showCode)}
-                    disabled={SUPPORT_EDITING_LANG.includes(language)}
-                  >
-                    {showCode ? <ResultIcon className="h-auto w-full" /> : <Icon.BsCode className="h-auto w-full" />}
-                  </button>
-                </Tooltip>
-              )}
-            </div>
+            <div className="ml-auto"></div>
             {hasCSVDownload && (
               <div className="ml-2">
                 <CSVLink data={executionResult?.rawResult} filename={filename} separator={separator}>
@@ -273,8 +261,8 @@ const CodeFlipCard = (props: Props) => {
           </div>
           {!isHidden &&
             (showCode ? (
-              <div className="rounded-lg bg-zinc-900">
-                <CodeBlock language={language} value={value} messageId={messageId} conversationId={conversationId} />
+              <div className="rounded-lg bg-base-200 p-4 dark:bg-base-200">
+                <Markdown text={value} messageId={messageId} conversationId={conversationId} />
               </div>
             ) : (
               <ResultsView

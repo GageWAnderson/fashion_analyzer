@@ -6,6 +6,7 @@ import { useMemo, useState } from "react"
 import Avatar from "react-avatar"
 import { Collapse } from "react-collapse"
 import { toast } from "react-hot-toast"
+import { StreamingDataTypeEnum, StreamingSignalsEnum } from "~/api-client"
 import { Dropdown, DropdownItem, Tooltip } from "~/components/Common"
 import Icon from "~/components/CustomIcons/Icon"
 
@@ -51,8 +52,25 @@ const MessageView = (props: Props) => {
     messageStore.clearMessage((item) => item.id !== message.id)
   }
 
+  const getClothingInfoMarkdown = (metadata: Record<string, any>) => {
+    return `\n**Name:** ${metadata.name}  \n**Price:** ${metadata.price}  \n**Link:** [${metadata.link}](${metadata.link})  \n![${metadata.name}](${metadata.image_url})`
+      .replace("\n", " ")
+      .trim()
+  }
+
   const appendixEvents = useMemo(() => {
     const appendixEvents = [] as ToolAppendixData[]
+
+    message.events
+      .filter((e) => e.data_type === StreamingDataTypeEnum.APPENDIX && e.data === StreamingSignalsEnum.EXTRACTED_ITEM)
+      .forEach((event) => {
+        appendixEvents.push({
+          value: getClothingInfoMarkdown(event.metadata),
+          language: SUPPORTED_SYNTAX_LANGUAGES.CLOTHING_INFO,
+          title: event.metadata.name || "Clothing Item",
+          event: event,
+        })
+      })
 
     Object.values(SUPPORTED_SYNTAX_LANGUAGES).forEach((language) => {
       const regex = new RegExp("```" + language + "([\\s\\S]*?)```", "g")

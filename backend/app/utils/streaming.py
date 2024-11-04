@@ -128,7 +128,7 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
         await self.streaming_function(
             StreamingData(
                 data=Signals.EXTRACTED_ITEM.value,
-                data_type=DataTypes.SIGNAL,
+                data_type=DataTypes.APPENDIX,
                 metadata=item.model_dump(),
             ).model_dump_json()
         )

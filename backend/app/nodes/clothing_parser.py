@@ -46,7 +46,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
     ) -> ClothingGraphState:
         raw_search_results = state.search_results
         parsed_clothing_items = []
-        # for raw_res in raw_search_results[:1]:
+        # for raw_res in raw_search_results:
         #     url = raw_res["url"]
         #     logger.info(f"Parsing search result: {url}")
         #     content = requests.get(url).text

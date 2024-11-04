@@ -184,9 +184,6 @@ const ConversationView = () => {
                 conversationStore.updateConversation(currentConversation.id, {
                   imageLinks: metadata?.image_links || [],
                 })
-              } else if (data === StreamingSignalsEnum.EXTRACTED_ITEM) {
-                // TODO: Handle extracted item and display on right sidebar
-                console.log(`Extracted item: ${JSON.stringify(metadata)}`)
               } else {
                 message.events.push(value)
               }
