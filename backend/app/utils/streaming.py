@@ -1,5 +1,6 @@
 from datetime import datetime
 import logging
+import asyncio
 from enum import Enum
 from typing import Any, Callable, Optional
 
@@ -132,3 +133,5 @@ class AsyncStreamingCallbackHandler(AsyncCallbackHandler):
                 metadata=item.model_dump(),
             ).model_dump_json()
         )
+        # HACK: Sleeping while putting items on the queue means items are streamed in order
+        await asyncio.sleep(2)

@@ -13,6 +13,7 @@ vector_search_k: 5
 vector_search_fetch_k: 20
 max_clothing_search_retries: 3
 max_search_results: 3
+max_clothing_items_to_stream: 5
 min_sources_for_summary: 1
 chunk_size: 20000
 chunk_overlap: 100
@@ -109,6 +110,10 @@ clothing_search_result_parser_prompt: |
   You are an expert fashion blogger and stylist and software engineer.
   Your goal is to parse the content of a web page to extract information about a clothing item displayed on the page.
   Return only the parsed clothing item and nothing else.
+  When constructing the clothing item, make sure to use the URL of the page as the source of the clothing item.
+
+  Web Page URL:
+  {url}
 
   Web Page Content:
   {content}

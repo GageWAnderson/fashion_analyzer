@@ -46,16 +46,6 @@ class ClothingExtractorNode(
         raw_response = AIMessage.model_validate(
             await llm.ainvoke(prompt.format(user_question=state.user_question))
         )
-        for i in range(2):
-            await self.stream_handler.on_extracted_item(
-                item=ClothingItem(
-                    name=f"Test Item {i}",
-                    price=19.99,
-                    link="https://www.pexels.com/search/shoes/",
-                    image_url="https://images.pexels.com/photos/5214139/pexels-photo-5214139.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500",
-                )
-            )
-            await asyncio.sleep(1)
         return {
             "search_item": ClothingSearchQuery(query=str(raw_response.content)),
         }

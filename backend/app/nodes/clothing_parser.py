@@ -46,53 +46,62 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
     ) -> ClothingGraphState:
         raw_search_results = state.search_results
         parsed_clothing_items = []
-        # for raw_res in raw_search_results:
-        #     url = raw_res["url"]
-        #     logger.info(f"Parsing search result: {url}")
-        #     content = requests.get(url).text
-        #     for chunk in self.split_html(content):
-        #         clicked_links = await self.click_links_and_get_results(url, chunk)
-        #         for clicked_link in clicked_links:
-        #             if self.is_clothing_product_link(clicked_link):
-        #                 logger.debug(f"Found clothing product link: {clicked_link}")
-        #                 try:
-        #                     raw_html_content = requests.get(clicked_link).text
-        #                     for split_html_content in self.split_html(raw_html_content):
-        #                         if not self.contains_clothing_item_info_or_links(
-        #                             split_html_content
-        #                         ):
-        #                             logger.info("Skipping chunk")
-        #                             continue
-        #                         result = await self.parse_search_result(
-        #                             split_html_content
-        #                         )
-        #                         logger.info(f"Parsed result: {result}")
-        #                         for parsed_clothing_item in result:
-        #                             logger.info(
-        #                                 f"Streaming Extracted item: {parsed_clothing_item}"
-        #                             )
-        #                             await self.stream_handler.on_extracted_item(
-        #                                 parsed_clothing_item
-        #                             )
-        #                             parsed_clothing_items.append(parsed_clothing_item)
-        #                 except Exception as e:
-        #                     logger.exception("Error parsing chunk")
-        #                     continue
+        for raw_res in raw_search_results:
+            url = raw_res["url"]
+            logger.info(f"Parsing search result: {url}")
+            content = requests.get(url).text
+            for chunk in self.split_html(content):
+                clicked_links = await self.click_links_and_get_results(url, chunk)
+                for clicked_link in clicked_links:
+                    if self.is_clothing_product_link(clicked_link):
+                        logger.debug(f"Found clothing product link: {clicked_link}")
+                        try:
+                            raw_html_content = requests.get(clicked_link).text
+                            for split_html_content in self.split_html(raw_html_content):
+                                if not self.contains_clothing_item_info_or_links(
+                                    split_html_content
+                                ):
+                                    logger.info("Skipping chunk")
+                                    continue
+                                result = await self.parse_search_result(
+                                    url=url,
+                                    raw_html=split_html_content,
+                                )
+                                logger.info(f"Parsed result: {result}")
+                                for i, parsed_clothing_item in enumerate(result):
+                                    if i >= backend_config.max_clothing_items_to_stream:
+                                        break
+                                    logger.info(
+                                        f"Streaming Extracted item: {parsed_clothing_item}"
+                                    )
+                                    await self.stream_handler.on_extracted_item(
+                                        parsed_clothing_item
+                                    )
+                                    parsed_clothing_items.append(parsed_clothing_item)
+                        except Exception as e:
+                            logger.exception("Error parsing chunk")
+                            continue
         return {"parsed_results": parsed_clothing_items}
 
-    async def parse_search_result(self, raw_html: str) -> list[ClothingItem]:
+    async def parse_search_result(self, url, raw_html: str) -> list[ClothingItem]:
         try:
-            return self.result_extractor(raw_html).clothing_items
+            return self.result_extractor(url, raw_html).clothing_items
         except Exception as e:
             logger.exception(f"Error parsing results")
             return []
 
-    def result_extractor(self, raw_results: str) -> ClothingItemList:
+    def result_extractor(self, url: str, raw_results: str) -> ClothingItemList:
         structured_output_llm = self.llm.with_structured_output(ClothingItemList)
 
         for attempt in range(backend_config.max_retries):
             try:
-                raw_res = structured_output_llm.invoke(raw_results)
+                prompt = PromptTemplate(
+                    input_variables=["url", "content"],
+                    template=backend_config.clothing_search_result_parser_prompt,
+                )
+                raw_res = structured_output_llm.invoke(
+                    prompt.format(url=url, content=raw_results)
+                )
                 logger.info(f"Raw res: {raw_res}")
                 return ClothingItemList.model_validate(raw_res)
             except Exception as e:
