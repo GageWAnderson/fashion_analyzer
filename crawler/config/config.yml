@@ -1,6 +1,7 @@
 llm: gpt-4o-mini
 llm_temperature: 0.0
 tool_call_llm: gpt-4o-mini
+fast_llm: gpt-4o-mini
 vision_llm: gpt-4o
 embedding_model: nomic-embed-text
 vector_store_collection_name: fashion_trends

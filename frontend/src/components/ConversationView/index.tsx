@@ -166,6 +166,7 @@ const ConversationView = () => {
         const { value, done: readerDone } = await reader.read()
         if (value) {
           const { data_type, data, metadata } = value
+          console.log(`Streaming data: ${JSON.stringify(value)}`)
           if (data && data.length > 0) {
             if (data_type === StreamingDataTypeEnum.SIGNAL) {
               if (data === StreamingSignalsEnum.START) {

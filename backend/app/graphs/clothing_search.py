@@ -36,10 +36,21 @@ class ClothingSearchGraph(Subgraph):
         config: BackendConfig,
         stream_handler: AsyncStreamingCallbackHandler,
     ) -> "ClothingSearchGraph":
+        llm = get_llm_from_config(config)
+        fast_llm = get_llm_from_config(config, config.fast_llm)
+
         graph = StateGraph(ClothingGraphState)
-        graph.add_node("clothing_extractor", ClothingExtractorNode())
+        graph.add_node(
+            "clothing_extractor",
+            ClothingExtractorNode.from_handler(stream_handler=stream_handler),
+        )
         graph.add_node("search", ClothingSearchNode())
-        graph.add_node("clothing_parser", ClothingParserNode())
+        graph.add_node(
+            "clothing_parser",
+            ClothingParserNode.from_llm_and_handler(
+                llm=llm, fast_llm=fast_llm, stream_handler=stream_handler
+            ),
+        )
 
         graph.add_conditional_edges(
             START,
@@ -48,12 +59,7 @@ class ClothingSearchGraph(Subgraph):
         )
         graph.add_edge("clothing_extractor", "search")
         graph.add_edge("search", "clothing_parser")
-        graph.add_conditional_edges(
-            "clothing_parser",
-            ClothingSearchGraph.check_results,
-            {True: END, False: "search"},
-        )
-        # TODO: Add a checking loop into the result checker to re-run the search if the results are not good enough
+        graph.add_edge("clothing_parser", END)
         return cls(
             graph=graph.compile(),
             stream_handler=stream_handler,
@@ -75,13 +81,13 @@ class ClothingSearchGraph(Subgraph):
         """
         # TODO: This should be a classifier to save money on LLM calls
         # TODO: Train a BERT classifier to classify questions into clothing or not clothing
-        llm = get_llm_from_config(backend_config)
+        fast_llm = get_llm_from_config(backend_config, llm=backend_config.fast_llm)
         prompt = PromptTemplate(
             input_variables=["user_question"],
             template=backend_config.question_filter_prompt,
         )
         raw_response = AIMessage.model_validate(
-            await llm.ainvoke(prompt.format(user_question=state.user_question))
+            await fast_llm.ainvoke(prompt.format(user_question=state.user_question))
         ).content
         return ClothingSearchGraph.parse_raw_response(raw_response)
 

@@ -11,4 +11,5 @@ export enum SUPPORTED_SYNTAX_LANGUAGES {
   YAML = "yaml",
   PLOTLY = "plotly",
   IMAGEURL = "ImageURL",
+  CLOTHING_INFO = "clothing_info",
 }

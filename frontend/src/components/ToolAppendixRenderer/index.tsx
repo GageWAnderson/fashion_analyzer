@@ -32,6 +32,7 @@ const ToolAppendixRenderer = (props: Props) => {
     case SUPPORTED_SYNTAX_LANGUAGES.JSON:
     case SUPPORTED_SYNTAX_LANGUAGES.PLOTLY:
     case SUPPORTED_SYNTAX_LANGUAGES.IMAGEURL:
+    case SUPPORTED_SYNTAX_LANGUAGES.CLOTHING_INFO:
       return (
         <ErrorBoundary key={data.value} fallback={null}>
           <CodeFlipCard

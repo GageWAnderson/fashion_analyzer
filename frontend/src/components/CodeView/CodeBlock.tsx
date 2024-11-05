@@ -37,16 +37,7 @@ export const CodeBlock = (props: Props) => {
   return (
     <div className="relative w-full max-w-full font-sans text-[16px]">
       <div className="flex items-center justify-between px-4 py-2">
-        <span className="font-mono text-xs text-white">{language}</span>
         <div className="flex items-center space-x-2">
-          <Tooltip content="Copy" position="daisytooltip-top">
-            <button
-              className="flex size-6 items-center justify-center rounded bg-gray-500 bg-none p-1 text-xs text-white opacity-70 hover:opacity-100"
-              onClick={copyToClipboard}
-            >
-              <Icon.BiClipboard className="h-auto w-full" />
-            </button>
-          </Tooltip>
           {showExecuteButton && (
             <Tooltip content="Open & Edit" position="daisytooltip-top">
               <button
@@ -58,6 +49,14 @@ export const CodeBlock = (props: Props) => {
             </Tooltip>
           )}
         </div>
+        <Tooltip content="Copy" position="daisytooltip-top">
+          <button
+            className="flex size-6 items-center justify-center rounded bg-gray-500 bg-none p-1 text-xs text-white opacity-70 hover:opacity-100"
+            onClick={copyToClipboard}
+          >
+            <Icon.BiClipboard className="h-auto w-full" />
+          </button>
+        </Tooltip>
       </div>
       <SyntaxHighlighter language={language.toLowerCase()} style={oneDark} customStyle={{ margin: 0 }}>
         {value}

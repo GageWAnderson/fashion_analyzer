@@ -10,6 +10,7 @@ class BaseConfig(BaseSettings):
     llm: str
     llm_temperature: float
     tool_call_llm: str
+    fast_llm: str
     embedding_model: str
     vector_store_collection_name: str
     vector_search_type: str
