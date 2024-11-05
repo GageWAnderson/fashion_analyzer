@@ -38,14 +38,21 @@ class ClothingExtractorNode(
     async def ainvoke(
         self, state: ClothingGraphState, config: Optional[RunnableConfig] = None
     ) -> ClothingGraphState:
-        llm = get_llm_from_config(backend_config)
-        prompt = PromptTemplate(
-            input_variables=["user_question"],
-            template=backend_config.clothing_extractor_prompt,
-        )
-        raw_response = AIMessage.model_validate(
-            await llm.ainvoke(prompt.format(user_question=state.user_question))
-        )
+        # llm = get_llm_from_config(backend_config, llm=backend_config.fast_llm)
+        # prompt = PromptTemplate(
+        #     input_variables=["user_question"],
+        #     template=backend_config.clothing_extractor_prompt,
+        # )
+        # raw_response = AIMessage.model_validate(
+        #     await llm.ainvoke(prompt.format(user_question=state.user_question))
+        # )
+        # logger.info(f"Raw extracted query response: {raw_response}")
+        # return {
+        #     "search_item": ClothingSearchQuery(query=str(raw_response.content)),
+        # }
+        # TODO: Re-enable LLM extraction for openAI models
+        # NOTE: Different prompts are required for different LLMs, causes more complexity
+        # In the codebase - making clean code for this is key for AI engineering
         return {
-            "search_item": ClothingSearchQuery(query=str(raw_response.content)),
+            "search_item": ClothingSearchQuery(query=state.user_question),
         }

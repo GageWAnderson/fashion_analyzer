@@ -5,7 +5,7 @@ from functools import partial
 from typing import AsyncGenerator, Any, Union
 
 from pydantic import BaseModel, ConfigDict
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.language_models import BaseLanguageModel
@@ -37,7 +37,7 @@ class ChatGraph(BaseModel):
 
     graph: CompiledStateGraph
     stream_handler: AsyncStreamingCallbackHandler
-    queue: asyncio.Queue
+    queue: asyncio.Queue # TODO: Create a more robust queue that returns messages to the fe more reliably
     stop_event: asyncio.Event
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -80,7 +80,7 @@ class ChatGraph(BaseModel):
             START,
             partial(
                 ChatGraph.select_subgraph,
-                get_llm_from_config(config, config.tool_call_llm),
+                get_llm_from_config(config, config.fast_llm),
                 subgraphs,
             ),
             [
@@ -146,7 +146,6 @@ class ChatGraph(BaseModel):
                 ]
             ),
         )
-        logger.info(f"Subgraph selection prompt: {prompt}")
         # TODO: Consider using .with_structured_output() to add structured output to subgraph selection
         # subgraph_choice_llm = llm.with_structured_output(SubgraphSelectionResponse)
         # return SubgraphSelectionResponse.model_validate(
@@ -155,9 +154,9 @@ class ChatGraph(BaseModel):
 
         # TODO: Consider using structured output if given a more powerful LLM
         # TODO: Build a switch on the LLM type that changes parsing mode depending on model power
-        raw_selected_subgraph = AIMessage.model_validate(
-            await llm.ainvoke([SystemMessage(content=prompt)])
-        ).content
+        # BUG: Ollama silently fails if given a SystemMessage instead of human, ai message
+        raw_res = await llm.ainvoke(input=[HumanMessage(content=prompt)])
+        raw_selected_subgraph = AIMessage.model_validate(raw_res).content
         selected_subgraph = ChatGraph.parse_subgraph_response(
             raw_selected_subgraph, [subgraph.name for subgraph in subgraphs]
         )

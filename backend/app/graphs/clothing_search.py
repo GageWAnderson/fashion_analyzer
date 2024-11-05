@@ -81,13 +81,13 @@ class ClothingSearchGraph(Subgraph):
         """
         # TODO: This should be a classifier to save money on LLM calls
         # TODO: Train a BERT classifier to classify questions into clothing or not clothing
-        llm = get_llm_from_config(backend_config)
+        fast_llm = get_llm_from_config(backend_config, llm=backend_config.fast_llm)
         prompt = PromptTemplate(
             input_variables=["user_question"],
             template=backend_config.question_filter_prompt,
         )
         raw_response = AIMessage.model_validate(
-            await llm.ainvoke(prompt.format(user_question=state.user_question))
+            await fast_llm.ainvoke(prompt.format(user_question=state.user_question))
         ).content
         return ClothingSearchGraph.parse_raw_response(raw_response)
 

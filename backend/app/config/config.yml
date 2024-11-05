@@ -1,6 +1,6 @@
-llm: gpt-4o-mini
-tool_call_llm: gpt-4o-mini
-fast_llm: gpt-4o-mini
+llm: gpt-4o
+tool_call_llm: llama3.1
+fast_llm: llama3.1
 max_tool_call_retries: 3
 max_retries: 3
 llm_temperature: 0.0

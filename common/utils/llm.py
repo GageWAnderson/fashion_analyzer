@@ -1,5 +1,6 @@
 from typing import Optional
 
+import httpx
 from langchain_openai import ChatOpenAI
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
@@ -17,6 +18,7 @@ def get_llm_from_config(
     """
     Get a LLM from the config. If a LLM is not specified, the default LLM is used.
     """
+    http_async_client = httpx.AsyncClient()
     if llm is None:
         llm = config.llm
 
@@ -28,6 +30,7 @@ def get_llm_from_config(
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
                 streaming=True,
+                http_async_client=http_async_client,
             )
         case "gpt-4o-mini":
             return ChatOpenAI(
@@ -36,26 +39,44 @@ def get_llm_from_config(
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
                 streaming=True,
-                cache=False, # Cache is disabled to always render responses
+                cache=False,  # Cache is disabled to always render responses
+                http_async_client=http_async_client,
             )
         case "llama3.1":
             return ChatOllama(
                 base_url=config.ollama_url,
                 model="llama3.1",
+                verbose=True,
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
+                http_async_client=http_async_client,
             )
         case "llama3-groq-tool-use":
             return ChatOllama(
+                base_url=config.ollama_url,
                 model="llama3-groq-tool-use:latest",
+                verbose=True,
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
+                http_async_client=http_async_client,
             )
         case "mixtral:8x7b":
             return ChatOllama(
+                base_url=config.ollama_url,
                 model="mixtral:8x7b",
+                verbose=True,
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
+                http_async_client=http_async_client,
+            )
+        case "mistral:7b":
+            return ChatOllama(
+                base_url=config.ollama_url,
+                model="mistral:latest",
+                verbose=True,
+                temperature=config.llm_temperature,
+                callbacks=callbacks,
+                http_async_client=http_async_client,
             )
         # TODO: Add more Ollama models
         # TODO: Add vLLM models
