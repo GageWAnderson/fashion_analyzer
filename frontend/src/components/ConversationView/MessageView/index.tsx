@@ -163,9 +163,6 @@ const MessageView = (props: Props) => {
         </>
       ) : (
         <>
-          {/* <div className="mr-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-gray-950">
-            <Image src="/logo.png" width="25" height="25" alt="agent" />
-          </div> */}
           {message.status === "LOADING" && message.content === "" && message.events.length === 0 ? (
             <div
               className="mt-0.5 w-12 rounded-lg bg-transparent px-4 py-2 dark:bg-transparent"
@@ -247,9 +244,9 @@ const MessageView = (props: Props) => {
                 </div>
                 {appendixEvents.length > 0 && (
                   <div className="mt-1 flex w-full flex-col items-center justify-start space-y-1 text-base-300 dark:text-base-300">
-                    {appendixEvents.map((data) => (
+                    {appendixEvents.map((data, index) => (
                       <ToolAppendixRenderer
-                        key={data.value}
+                        key={index}
                         data={data}
                         message={message}
                         isLatestMessage={isLatestMessage}
