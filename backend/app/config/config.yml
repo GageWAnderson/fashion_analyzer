@@ -1,4 +1,4 @@
-llm: gpt-4o-mini
+llm: gpt-4o-mini # NOTE: gpt-4o-mini is faster and cheaper than gpt-4o and can still do structured output very well
 tool_call_llm: llama3.1
 fast_llm: llama3.1
 summarize_llm: mistral:7b # TODO: Try a 70B local model
