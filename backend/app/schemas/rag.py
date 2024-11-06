@@ -6,8 +6,12 @@ from langchain.schema import BaseMessage
 from langchain_core.documents import Document
 
 
+def user_question_reducer(x: str, y: str) -> str:
+    return y if y is not None else x
+
+
 class RagState(TypedDict):
-    user_question: Annotated[str, operator.add]
+    user_question: Annotated[str, user_question_reducer]
     messages: Annotated[Sequence[BaseMessage], operator.add]
     docs: Annotated[list[Document], operator.add]
 

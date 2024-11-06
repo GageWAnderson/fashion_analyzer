@@ -1,4 +1,5 @@
 from typing import Optional
+import logging
 
 from pydantic import BaseModel, ConfigDict
 
@@ -6,6 +7,9 @@ from langchain_core.runnables import Runnable, RunnableConfig
 
 from backend.app.schemas.agent_state import AgentState
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
+
+
+logger = logging.getLogger(__name__)
 
 
 class SubgraphStartNode(BaseModel, Runnable):
@@ -33,5 +37,6 @@ class SubgraphStartNode(BaseModel, Runnable):
     async def ainvoke(
         self, state: AgentState, config: Optional[RunnableConfig], **kwargs
     ) -> AgentState:
+        logger.info(f"Starting subgraph: {self.name}")
         await self.stream_handler.on_tool_start(self.name)
         return {"selected_tool": self.name}
