@@ -21,6 +21,7 @@ class BackendConfig(BaseConfig):
     is_clothing_product_link_prompt: str
     chunk_size: int
     chunk_overlap: int
+    max_queue_size: int
 
 
 backend_config = BackendConfig.from_yaml("app/config/config.yml")

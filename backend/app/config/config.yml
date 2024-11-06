@@ -17,6 +17,7 @@ max_clothing_items_to_stream: 5
 min_sources_for_summary: 1
 chunk_size: 20000
 chunk_overlap: 100
+max_queue_size: 100
 logging_dir: ../logs
 should_continue_prompt: |
   Given the user's original question: {original_question}
