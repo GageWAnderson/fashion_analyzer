@@ -24,7 +24,7 @@ async def summarize_docs(
         question=user_question,
         sources="\n".join(get_source_urls(metadatas)),
         image_links="\n".join(
-            get_image_urls(metadatas)
+            get_image_urls(metadatas)[: backend_config.max_images_to_display]
         ),  # TODO: Filter down to a smaller number of images
     )
     logger.info(f"Summarize prompt: {summarize_prompt}")

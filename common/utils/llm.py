@@ -30,6 +30,7 @@ def get_llm_from_config(
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
                 streaming=True,
+                verbose=True,
                 http_async_client=http_async_client,
             )
         case "gpt-4o-mini":
@@ -39,10 +40,13 @@ def get_llm_from_config(
                 temperature=config.llm_temperature,
                 callbacks=callbacks,
                 streaming=True,
+                verbose=True,
                 cache=False,  # Cache is disabled to always render responses
                 http_async_client=http_async_client,
             )
         case "llama3.1":
+            # TODO: ChatOllama doesn't have async parallel calling support!
+            # TODO: Switch to a server that works better with parallel calling
             return ChatOllama(
                 base_url=config.ollama_url,
                 model="llama3.1",

@@ -2,6 +2,7 @@ from typing import Optional
 import logging
 import requests
 import asyncio
+import aiohttp
 
 from pydantic import BaseModel, ConfigDict
 from langchain_core.runnables import Runnable, RunnableConfig
@@ -12,6 +13,7 @@ from langchain_core.messages import AIMessage
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+from urllib3.exceptions import ReadTimeoutError
 
 from backend.app.schemas.clothing import ClothingGraphState
 from backend.app.schemas.clothing import ClothingItemList, ClothingItem
@@ -41,32 +43,90 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
     def invoke(self, state: ClothingGraphState) -> ClothingGraphState:
         raise NotImplementedError("ClothingParserNode does not support sync invoke")
 
-    # TODO: Add batched inference to speed up processing
+    # async def ainvoke(
+    #     self, state: ClothingGraphState, config: Optional[RunnableConfig] = None
+    # ) -> ClothingGraphState:
+    #     """
+    #     Process all the search results in serial.
+    #     """
+    #     raw_search_results = state.search_results
+    #     parsed_clothing_items = []
+
+    #     for search_result in raw_search_results:
+    #         try:
+    #             processed_items = await self._process_search_result(search_result)
+    #             if processed_items:
+    #                 parsed_clothing_items.extend(processed_items)
+    #         except Exception as e:
+    #             logger.warning(f"Error processing search result: {e}")
+    #             continue
+
+    #     return {"parsed_results": parsed_clothing_items}
+
+    # Process all search results in parallel
+    # TODO: Use a parallel LLM server to handle the large number of invocations required for this tool
     async def ainvoke(
         self, state: ClothingGraphState, config: Optional[RunnableConfig] = None
     ) -> ClothingGraphState:
+        """
+        Process all search results in parallel.
+        """
         raw_search_results = state.search_results
         parsed_clothing_items = []
 
-        for raw_res in raw_search_results:
-            items = await self._process_search_result(raw_res)
-            parsed_clothing_items.extend(items)
+        try:
+            # Create tasks but don't start them yet
+            search_result_tasks = [
+                self._process_search_result(raw_res) for raw_res in raw_search_results
+            ]
 
-        return {"parsed_results": parsed_clothing_items}
+            # Run tasks with asyncio.gather and handle cancellation
+            completed_results = await asyncio.gather(
+                *search_result_tasks, return_exceptions=True
+            )
+
+            for result in completed_results:
+                if isinstance(result, (asyncio.TimeoutError, ReadTimeoutError)):
+                    logger.warning(f"Timeout processing search result")
+                    continue
+                elif isinstance(result, Exception):
+                    logger.warning(f"Error processing search result: {result}")
+                    continue
+                parsed_clothing_items.extend(result)
+
+            if not parsed_clothing_items:
+                logger.warning("No clothing items found")
+                raise ValueError("No clothing items found")
+
+            return {"parsed_results": parsed_clothing_items}
+
+        except asyncio.CancelledError:
+            # Properly handle cancellation
+            logger.info("Received cancellation request")
+            raise
 
     async def _process_search_result(self, raw_res: dict) -> list[ClothingItem]:
         """Process a single search result and extract clothing items."""
         url = raw_res["url"]
         logger.info(f"Parsing search result: {url}")
 
-        content = requests.get(url).text
-        chunks = list(self.split_html(content))
-        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    url, timeout=backend_config.link_click_timeout
+                ) as response:
+                    content = await response.text()
+        except asyncio.TimeoutError:
+            logger.warning(f"Timeout processing search result: {url}")
+            return []
+
+        chunks = self.split_html(content)
+
         # Process chunks in parallel using asyncio.gather
         chunk_items = await asyncio.gather(
             *[self._process_chunk(url, chunk) for chunk in chunks]
         )
-        
+
         # Flatten the list of lists into a single list
         items = [item for sublist in chunk_items for item in sublist]
 
@@ -74,12 +134,16 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
 
     async def _process_chunk(self, url: str, chunk: str) -> list[ClothingItem]:
         """Process a single HTML chunk and extract clothing items."""
-        items = []
+        logger.info(f"Processing chunk: {chunk[:20]}...")
         clicked_links = await self.click_links_and_get_results(url, chunk)
 
-        for clicked_link in clicked_links:
-            link_items = await self._process_link(clicked_link, url)
-            items.extend(link_items)
+        # Process all links in parallel using asyncio.gather
+        link_items = await asyncio.gather(
+            *[self._process_link(clicked_link, url) for clicked_link in clicked_links]
+        )
+
+        # Flatten the list of lists into a single list
+        items = [item for sublist in link_items for item in sublist]
 
         return items
 
@@ -87,112 +151,92 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
         self, clicked_link: str, original_url: str
     ) -> list[ClothingItem]:
         """Process a single link and extract clothing items."""
-        is_clothing_product_link = await self.is_clothing_product_link(clicked_link)
-        if not is_clothing_product_link:
-            return []
+        logger.info(f"Processing link: {clicked_link}...")
+        # is_clothing_product_link = await self.is_clothing_product_link(clicked_link)
+        # if not is_clothing_product_link:
+        #     logger.info(f"Skipping link: {clicked_link}")
+        #     return []
 
-        logger.debug(f"Found clothing product link: {clicked_link}")
+        # logger.info(f"Found clothing product link: {clicked_link}")
         items = []
 
         try:
-            raw_html_content = requests.get(clicked_link).text
-            items = await self._extract_items_from_html(raw_html_content, original_url)
-        except Exception as e:
-            logger.exception("Error parsing chunk")
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    clicked_link, timeout=backend_config.link_click_timeout
+                ) as response:
+                    raw_html_content = await response.text()
+        except asyncio.TimeoutError:
+            logger.warning(f"Timeout processing search result: {clicked_link}")
+            return []
 
-        return items
+        return await self._extract_items_from_html(raw_html_content, original_url)
 
     async def _extract_items_from_html(
         self, html_content: str, url: str
     ) -> list[ClothingItem]:
         """Extract clothing items from HTML content."""
+        structured_output_llm = self.llm.with_structured_output(ClothingItemList)
+        prompt = PromptTemplate(
+            input_variables=["url", "content"],
+            template=backend_config.clothing_search_result_parser_prompt,
+        )
+        logger.info("Extracting items from HTML...")
         items = []
         items_streamed = 0
 
-        for split_html_content in self.split_html(html_content):
-            contains_clothing_item_info = (
-                await self.contains_clothing_item_info_or_links(split_html_content)
-            )
-            if not contains_clothing_item_info:
-                logger.info("Skipping chunk")
+        # Split HTML into chunks and process in parallel
+        html_chunks = self.split_html(html_content)
+        for chunk in html_chunks:
+            if items_streamed >= backend_config.max_clothing_items_to_stream:
+                break
+            # if not await self.contains_clothing_item_info_or_links(chunk):
+            #     continue
+            try:
+                raw_res = await structured_output_llm.ainvoke(
+                    prompt.format(url=url, content=chunk)
+                )
+                clothing_items = ClothingItemList.model_validate(raw_res).clothing_items
+            except Exception as e:
+                logger.warning("Error extracting items from chunk")
                 continue
-
-            result = await self.parse_search_result(
-                url=url, raw_html=split_html_content
-            )
-            logger.info(f"Parsed result: {result}")
-
-            for item in result:
-                items.append(item)
-                # Only stream if all fields have values
-                # if (
-                #     items_streamed < backend_config.max_clothing_items_to_stream
-                #     and all(
-                #         getattr(item, field) is not None for field in item.model_fields
-                #     )
-                # ):
-                logger.info(f"Streaming Extracted item: {item}")
-                await self.stream_handler.on_extracted_item(item)
-                items_streamed += 1
-
+            items.extend(clothing_items)
+            for item in clothing_items:
+                # Only stream if all fields are non-null
+                if all(getattr(item, field) is not None for field in item.model_fields):
+                    await self.stream_handler.on_extracted_item(item)
+                    items_streamed += 1
         return items
 
-    async def parse_search_result(self, url, raw_html: str) -> list[ClothingItem]:
-        try:
-            items = await self.result_extractor(url, raw_html)
-            return items.clothing_items
-        except Exception as e:
-            logger.exception(f"Error parsing results")
-            return []
+    # async def is_clothing_product_link(self, url: str) -> bool:
+    #     prompt = PromptTemplate(
+    #         input_variables=["url"],
+    #         template=backend_config.is_clothing_product_link_prompt,
+    #     )
+    #     extract_prompt = prompt.format(url=url)
+    #     # TODO: Add batching to speed up processing
+    #     raw_res = AIMessage.model_validate(
+    #         await self.fast_llm.ainvoke(extract_prompt)
+    #     ).content
+    #     return "true" in raw_res.lower()
 
-    async def result_extractor(self, url: str, raw_results: str) -> ClothingItemList:
-        structured_output_llm = self.llm.with_structured_output(ClothingItemList)
-
-        for attempt in range(backend_config.max_retries):
-            try:
-                prompt = PromptTemplate(
-                    input_variables=["url", "content"],
-                    template=backend_config.clothing_search_result_parser_prompt,
-                )
-                # TODO: Add batching to speed up processing
-                raw_res = await structured_output_llm.ainvoke(
-                    prompt.format(url=url, content=raw_results)
-                )
-                logger.info(f"Raw res: {raw_res}")
-                return ClothingItemList.model_validate(raw_res)
-            except Exception as e:
-                if attempt == backend_config.max_retries - 1:
-                    raise
-                logger.warning(f"Attempt {attempt + 1} failed: {str(e)}. Retrying...")
-
-    async def is_clothing_product_link(self, url: str) -> bool:
-        prompt = PromptTemplate(
-            input_variables=["url"],
-            template=backend_config.is_clothing_product_link_prompt,
-        )
-        extract_prompt = prompt.format(url=url)
-        # TODO: Add batching to speed up processing
-        raw_res = AIMessage.model_validate(
-            await self.fast_llm.ainvoke(extract_prompt)
-        ).content
-        return "true" in raw_res.lower()
-
-    async def contains_clothing_item_info_or_links(self, html_chunk: str) -> bool:
-        """
-        Returns True if the HTML chunk is about a clothing item
-        or links that are promising for finding clothing items, False otherwise.
-        """
-        prompt = PromptTemplate(
-            input_variables=["html"],
-            template=backend_config.html_contains_clothing_info_prompt,
-        )
-        extract_prompt = prompt.format(html=html_chunk)
-        raw_res = AIMessage.model_validate(
-            await self.fast_llm.ainvoke(extract_prompt)
-        ).content
-        return (
-            "true" in raw_res.lower()
-        )  # TODO: Consider structured output in the future
+    # async def contains_clothing_item_info_or_links(self, html_chunk: str) -> bool:
+    #     """
+    #     Returns True if the HTML chunk is about a clothing item
+    #     or links that are promising for finding clothing items, False otherwise.
+    #     """
+    #     logger.info(f"Checking if chunk contains clothing info: {html_chunk[:20]}...")
+    #     prompt = PromptTemplate(
+    #         input_variables=["html"],
+    #         template=backend_config.html_contains_clothing_info_prompt,
+    #     )
+    #     extract_prompt = prompt.format(html=html_chunk)
+    #     raw_res = AIMessage.model_validate(
+    #         await self.fast_llm.ainvoke(extract_prompt)
+    #     ).content
+    #     return (
+    #         "true" in raw_res.lower()
+    #     )  # TODO: Consider structured output in the future
 
     @staticmethod
     async def click_links_and_get_results(parent_url: str, raw_html: str) -> list[str]:

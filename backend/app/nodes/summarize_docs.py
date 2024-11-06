@@ -29,7 +29,11 @@ class SummarizeDocsNode(Runnable[RagState, RagState]):
             raise ValueError("No documents found")
 
         metadatas = get_metadatas(state["docs"])
-        llm = get_llm_from_config(backend_config, callbacks=[self.stream_handler])
+        llm = get_llm_from_config(
+            backend_config,
+            llm=backend_config.summarize_llm,
+            callbacks=[self.stream_handler],
+        )
         response = await summarize_docs(state["user_question"], metadatas, llm)
 
         # TODO: Should Doc ID be used to track metadata on the frontend?

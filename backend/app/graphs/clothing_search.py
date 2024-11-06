@@ -65,14 +65,6 @@ class ClothingSearchGraph(Subgraph):
             stream_handler=stream_handler,
         )
 
-    async def ainvoke(self, *args, **kwargs) -> Union[dict[str, Any], Any]:
-        """
-        Searches the web for clothing items similar to the one the user is asking about.
-        """
-        return self.graph.ainvoke(
-            {"question": input}, config={"callbacks": [self.stream_handler]}
-        )
-
     @staticmethod
     async def filter_question(state: ClothingGraphState) -> bool:
         """

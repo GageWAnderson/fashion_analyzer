@@ -4,11 +4,13 @@ from common.config.base_config import BaseConfig
 class BackendConfig(BaseConfig):
     should_continue_prompt: str
     tool_call_llm: str
+    summarize_llm: str
     summarize_docs_prompt: str
     max_tool_call_retries: int
     max_search_results: int
     max_retries: int
     max_clothing_items_to_stream: int
+    max_images_to_display: int
     summarize_weekly_prompt: str
     summarize_docs_prompt_no_images: str
     min_sources_for_summary: int
@@ -22,6 +24,8 @@ class BackendConfig(BaseConfig):
     chunk_size: int
     chunk_overlap: int
     max_queue_size: int
+    clothing_parser_timeout: float
+    link_click_timeout: float
 
 
 backend_config = BackendConfig.from_yaml("app/config/config.yml")
