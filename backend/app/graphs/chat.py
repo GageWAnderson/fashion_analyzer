@@ -37,7 +37,9 @@ class ChatGraph(BaseModel):
 
     graph: CompiledStateGraph
     stream_handler: AsyncStreamingCallbackHandler
-    queue: asyncio.Queue # TODO: Create a more robust queue that returns messages to the fe more reliably
+    queue: (
+        asyncio.Queue
+    )  # TODO: Create a more robust queue that returns messages to the fe more reliably
     stop_event: asyncio.Event
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -46,7 +48,7 @@ class ChatGraph(BaseModel):
         cls,
         config: BackendConfig,
     ) -> "ChatGraph":
-        queue = asyncio.Queue()
+        queue = asyncio.Queue(maxsize=backend_config.max_queue_size)
         stop_event = asyncio.Event()
         stream_handler = AsyncStreamingCallbackHandler(
             streaming_function=partial(cls._streaming_function, queue)
@@ -103,7 +105,10 @@ class ChatGraph(BaseModel):
         result = None
         await self.stream_handler.on_llm_start(serialized={}, prompts=[], **kwargs)
         try:
-            # TODO: Pass streaming=True to ainvoke when streaming_handler is removed
+            # Log queue size periodically
+            if self.queue.qsize() > backend_config.max_queue_size * 0.5:
+                logger.warning(f"Queue size is large: {self.queue.qsize()}")
+
             result = await self.graph.ainvoke(*args, **kwargs)
         except Exception:
             error_message = """\nI'm sorry, but there was an issue while processing your request.
@@ -118,10 +123,19 @@ class ChatGraph(BaseModel):
     async def process_queue(self) -> AsyncGenerator[str, None]:
         while not self.stop_event.is_set():
             try:
+                # Check if queue is getting too full
+                if self.queue.qsize() > 80:  # 80% of maxsize
+                    logger.warning("Queue is backing up, applying backpressure")
+                    await asyncio.sleep(0.1)
+                    continue
+
                 item = await asyncio.wait_for(self.queue.get(), timeout=0.1)
                 yield item
                 self.queue.task_done()
             except asyncio.TimeoutError:
+                continue
+            except Exception as e:
+                logger.error(f"Error processing queue item: {e}")
                 continue
 
     @staticmethod

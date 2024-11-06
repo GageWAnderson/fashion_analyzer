@@ -1,6 +1,7 @@
 from typing import Optional
 import logging
 import requests
+import asyncio
 
 from pydantic import BaseModel, ConfigDict
 from langchain_core.runnables import Runnable, RunnableConfig
@@ -40,6 +41,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
     def invoke(self, state: ClothingGraphState) -> ClothingGraphState:
         raise NotImplementedError("ClothingParserNode does not support sync invoke")
 
+    # TODO: Add batched inference to speed up processing
     async def ainvoke(
         self, state: ClothingGraphState, config: Optional[RunnableConfig] = None
     ) -> ClothingGraphState:
@@ -56,12 +58,17 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
         """Process a single search result and extract clothing items."""
         url = raw_res["url"]
         logger.info(f"Parsing search result: {url}")
-        items = []
 
         content = requests.get(url).text
-        for chunk in self.split_html(content):
-            chunk_items = await self._process_chunk(url, chunk)
-            items.extend(chunk_items)
+        chunks = list(self.split_html(content))
+        
+        # Process chunks in parallel using asyncio.gather
+        chunk_items = await asyncio.gather(
+            *[self._process_chunk(url, chunk) for chunk in chunks]
+        )
+        
+        # Flatten the list of lists into a single list
+        items = [item for sublist in chunk_items for item in sublist]
 
         return items
 
@@ -147,6 +154,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
                     input_variables=["url", "content"],
                     template=backend_config.clothing_search_result_parser_prompt,
                 )
+                # TODO: Add batching to speed up processing
                 raw_res = await structured_output_llm.ainvoke(
                     prompt.format(url=url, content=raw_results)
                 )
@@ -163,6 +171,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
             template=backend_config.is_clothing_product_link_prompt,
         )
         extract_prompt = prompt.format(url=url)
+        # TODO: Add batching to speed up processing
         raw_res = AIMessage.model_validate(
             await self.fast_llm.ainvoke(extract_prompt)
         ).content
