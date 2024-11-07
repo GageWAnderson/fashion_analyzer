@@ -23,6 +23,7 @@ from backend.app.utils.streaming import AsyncStreamingCallbackHandler
 logger = logging.getLogger(__name__)
 
 
+# TODO: Refactor this funciton to use full-BFS once there is a parallel LLM server
 class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphState]):
 
     name: str = "clothing_parser_node"
@@ -122,7 +123,8 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
 
         chunks = self.split_html(content)
 
-        # Process chunks in parallel using asyncio.gather
+        # TODO: Enable pruning by filtering chunks when connecting to a local LLM server
+
         chunk_items = await asyncio.gather(
             *[self._process_chunk(url, chunk) for chunk in chunks]
         )
@@ -152,13 +154,13 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
     ) -> list[ClothingItem]:
         """Process a single link and extract clothing items."""
         logger.info(f"Processing link: {clicked_link}...")
+        # TODO: Enable pruning when connecting to a local LLM server
         # is_clothing_product_link = await self.is_clothing_product_link(clicked_link)
         # if not is_clothing_product_link:
         #     logger.info(f"Skipping link: {clicked_link}")
         #     return []
 
         # logger.info(f"Found clothing product link: {clicked_link}")
-        items = []
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -190,6 +192,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
         for chunk in html_chunks:
             if items_streamed >= backend_config.max_clothing_items_to_stream:
                 break
+            # TODO: Enable pruning by filtering chunks when connecting to a parallel local LLM server
             # if not await self.contains_clothing_item_info_or_links(chunk):
             #     continue
             try:

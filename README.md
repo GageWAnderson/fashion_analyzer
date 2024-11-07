@@ -71,6 +71,12 @@ cd backend
 uvicorn main:app --reload
 ```
 
+### Running the LLM server
+On a machine with access to an NVIDIA GPU, you can run the LLM server using the following command:
+```bash
+vllm serve mistralai/Mistral-7B-Instruct-v0.3 --dtype bfloat16 --max_model_len 4096 --tensor_parallel_size 2
+```
+
 ### Run the Application
 To run the application, navigate to the root directory and run:
 ```bash

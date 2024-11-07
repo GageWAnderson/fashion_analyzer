@@ -1,13 +1,18 @@
 from typing import Optional
-
+from functools import partial
 import httpx
+
 from langchain_openai import ChatOpenAI
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.language_models import BaseLanguageModel
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_core.callbacks import AsyncCallbackHandler
+
+from backend.app.config.config import backend_config
 from common.config.base_config import BaseConfig
+from common.schemas.llm import LLMPrefix
+from common.utils.vllm import VLLMClient
 
 
 def get_llm_from_config(
@@ -17,10 +22,21 @@ def get_llm_from_config(
 ) -> BaseLanguageModel:
     """
     Get a LLM from the config. If a LLM is not specified, the default LLM is used.
+    Since ChatOllama doesn't have async parallel calling support, we give the option
+    of connecting to a remote vLLM server instead for parallel calling.
     """
-    http_async_client = httpx.AsyncClient()
     if llm is None:
         llm = config.llm
+
+    http_async_client = httpx.AsyncClient()
+    chat_ollama = partial(
+        ChatOllama,
+        base_url=config.ollama_url,
+        verbose=True,
+        temperature=config.llm_temperature,
+        callbacks=callbacks,
+        http_async_client=http_async_client,
+    )
 
     match llm:
         case "gpt-4o":
@@ -44,46 +60,16 @@ def get_llm_from_config(
                 cache=False,  # Cache is disabled to always render responses
                 http_async_client=http_async_client,
             )
-        case "llama3.1":
-            # TODO: ChatOllama doesn't have async parallel calling support!
-            # TODO: Switch to a server that works better with parallel calling
-            return ChatOllama(
-                base_url=config.ollama_url,
-                model="llama3.1",
-                verbose=True,
-                temperature=config.llm_temperature,
-                callbacks=callbacks,
-                http_async_client=http_async_client,
+        case str() if LLMPrefix.OLLAMA.value in llm:
+            model_name = llm.split("_")[1]
+            return chat_ollama(model=model_name)
+        case str() if LLMPrefix.VLLM.value in llm:
+            model_name = llm.split("_")[1]
+            return VLLMClient(
+                openai_api_key="EMPTY",
+                openai_api_base=backend_config.vllm_url,
+                model_name=model_name,
             )
-        case "llama3-groq-tool-use":
-            return ChatOllama(
-                base_url=config.ollama_url,
-                model="llama3-groq-tool-use:latest",
-                verbose=True,
-                temperature=config.llm_temperature,
-                callbacks=callbacks,
-                http_async_client=http_async_client,
-            )
-        case "mixtral:8x7b":
-            return ChatOllama(
-                base_url=config.ollama_url,
-                model="mixtral:8x7b",
-                verbose=True,
-                temperature=config.llm_temperature,
-                callbacks=callbacks,
-                http_async_client=http_async_client,
-            )
-        case "mistral:7b":
-            return ChatOllama(
-                base_url=config.ollama_url,
-                model="mistral:latest",
-                verbose=True,
-                temperature=config.llm_temperature,
-                callbacks=callbacks,
-                http_async_client=http_async_client,
-            )
-        # TODO: Add more Ollama models
-        # TODO: Add vLLM models
         case _:
             raise ValueError(f"Invalid LLM: {llm}")
 

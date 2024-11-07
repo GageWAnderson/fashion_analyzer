@@ -45,6 +45,7 @@ class BaseConfig(BaseSettings):
     minio_backend_user: str = Field(..., env="MINIO_BACKEND_USER")
     minio_backend_password: str = Field(..., env="MINIO_BACKEND_PASSWORD")
     ollama_url: str = Field(..., env="OLLAMA_URL")
+    vllm_url: str = Field(..., env="VLLM_URL")
     unstructured_api_key: str = Field(..., env="UNSTRUCTURED_API_KEY")
 
     class Config:

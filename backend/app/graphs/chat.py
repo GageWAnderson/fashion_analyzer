@@ -171,6 +171,7 @@ class ChatGraph(BaseModel):
         # BUG: Ollama silently fails if given a SystemMessage instead of human, ai message
         raw_res = await llm.ainvoke(input=[HumanMessage(content=prompt)])
         raw_selected_subgraph = AIMessage.model_validate(raw_res).content
+        logger.info(f"Raw subgraph response: {raw_selected_subgraph}")
         selected_subgraph = ChatGraph.parse_subgraph_response(
             raw_selected_subgraph, [subgraph.name for subgraph in subgraphs]
         )

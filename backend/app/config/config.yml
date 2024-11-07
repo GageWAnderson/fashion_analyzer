@@ -1,7 +1,10 @@
 llm: gpt-4o-mini # NOTE: gpt-4o-mini is faster and cheaper than gpt-4o and can still do structured output very well
-tool_call_llm: llama3.1
-fast_llm: llama3.1
-summarize_llm: mistral:7b # TODO: Try a 70B local model
+# tool_call_llm: ollama_llama3.1
+# fast_llm: ollama_llama3.1
+# summarize_llm: ollama_mistral:latest 
+tool_call_llm: vllm_mistralai/Mistral-7B-Instruct-v0.3
+fast_llm: vllm_mistralai/Mistral-7B-Instruct-v0.3
+summarize_llm: vllm_mistralai/Mistral-7B-Instruct-v0.3 # TODO: Try a 70B local model
 max_tool_call_retries: 3
 max_retries: 3
 llm_temperature: 0.0
