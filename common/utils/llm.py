@@ -69,6 +69,8 @@ def get_llm_from_config(
                 openai_api_key="EMPTY",
                 openai_api_base=backend_config.vllm_url,
                 model_name=model_name,
+                streaming=True,
+                callbacks=callbacks,
             )
         case _:
             raise ValueError(f"Invalid LLM: {llm}")

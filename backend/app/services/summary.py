@@ -53,7 +53,7 @@ class SummaryService(BaseModel):
 
         summary = (
             await summarize_docs(
-                backend_config.summarize_weekly_prompt, metadatas, self.llm
+                backend_config.summarize_weekly_prompt, docs, metadatas, self.llm
             )
         ).content
         return WeeklySummaryResponse(

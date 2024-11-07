@@ -34,7 +34,9 @@ class SummarizeDocsNode(Runnable[RagState, RagState]):
             llm=backend_config.summarize_llm,
             callbacks=[self.stream_handler],
         )
-        response = await summarize_docs(state["user_question"], metadatas, llm)
+        response = await summarize_docs(
+            state["user_question"], state["docs"], metadatas, llm
+        )
 
         # TODO: Should Doc ID be used to track metadata on the frontend?
         await self.stream_handler.on_tool_metadata(

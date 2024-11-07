@@ -1,10 +1,12 @@
 llm: gpt-4o-mini # NOTE: gpt-4o-mini is faster and cheaper than gpt-4o and can still do structured output very well
+# TODO: Get a local model that can do structured output
+# llm: vllm_meta-llama/Llama-3.1-8B-Instruct
 # tool_call_llm: ollama_llama3.1
 # fast_llm: ollama_llama3.1
 # summarize_llm: ollama_mistral:latest 
-tool_call_llm: vllm_mistralai/Mistral-7B-Instruct-v0.3
-fast_llm: vllm_mistralai/Mistral-7B-Instruct-v0.3
-summarize_llm: vllm_mistralai/Mistral-7B-Instruct-v0.3 # TODO: Try a 70B local model
+tool_call_llm: vllm_meta-llama/Llama-3.1-8B-Instruct
+fast_llm: vllm_meta-llama/Llama-3.1-8B-Instruct
+summarize_llm: vllm_meta-llama/Llama-3.1-8B-Instruct # TODO: Try a 70B local model
 max_tool_call_retries: 3
 max_retries: 3
 llm_temperature: 0.0
@@ -16,16 +18,17 @@ vector_search_type: mmr
 vector_search_k: 5
 vector_search_fetch_k: 20
 max_clothing_search_retries: 3
-max_search_results: 3
+max_search_results: 5
 max_clothing_items_to_stream: 5
 max_images_to_display: 5
 min_sources_for_summary: 1
-chunk_size: 20000
+chunk_size: 10000
 chunk_overlap: 100
+chunk_batch_size: 1
 max_queue_size: 100
 logging_dir: ../logs
-clothing_parser_timeout: 120.0
-link_click_timeout: 5.0
+clothing_parser_timeout: 240.0
+link_click_timeout: 20.0
 should_continue_prompt: |
   Given the user's original question: {original_question}
   and the last message in the conversation: {last_message}
@@ -64,7 +67,10 @@ summarize_docs_prompt: |
   User Question:
   {question}
 
-  Sources:
+  Source Documents:
+  {docs}
+
+  Sources Links:
   {sources}
 
   Image URLs:

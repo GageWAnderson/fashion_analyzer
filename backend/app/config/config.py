@@ -23,6 +23,7 @@ class BackendConfig(BaseConfig):
     is_clothing_product_link_prompt: str
     chunk_size: int
     chunk_overlap: int
+    chunk_batch_size: int
     max_queue_size: int
     clothing_parser_timeout: float
     link_click_timeout: float

@@ -2,8 +2,8 @@ from typing import Any, Optional
 
 from langchain_core.runnables import RunnableConfig, ensure_config
 from langchain_core.language_models import LanguageModelInput
-from langchain_core.messages import AIMessage
 from langchain_community.llms.vllm import VLLMOpenAI
+from langchain_core.messages import AIMessage
 
 
 class VLLMClient(VLLMOpenAI):
