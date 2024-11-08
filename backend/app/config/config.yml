@@ -122,7 +122,7 @@ clothing_extractor_prompt: |
   Search Query:
 clothing_search_result_parser_prompt: |
   You are an expert fashion blogger and stylist and software engineer.
-  Your goal is to parse the content of a web page to extract information about a clothing item displayed on the page.
+  Your goal is to parse the content of a web page to extract information about the clothing items displayed on the page.
   Return only the parsed clothing item and nothing else.
   When constructing the clothing item, make sure to use the URL of the page as the source of the clothing item.
 
@@ -132,7 +132,7 @@ clothing_search_result_parser_prompt: |
   Web Page Content:
   {content}
 
-  Parsed Clothing Item:
+  Parsed Clothing Items:
 html_contains_clothing_info_prompt: |
   Given the following HTML snippet, determine if it contains information about a clothing item or links that are promising for finding clothing items.
   Return "true" if it does, "false" otherwise.

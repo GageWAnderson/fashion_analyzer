@@ -79,6 +79,13 @@ NOTE: The Llama 3.1 architecture has better performance on the vLLM server.
 vllm serve mistralai/Mistral-7B-Instruct-v0.3 --dtype bfloat16 --max_model_len 4096 --tensor_parallel_size 2 --tokenizer_mode "mistral"
 ```
 
+#### Running tool calling on the LLM server
+In order to run a tool calling LLM on the vLLM server, a few more arguments are required:
+```bash
+vllm serve meta-llama/Llama-3.1-8B-Instruct --dtype bfloat16 --max_model_len 4096 --tensor_parallel_size 2 \
+--chat-template tool_chat_template_llama3.1_json.jinja --tool-call-parser llama3_json --enable-auto-tool-choice
+```
+
 ### Run the Application
 To run the application, navigate to the root directory and run:
 ```bash
