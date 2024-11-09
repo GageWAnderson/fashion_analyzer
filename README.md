@@ -1,6 +1,12 @@
 # Fashion Analyzer
 Fashion Analyzer is a web application that uses a FastAPI backend and a React frontend to analyze fashion images. The application is containerized using Docker and coordinated with Docker Compose.
 
+It supports the following features:
+1. Summary and analysis of the most recent trends in fashion.
+2. A constrained AI search engine that can search the web for clothing itmes a user requests.
+
+Fashion anaylzer runs with 100% local models! It uses [vLLM](https://github.com/vllm-project/vllm) to run the LLMs.
+
 ## Features
 
 - **FastAPI Backend**: Provides a robust and high-performance API for image analysis.

@@ -12,7 +12,7 @@ from langchain_core.callbacks import AsyncCallbackHandler
 from backend.app.config.config import backend_config
 from common.config.base_config import BaseConfig
 from common.schemas.llm import LLMPrefix
-from common.utils.vllm import VLLMClient
+from common.utils.vllm import VLLMClient, VLLMToolCallClient
 
 
 def get_llm_from_config(
@@ -63,6 +63,11 @@ def get_llm_from_config(
         case str() if LLMPrefix.OLLAMA.value in llm:
             model_name = llm.split("_")[1]
             return chat_ollama(model=model_name)
+        case str() if LLMPrefix.VLLM_TOOL_CALL.value in llm:
+            return VLLMToolCallClient(
+                api_key="EMPTY",
+                base_url=backend_config.vllm_url,
+            )
         case str() if LLMPrefix.VLLM.value in llm:
             model_name = llm.split("_")[1]
             return VLLMClient(

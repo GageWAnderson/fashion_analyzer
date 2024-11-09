@@ -30,13 +30,23 @@ class ClothingItem(BaseModel):
     link: Optional[str] = Field(None, description="URL of the item's page")
 
 
-class ClothingItemList(BaseModel):
+class ClothingItemFunction(BaseModel):
     """
     A wrapper class for a list of clothing items.
     Used to make sure LLMs called with .with_structured_output() return the correct type.
     """
 
-    clothing_items: list[ClothingItem]
+    name: str = Field(
+        "extract_clothing_item",
+        description="Name of the function to extract a clothing item.",
+    )
+    description: str = Field(
+        "Given the text, extract one clothing item mentioned.",
+        description="Description of the function to extract a clothing item.",
+    )
+    parameters: ClothingItem = Field(
+        ..., description="The item of clothing to extract from the provided text."
+    )
 
 
 class ClothingGraphState(BaseModel):

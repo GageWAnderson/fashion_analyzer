@@ -1,8 +1,8 @@
-llm: gpt-4o-mini
+llm: vllm_meta-llama/Llama-3.1-8B-Instruct
 llm_temperature: 0.0
-tool_call_llm: gpt-4o-mini
-fast_llm: gpt-4o-mini
-vision_llm: gpt-4o
+tool_call_llm: vllm_tool_call_meta-llama/Llama-3.1-8B-Instruct
+fast_llm: vllm_meta-llama/Llama-3.1-8B-Instruct
+vision_llm: vllm_meta-llama/Llama-3.2-11B-Vision-Instruct
 embedding_model: nomic-embed-text
 vector_store_collection_name: fashion_trends
 search_plan_retry_limit: 3

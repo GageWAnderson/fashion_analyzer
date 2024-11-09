@@ -38,7 +38,7 @@ class ClothingSearchGraph(Subgraph):
     ) -> "ClothingSearchGraph":
         llm = get_llm_from_config(config)
         fast_llm = get_llm_from_config(config, config.fast_llm)
-
+        structured_llm = get_llm_from_config(config, config.tool_call_llm)
         graph = StateGraph(ClothingGraphState)
         graph.add_node(
             "clothing_extractor",
@@ -48,7 +48,10 @@ class ClothingSearchGraph(Subgraph):
         graph.add_node(
             "clothing_parser",
             ClothingParserNode.from_llm_and_handler(
-                llm=llm, fast_llm=fast_llm, stream_handler=stream_handler
+                llm=llm,
+                fast_llm=fast_llm,
+                structured_llm=structured_llm,
+                stream_handler=stream_handler,
             ),
         )
 

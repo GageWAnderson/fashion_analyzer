@@ -8,3 +8,4 @@ EmbeddingModelType = Literal["text-embedding-3-small", "nomic-embed-text"]
 class LLMPrefix(Enum):
     OLLAMA = "ollama_"
     VLLM = "vllm_"
+    VLLM_TOOL_CALL = "vllm_tool_call_"

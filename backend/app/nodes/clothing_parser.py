@@ -7,6 +7,7 @@ import aiohttp
 from pydantic import BaseModel, ConfigDict
 from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.prompts import PromptTemplate
+from openai import OpenAI
 from langchain_core.language_models import BaseLanguageModel
 from bs4 import BeautifulSoup
 from langchain_core.messages import AIMessage
@@ -16,9 +17,10 @@ from urllib.parse import urljoin
 from urllib3.exceptions import ReadTimeoutError
 
 from backend.app.schemas.clothing import ClothingGraphState
-from backend.app.schemas.clothing import ClothingItemList, ClothingItem
+from backend.app.schemas.clothing import ClothingItemFunction, ClothingItem
 from backend.app.config.config import backend_config
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler
+from common.utils.vllm import VLLMToolCallClient
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +31,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
     name: str = "clothing_parser_node"
     llm: BaseLanguageModel
     fast_llm: BaseLanguageModel
+    structured_llm: BaseLanguageModel | OpenAI | VLLMToolCallClient
     stream_handler: AsyncStreamingCallbackHandler
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -37,9 +40,15 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
         cls,
         llm: BaseLanguageModel,
         fast_llm: BaseLanguageModel,
+        structured_llm: BaseLanguageModel,
         stream_handler: AsyncStreamingCallbackHandler,
     ):
-        return cls(llm=llm, fast_llm=fast_llm, stream_handler=stream_handler)
+        return cls(
+            llm=llm,
+            fast_llm=fast_llm,
+            structured_llm=structured_llm,
+            stream_handler=stream_handler,
+        )
 
     def invoke(self, state: ClothingGraphState) -> ClothingGraphState:
         raise NotImplementedError("ClothingParserNode does not support sync invoke")
@@ -194,7 +203,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
     ) -> list[ClothingItem]:
         """Extract clothing items from HTML content."""
         logger.info("Extracting items from HTML...")
-        structured_output_llm = self.llm.with_structured_output(ClothingItemList)
+        # structured_output_llm = self.llm.with_structured_output(ClothingItemList)
         prompt = PromptTemplate(
             input_variables=["url", "content"],
             template=backend_config.clothing_search_result_parser_prompt,
@@ -212,19 +221,24 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
             # if not await self.contains_clothing_item_info_or_links(chunk):
             #     continue
             try:
-                raw_res = await structured_output_llm.ainvoke(
-                    prompt.format(url=url, content=chunk)
+                raw_res = await self.structured_llm.ainvoke_with_tools(
+                    prompt.format(url=url, content=chunk),
+                    tools=[self.get_clothing_item_oai_function()],
                 )
-                clothing_items = ClothingItemList.model_validate(raw_res).clothing_items
+                logger.info(f"Raw Extracted item: {raw_res}")
+                extracted_item = ClothingItem.model_validate(raw_res)
             except Exception as e:
-                logger.warning("Error extracting items from chunk")
+                logger.exception("Error extracting items from chunk")
                 continue
-            items.extend(clothing_items)
-            for item in clothing_items:
-                # Only stream if all fields are non-null
-                if all(getattr(item, field) is not None for field in item.model_fields):
-                    await self.stream_handler.on_extracted_item(item)
-                    items_streamed += 1
+            items.append(extracted_item)
+
+            # Only stream the clothing item if all fields are non-null
+            if all(
+                getattr(extracted_item, field) is not None
+                for field in extracted_item.model_fields
+            ):
+                await self.stream_handler.on_extracted_item(extracted_item)
+                items_streamed += 1
         return items
 
     async def is_clothing_product_link(self, url: str) -> bool:
@@ -301,3 +315,27 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
             is_separator_regex=False,
         )
         return text_splitter.split_text(html)
+
+    @staticmethod
+    def get_clothing_item_oai_function() -> dict:
+        description = """
+Given the text, extract one clothing item mentioned.
+Make sure to extract the full image link in the <img> src attribute.
+"""
+        return {
+            "type": "function",
+            "function": {
+                "name": "extract_clothing_item",
+                "description": description,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "price": {"type": "number"},
+                        "image_url": {"type": "string"},
+                        "link": {"type": "string"},
+                    },
+                    "required": ["name", "price", "image_url", "link"],
+                },
+            },
+        }

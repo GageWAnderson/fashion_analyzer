@@ -52,6 +52,7 @@ const MessageView = (props: Props) => {
     messageStore.clearMessage((item) => item.id !== message.id)
   }
 
+  // TODO: Only display the item if the image link works on the client side
   const getClothingInfoMarkdown = (metadata: Record<string, any>) => {
     return `\n**Name:** ${metadata.name}  \n**Price:** ${metadata.price}  \n**Link:** [${metadata.link}](${metadata.link})  \n![${metadata.name}](${metadata.image_url})`
       .replace("\n", " ")
