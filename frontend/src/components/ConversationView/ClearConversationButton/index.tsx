@@ -19,7 +19,7 @@ const ClearConversationButton = () => {
         disabled={messageList.length === 0}
         onClick={() => Modal.openModal(getConversationClearModalId())}
       >
-        <Icon.BiTrash className="h-auto w-6" />
+        <Icon.FaTrash className="h-auto w-6" />
       </button>
 
       {<ClearConversationConfirmModal getConversationClearModalId={getConversationClearModalId} />}

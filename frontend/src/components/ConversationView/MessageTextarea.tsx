@@ -70,11 +70,11 @@ const MessageTextarea = (props: Props) => {
   }
 
   return (
-    <div className="flex h-auto w-full flex-row items-end justify-between rounded-lg border border-base-100 px-2 py-1">
+    <div className="flex h-auto w-full flex-row items-end justify-between rounded-xl border-2 border-base-200 bg-neutral/50 px-3 py-2 shadow-sm">
       <TextareaAutosize
         ref={textareaRef}
-        className="hide-scrollbar size-full resize-none border-none bg-transparent p-2 leading-6 outline-none"
-        placeholder={"Message the agent"}
+        className="hide-scrollbar size-full resize-none border-none bg-transparent p-2 leading-7 outline-none placeholder:text-base-200/70"
+        placeholder={"What would you like to ask?"}
         rows={1}
         minRows={1}
         maxRows={5}
@@ -85,12 +85,12 @@ const MessageTextarea = (props: Props) => {
         data-cy={CONVERSATION_VIEW_SELECTORS.textInputArea}
       />
       <button
-        className="glass w-8 -translate-y-1 cursor-pointer rounded-md p-1 hover:shadow disabled:cursor-not-allowed disabled:opacity-60"
+        className="glass ml-1 w-10 cursor-pointer rounded-lg bg-primary/10 p-2 transition-all hover:bg-primary/20 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
         disabled={disabled}
         onClick={handleSend}
         data-cy={CONVERSATION_VIEW_SELECTORS.sendMessageButton}
       >
-        <Icon.IoMdSend className="h-auto w-full text-accent" />
+        <Icon.IoArrowUp className="h-auto w-full text-primary" />
       </button>
     </div>
   )

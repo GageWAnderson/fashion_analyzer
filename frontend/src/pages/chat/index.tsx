@@ -15,7 +15,7 @@ const SideDrawer = dynamic(() => import("~/components/CodeView/SideDrawer"), {
 
 const ChatLanding: NextPage = () => {
   return (
-    <div className="flex size-full flex-row !overflow-hidden">
+    <div className="border-top flex size-full flex-row !overflow-hidden border-base-200 bg-base-100 pt-2">
       <ConversationSidebar />
       <ConversationView />
       <SideDrawer />

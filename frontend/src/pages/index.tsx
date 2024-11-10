@@ -13,7 +13,7 @@ const Home: NextPage = () => {
       <Head>
         <title>{APPLICATION_TITLE}</title>
         <meta name="FashionAgent" content="By Gage Anderson" />
-        {/* <link rel="icon" href="/favicon.ico" TODO: Uncomment when you make an icon /> */}
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex size-full flex-col bg-neutral dark:bg-base-300">
         <Header />

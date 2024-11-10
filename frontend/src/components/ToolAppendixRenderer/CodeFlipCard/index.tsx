@@ -216,38 +216,33 @@ const CodeFlipCard = (props: Props) => {
 
   return (
     <div className="relative w-full">
-      <div className="relative left-[calc(-30vw+50%)] w-screen sm:w-[calc(80vw)] lg:w-[calc(60vw)] 2xl:w-[calc(60vw)]">
-        <div className="mb-4 rounded-lg bg-base-100 px-4 py-2 dark:bg-base-100">
-          <div className="mb-2 flex">
-            <div className="align-text-center flex h-auto text-center">{title}</div>
-            <div className="ml-auto"></div>
-            {hasCSVDownload && (
-              <div className="ml-2">
+      <div className="relative mx-auto w-11/12 max-w-[1200px]">
+        <div className="mb-6 overflow-hidden rounded-xl bg-base-100 px-6 py-4 shadow-sm transition-all hover:shadow-md dark:bg-base-100">
+          <div className="mb-3 flex items-center">
+            <div className="text-lg font-medium">{title}</div>
+            <div className="ml-auto flex items-center gap-2">
+              {hasCSVDownload && (
                 <CSVLink data={executionResult?.rawResult} filename={filename} separator={separator}>
                   <Tooltip content="Download as CSV" position="daisytooltip-top">
-                    <button className="flex size-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100">
+                    <button className="flex size-7 items-center justify-center rounded-lg bg-accent p-1.5 text-white transition-opacity hover:opacity-90">
                       <Icon.AiOutlineDownload className="h-auto w-full" />
                     </button>
                   </Tooltip>
                 </CSVLink>
-              </div>
-            )}
-            {hasGraphDownload && (
-              <div className="ml-2">
+              )}
+              {hasGraphDownload && (
                 <Tooltip content="Download as PNG" position="daisytooltip-top">
                   <button
-                    className="flex size-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100"
+                    className="flex size-7 items-center justify-center rounded-lg bg-accent p-1.5 text-white transition-opacity hover:opacity-90"
                     onClick={handleGraphDownload}
                   >
                     <Icon.AiOutlineDownload className="h-auto w-full" />
                   </button>
                 </Tooltip>
-              </div>
-            )}
-            <div className="ml-2">
+              )}
               <Tooltip content={isHidden ? "Show" : "Collapse"} position="daisytooltip-top">
                 <button
-                  className="flex size-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs text-white opacity-90 hover:opacity-100"
+                  className="flex size-7 items-center justify-center rounded-lg bg-accent p-1.5 text-white transition-opacity hover:opacity-90"
                   onClick={() => setIsHidden(!isHidden)}
                 >
                   {isHidden ? (
@@ -261,7 +256,7 @@ const CodeFlipCard = (props: Props) => {
           </div>
           {!isHidden &&
             (showCode ? (
-              <div className="rounded-lg bg-base-200 p-4 dark:bg-base-200">
+              <div className="rounded-xl bg-secondary p-6 dark:bg-secondary">
                 <Markdown text={value} messageId={messageId} conversationId={conversationId} />
               </div>
             ) : (

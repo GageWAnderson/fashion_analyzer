@@ -1,8 +1,7 @@
-import { signOut } from "next-auth/react"
 import { useTheme } from "next-themes"
 import { useState } from "react"
 
-import { Accordion, Drawer, Dropdown, DropdownItem, Modal, SettingsModal } from "~/components/Common"
+import { Accordion, Drawer, Dropdown, DropdownItem, Modal } from "~/components/Common"
 import Icon from "~/components/CustomIcons/Icon"
 
 import { useConversationStore } from "~/stores"
@@ -40,8 +39,6 @@ const ConversationSidebar = () => {
       conversationStore.setCurrentConversationId(undefined)
     }
   }
-
-  const getSettingsModalId = () => "conversation-sidebar-settings-modal"
 
   return (
     <>
@@ -115,29 +112,10 @@ const ConversationSidebar = () => {
             </div>
           </div>
         )}
-        expandedHeader={<div className="m-0 flex w-full justify-center">Placeholder</div>}
+        expandedHeader={<div className="m-0 flex w-full justify-center text-2xl font-bold">Fashion Analyzer</div>}
         footer={(toggle) => (
           <div className="flex w-full flex-col justify-center">
             <div className="daisydivider !m-0 py-cmd" />
-
-            <div className="flex w-full justify-center">
-              <div className="flex w-full flex-col gap-cmd py-cmd">
-                <button className="group daisybtn glass hover:daisybtn-error" onClick={() => signOut()}>
-                  <Icon.IoLogOutOutline className="!text-fluid-cmd text-base-200 group-hover:!text-neutral dark:!text-neutral" />
-                </button>
-
-                <button
-                  className="group daisybtn glass hover:daisybtn-secondary"
-                  onClick={() => Modal.openModal(getSettingsModalId())}
-                  data-cy={CONVERSATION_SIDEBAR_SELECTORS.collapseSidebarButton}
-                >
-                  <Icon.FiSettings className="!text-fluid-cmd text-base-200 group-hover:!text-neutral dark:!text-neutral" />
-                </button>
-              </div>
-            </div>
-
-            <div className="daisydivider" />
-
             <button
               className="group daisybtn glass daisybtn-md flex w-full justify-center px-csm"
               onClick={() => toggle()}
@@ -190,7 +168,7 @@ const ConversationSidebar = () => {
                         )}
 
                         <span
-                          className={`max-w-full grow truncate break-all group-hover:text-neutral ${
+                          className={`max-w-full grow whitespace-normal break-all group-hover:text-neutral ${
                             conversation.id === conversationStore.currentConversationId ? "!text-neutral" : ""
                           }`}
                         >
@@ -242,8 +220,6 @@ const ConversationSidebar = () => {
           conversation={updateConversationModalContext}
         />
       )}
-
-      {<SettingsModal getSettingsModalId={getSettingsModalId} />}
     </>
   )
 }

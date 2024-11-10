@@ -57,6 +57,7 @@ class ChatGraph(BaseModel):
         vector_store = await PgVectorStore.from_config(config)
 
         # TODO: Consider abstracting this into a function that takes a config
+        # TODO: Add a missing_tool to filter out irrelevant requests
         subgraphs: list[Subgraph] = [
             RagGraph.from_config(config, vector_store, stream_handler),
             ClothingSearchGraph.from_config(config, stream_handler),

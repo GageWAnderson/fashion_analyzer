@@ -53,7 +53,7 @@ export const Tabs: FC<TabsProps> = ({ children, forcedActiveTab, classNames, fix
 
   const getButtonClasses = (label: string) =>
     clsx(
-      "size-full flex flex-1 items-center justify-center p-2 text-gray-700 font-medium rounded-t-[10px] shadow-[rgba(50,50,93,0.25)_0px_6px_12px_-2px,_rgba(0,0,0,0.3)_0px_3px_7px_-3px] min-w-[75px] bg-neutral dark:bg-base-100 relative",
+      "size-full flex flex-1 items-center justify-center p-2 text-gray-700 font-medium rounded-t-[10px] bg-accent dark:bg-base-100 relative border border-base-200",
       {
         "border-b-2 border-b-accent": activeTab === label,
       },
@@ -62,7 +62,7 @@ export const Tabs: FC<TabsProps> = ({ children, forcedActiveTab, classNames, fix
 
   return (
     <div className={`w-full ${classNames}`}>
-      <div className="fixed  w-full bg-transparent pb-csm">
+      <div className="fixed  w-full bg-base-100">
         <div className="flex max-h-[40px] w-full border-gray-300 bg-transparent lg:max-h-[50px]">
           {tabItems.map((tabItem: TabItemProps, index) => {
             const { label, showTooltip, hideLabel, icon } = tabItem
@@ -78,7 +78,7 @@ export const Tabs: FC<TabsProps> = ({ children, forcedActiveTab, classNames, fix
                   style={{
                     zIndex: activeTab === label ? 1000 : zIndex[index],
                     left: left[index],
-                    borderBottom: activeTab === label ? `2px solid $${LIGHT_THEME.colors?.accent}` : undefined,
+                    borderBottom: activeTab === label ? `4px solid $${LIGHT_THEME.colors?.accent}` : undefined,
                   }}
                   className={getButtonClasses(label)}
                   onClick={() => handleClick(label)}

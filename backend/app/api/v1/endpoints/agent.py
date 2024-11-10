@@ -1,5 +1,6 @@
 __all__ = ["agent_router"]
 import asyncio
+import logging
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
@@ -12,20 +13,22 @@ from backend.app.api.dependencies import get_chat_graph_dependency
 
 agent_router = APIRouter()
 
+logger = logging.getLogger(__name__)
+
 
 @agent_router.post("/agent")
 async def agent(
     conversation: Conversation,
     chat_graph: ChatGraph = Depends(get_chat_graph_dependency),
 ) -> StreamingResponse:
-
+    logger.info(f"Settings: {conversation.settings}")
     asyncio.create_task(
         chat_graph.ainvoke(
             {
                 "user_question": conversation.load_messages()[-1].content,
                 "messages": conversation.load_messages(),
                 "search_item": None,
-            },  # TODO: Do I need to pass a callback here?
+            },
         )
     )
 

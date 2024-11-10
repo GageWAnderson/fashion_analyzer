@@ -29,4 +29,4 @@ class BackendConfig(BaseConfig):
     link_click_timeout: float
 
 
-backend_config = BackendConfig.from_yaml("app/config/config.yml")
+backend_config = BackendConfig.from_yaml("backend/app/config/config.yml")

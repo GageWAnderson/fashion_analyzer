@@ -114,14 +114,16 @@ const MessageView = (props: Props) => {
 
   return (
     <div
-      className={`group mx-auto flex w-full max-w-full flex-row items-start justify-start bg-neutral px-8 py-4 dark:bg-base-300 xl:px-16 ${
-        isCurrentUser ? "justify-start !bg-base-100 pb-8 pt-6" : ""
+      className={`group mx-auto flex w-full max-w-full flex-row items-start justify-start px-8 py-4 xl:px-16 ${
+        isCurrentUser
+          ? "bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-900/20"
+          : "bg-gradient-to-r from-gray-50 to-transparent dark:from-gray-800/20"
       }`}
       data-cy={CONVERSATION_VIEW_SELECTORS.filledChatMessageAreaWrapper}
     >
       {isCurrentUser ? (
         <>
-          <div className="mr-2 flex size-10 shrink-0 items-center justify-center rounded-full [&_span]:!text-neutral">
+          <div className="mr-3 flex size-10 shrink-0 items-center justify-center rounded-full shadow-sm [&_span]:!text-neutral">
             {session?.user?.name ? (
               <div data-cy={CONVERSATION_VIEW_SELECTORS.userAvatar} className="size-full">
                 <Avatar name={session.user.name.replace("-", " ")} size="40" round={true} />
@@ -131,28 +133,28 @@ const MessageView = (props: Props) => {
             )}
           </div>
           <div className="flex w-auto max-w-[calc(100%-2rem)] flex-col items-start justify-start">
-            <div className="w-full whitespace-pre-wrap break-all rounded-lg bg-transparent px-4 py-2">
+            <div className="w-full whitespace-pre-wrap break-all rounded-2xl bg-white/80 px-6 py-3 shadow-sm dark:bg-gray-800/80">
               <p data-cy={CONVERSATION_VIEW_SELECTORS.userMessage}>{message.content}</p>
             </div>
           </div>
           <div className="invisible group-hover:visible">
             <Dropdown
               tigger={
-                <button className="ml-1 mt-2 flex size-6 shrink-0 items-center justify-center">
-                  <Icon.IoMdMore className="h-auto w-5 text-base-300 dark:!text-neutral" />
+                <button className="ml-2 mt-2 flex size-6 shrink-0 items-center justify-center">
+                  <Icon.IoMdMore className="h-auto w-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
                 </button>
               }
             >
-              <div className="flex flex-col items-start justify-start rounded-lg bg-base-100 p-1">
+              <div className="flex flex-col items-start justify-start rounded-xl bg-white p-1.5 shadow-lg dark:bg-gray-800">
                 <DropdownItem
-                  className="flex w-full cursor-pointer flex-row items-center justify-start rounded-lg p-1 px-2 hover:bg-neutral dark:hover:bg-accent"
+                  className="flex w-full cursor-pointer flex-row items-center justify-start rounded-lg p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                   onClick={copyMessage}
                 >
                   <Icon.BiClipboard className="mr-2 h-auto w-4 opacity-70" />
                   Copy
                 </DropdownItem>
                 <DropdownItem
-                  className="flex w-full cursor-pointer flex-row items-center justify-start rounded-lg p-1 px-2 hover:bg-neutral dark:hover:bg-accent"
+                  className="flex w-full cursor-pointer flex-row items-center justify-start rounded-lg p-2 hover:bg-red-50 dark:hover:bg-red-900/30"
                   onClick={() => deleteMessage(message)}
                 >
                   <Icon.BiTrash className="mr-2 h-auto w-4 opacity-70" />
@@ -166,7 +168,7 @@ const MessageView = (props: Props) => {
         <>
           {message.status === "LOADING" && message.content === "" && message.events.length === 0 ? (
             <div
-              className="mt-0.5 w-12 rounded-lg bg-transparent px-4 py-2 dark:bg-transparent"
+              className="mt-0.5 w-12 rounded-lg bg-transparent px-4 py-2"
               data-cy={CONVERSATION_VIEW_SELECTORS.stepsLoading}
             >
               <ThreeDotsLoader />
@@ -174,44 +176,44 @@ const MessageView = (props: Props) => {
           ) : (
             <>
               <div
-                className="flex w-full max-w-[calc(100%-2rem)] flex-col items-start justify-start bg-transparent"
+                className="flex w-full max-w-[calc(100%-2rem)] flex-col items-start justify-start"
                 data-cy={CONVERSATION_VIEW_SELECTORS.stepsWrapper}
               >
                 <div
-                  className={`prose prose-neutral w-full max-w-full rounded-lg bg-transparent px-4 py-2 text-base-300 dark:bg-transparent dark:text-base-300 ${
-                    message.status === "FAILED" && "border border-red-400 bg-red-100 text-red-500"
+                  className={`prose prose-neutral w-full max-w-full rounded-2xl bg-white/90 px-6 py-4 shadow-sm dark:bg-gray-800/90 ${
+                    message.status === "FAILED" && "border-2 border-red-400 bg-red-50 text-red-500 dark:bg-red-900/20"
                   }`}
                 >
-                  <div className="rounded-lg border-accent  bg-primary/30">
-                    <div className="flex items-center justify-start">
-                      <div className="my-1 ml-2">
-                        <Icon.TbListDetails className="h-auto w-6 text-accent" />
+                  <div className="rounded-xl border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/50">
+                    <div className="flex items-center justify-start p-2">
+                      <div className="ml-2">
+                        <Icon.MdListAlt className="h-auto w-6 text-blue-500 dark:text-blue-400" />
                       </div>
-                      <div className="my-1 ml-1">
-                        <span className="text-lg text-neutral">Steps</span>
+                      <div className="ml-2">
+                        <span className="text-lg font-medium text-gray-700 dark:text-gray-300">Details</span>
                       </div>
                       {message.status === "LOADING" && (
-                        <div className="my-1 ml-2" data-cy={CONVERSATION_VIEW_SELECTORS.stepsLoading}>
+                        <div className="ml-3" data-cy={CONVERSATION_VIEW_SELECTORS.stepsLoading}>
                           <ThreeDotsLoader />
                         </div>
                       )}
-                      <div className="my-1 ml-auto mr-2">
+                      <div className="ml-auto">
                         <Tooltip content={isActionsCollapsed ? "Show steps" : "Hide steps"} position="daisytooltip-top">
                           <button
-                            className="flex size-6 items-center justify-center rounded bg-accent bg-none p-1 text-xs opacity-90 hover:opacity-100"
+                            className="flex size-8 items-center justify-center rounded-lg bg-blue-100 p-1.5 text-blue-600 transition-colors hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-800/70"
                             onClick={() => setIsActionsCollapsed(!isActionsCollapsed)}
                           >
                             {isActionsCollapsed ? (
-                              <Icon.BiChevronDown className="h-auto w-full !text-base-300 dark:!text-neutral" />
+                              <Icon.BiChevronDown className="h-auto w-full" />
                             ) : (
-                              <Icon.BiChevronUp className="h-auto w-full !text-base-300 dark:!text-neutral" />
+                              <Icon.BiChevronUp className="h-auto w-full" />
                             )}
                           </button>
                         </Tooltip>
                       </div>
                     </div>
                     <Collapse isOpened={!isActionsCollapsed}>
-                      <div className="m-1 border-t-2 border-dashed border-gray-400 p-2 text-base-300 dark:text-neutral">
+                      <div className="border-t border-gray-200 p-4 dark:border-gray-700">
                         {Object.keys(groupedToolEvents).map((tool) => (
                           <MessageEvents key={tool} events={groupedToolEvents[tool] || []} message={message} />
                         ))}
@@ -244,7 +246,7 @@ const MessageView = (props: Props) => {
                     ))}
                 </div>
                 {appendixEvents.length > 0 && (
-                  <div className="mt-1 flex w-full flex-col items-center justify-start space-y-1 text-base-300 dark:text-base-300">
+                  <div className="mt-3 flex w-full flex-col items-center justify-start space-y-2">
                     {appendixEvents.map((data, index) => (
                       <ToolAppendixRenderer
                         key={index}
@@ -256,28 +258,28 @@ const MessageView = (props: Props) => {
                     ))}
                   </div>
                 )}
-                <span className="self-end pr-1 pt-1 text-sm text-gray-400">
+                <span className="self-end pr-2 pt-2 text-sm text-gray-500 dark:text-gray-400">
                   {dayjs(message.createdAt).format("lll")}
                 </span>
               </div>
               <div className="invisible group-hover:visible">
                 <Dropdown
                   tigger={
-                    <button className="ml-1 mt-2 flex size-6 shrink-0 items-center justify-center text-gray-900 hover:text-gray-900">
-                      <Icon.IoMdMore className="h-auto w-5 text-base-300 dark:!text-neutral" />
+                    <button className="ml-2 mt-2 flex size-6 shrink-0 items-center justify-center">
+                      <Icon.IoMdMore className="h-auto w-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" />
                     </button>
                   }
                 >
-                  <div className="flex flex-col items-start justify-start rounded-lg bg-base-100 p-1">
+                  <div className="flex flex-col items-start justify-start rounded-xl bg-white p-1.5 shadow-lg dark:bg-gray-800">
                     <DropdownItem
-                      className="flex w-full cursor-pointer flex-row items-center justify-start rounded-lg p-1 px-2 hover:bg-neutral dark:hover:bg-accent"
+                      className="flex w-full cursor-pointer flex-row items-center justify-start rounded-lg p-2 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                       onClick={copyMessage}
                     >
                       <Icon.BiClipboard className="mr-2 h-auto w-4 opacity-70" />
                       Copy
                     </DropdownItem>
                     <DropdownItem
-                      className="flex w-full cursor-pointer flex-row items-center justify-start rounded-lg p-1 px-2 hover:bg-neutral dark:hover:bg-accent"
+                      className="flex w-full cursor-pointer flex-row items-center justify-start rounded-lg p-2 hover:bg-red-50 dark:hover:bg-red-900/30"
                       onClick={() => deleteMessage(message)}
                     >
                       <Icon.BiTrash className="mr-2 h-auto w-4 opacity-70" />

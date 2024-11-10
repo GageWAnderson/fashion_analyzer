@@ -26,7 +26,7 @@ const MyApp = ({ Component, pageProps: { session, ...pageProps } }: AppProps) =>
     <Head>
       <title>{APPLICATION_TITLE}</title>
       <meta name="A Fashion analysis AI Agent" content="By Gage Anderson" />
-      {/* <link rel="icon" href="/favicon.ico" /> TODO: Uncomment when you make an icon */}
+      <link rel="icon" href="/favicon.ico" /> TODO: Uncomment when you make an icon
     </Head>
     <ThemeProvider>
       <Layout>

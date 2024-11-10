@@ -37,12 +37,13 @@ import {
   BiX,
 } from "react-icons/bi"
 import { BsBox2, BsBoxArrowDown, BsCode, BsDatabase, BsGraphUp, BsTable } from "react-icons/bs"
-import { FaFileImage, FaSearch, FaSignInAlt } from "react-icons/fa"
+import { FaFileImage, FaSearch, FaSignInAlt, FaTrash } from "react-icons/fa"
 import { FiEdit3, FiMoon, FiMoreHorizontal, FiSave, FiSettings, FiThumbsDown, FiThumbsUp, FiX } from "react-icons/fi"
 import { GoDatabase } from "react-icons/go"
 import { GrDocumentStore } from "react-icons/gr"
 import { IoIosMenu, IoMdClose, IoMdMoon, IoMdMore, IoMdSend, IoMdSunny } from "react-icons/io"
 import {
+  IoArrowUp,
   IoChatbubble,
   IoChatbubbleEllipsesOutline,
   IoChatbubbleOutline,
@@ -54,7 +55,7 @@ import {
   IoTrash,
 } from "react-icons/io5"
 
-import { MdOutlineCancel, MdOutlineQuickreply, MdOutlineWbSunny } from "react-icons/md"
+import { MdListAlt, MdOutlineCancel, MdOutlineQuickreply, MdOutlineWbSunny } from "react-icons/md"
 import { RiDraftLine } from "react-icons/ri"
 import { SiAnswer, SiSnowflake, SiWritedotas } from "react-icons/si"
 import { TbListDetails, TbSection, TbWriting } from "react-icons/tb"
@@ -113,6 +114,7 @@ const Icon = {
   IoChatbubbleOutline,
   IoTrash,
   IoLogOutOutline,
+  IoArrowUp,
 
   // Si icons
   SiSnowflake,
@@ -163,11 +165,13 @@ const Icon = {
   MdOutlineQuickreply,
   MdOutlineWbSunny,
   MdOutlineCancel,
+  MdListAlt,
 
   // Fa icons
   FaSignInAlt,
   FaFileImage,
   FaSearch,
+  FaTrash,
 }
 
 // Icon is a collection of all icons from react-icons.

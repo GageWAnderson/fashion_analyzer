@@ -87,42 +87,42 @@ body,
 }
 
 @font-face {
-  font-family: "BCG Sans";
-  src: url("/fonts/sans/BCGHenSansRegular.ttf") format("ttf");
+  font-family: "Open Sans";
+  src: url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap");
 }
 @font-face {
-  font-family: "BCG Sans";
-  src: url("/fonts/sans/BCGHenSansBold.ttf") format("ttf");
+  font-family: "Open Sans";
+  src: url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@700&display=swap");
   font-weight: bold;
 }
 @font-face {
-  font-family: "BCG Sans";
-  src: url("/fonts/sans/BCGHenSansItalic.ttf") format("ttf");
+  font-family: "Open Sans";
+  src: url("https://fonts.googleapis.com/css2?family=Open+Sans:ital@1&display=swap");
   font-style: italic;
 }
 @font-face {
-  font-family: "BCG Sans";
-  src: url("/fonts/sans/BCGHenSansBoldIta.ttf") format("ttf");
+  font-family: "Open Sans";
+  src: url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@1,700&display=swap");
   font-weight: bold;
   font-style: italic;
 }
 @font-face {
-  font-family: "BCG Serif";
-  src: url("/fonts/sans/BCGHenSerifRegular.ttf") format("ttf");
+  font-family: "Merriweather";
+  src: url("https://fonts.googleapis.com/css2?family=Merriweather&display=swap");
 }
 @font-face {
-  font-family: "BCG Serif";
-  src: url("/fonts/sans/BCGHenSerifBold.ttf") format("ttf");
+  font-family: "Merriweather";
+  src: url("https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap");
   font-weight: bold;
 }
 @font-face {
-  font-family: "BCG Serif";
-  src: url("/fonts/sans/BCGHenSerifItalic.ttf") format("ttf");
+  font-family: "Merriweather";
+  src: url("https://fonts.googleapis.com/css2?family=Merriweather:ital@1&display=swap");
   font-style: italic;
 }
 @font-face {
-  font-family: "BCG Serif";
-  src: url("/fonts/sans/BCGHenSerifBoldIta.ttf") format("ttf");
+  font-family: "Merriweather";
+  src: url("https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@1,700&display=swap");
   font-weight: bold;
   font-style: italic;
 }

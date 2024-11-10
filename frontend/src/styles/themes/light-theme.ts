@@ -2,9 +2,9 @@ import { type UIColorTheme } from "~/styles/themes"
 
 export const LIGHT_THEME: UIColorTheme = {
   colors: {
-    primary: "#00E0B5",
-    secondary: "#14E6E6",
-    accent: "#6E76FA",
+    primary: "#4B9EFA",
+    secondary: "#A6A6A9",
+    accent: "#4B9EFA",
     neutral: "#F4F4F9",
     "base-100": "#E5E5E7",
     "base-200": "#67676B",

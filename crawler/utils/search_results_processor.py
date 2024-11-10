@@ -139,6 +139,10 @@ class SearchResultProcessor(BaseModel):
         Returns:
             str: A one-sentence summary of the image.
         """
+        # TODO: Change the mechanism for summarizing images depending on the LLM
+        if config.vision_llm != "gpt-4o":
+            return "No image summary available"
+
         llm = get_llm_from_config(config, llm=config.vision_llm)
         # Encode the image as base64
         buffered = BytesIO()

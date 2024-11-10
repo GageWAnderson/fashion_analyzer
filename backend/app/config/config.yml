@@ -132,7 +132,7 @@ clothing_search_result_parser_prompt: |
   Web Page Content:
   {content}
 
-  Parsed Clothing Items:
+  Parsed Clothing Item:
 html_contains_clothing_info_prompt: |
   Given the following HTML snippet, determine if it contains information about a clothing item or links that are promising for finding clothing items.
   Return "true" if it does, "false" otherwise.

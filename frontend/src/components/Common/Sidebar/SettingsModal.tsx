@@ -3,7 +3,6 @@ import { useEffect, useState } from "react"
 import Icon from "~/components/CustomIcons/Icon"
 
 import { useSettingStore } from "~/stores"
-import { Input } from "../Input/Input"
 import { Modal } from "../Modal/Modal"
 
 interface Props {
@@ -13,30 +12,21 @@ interface Props {
 export const SettingsModal = (props: Props) => {
   const { getSettingsModalId } = props
   const settingsStore = useSettingStore()
-
-  const [openaiApiKey, setOpenaiApiKey] = useState<string>("")
-  const [openaiOrgId, setOpenaiOrgId] = useState<string>("")
-  const [favoriteArtist, setFavoriteArtist] = useState<string>(settingsStore.setting.data["favorite_artist"])
+  const [runMode, setRunMode] = useState<string>("")
 
   useEffect(() => {
-    const apiKey = localStorage.getItem("openaiApiKey")
-    const orgId = localStorage.getItem("openaiOrgId") //
+    const runMode = localStorage.getItem("runMode")
 
-    if (apiKey) {
-      setOpenaiApiKey(apiKey)
-    }
-
-    if (orgId) {
-      setOpenaiOrgId(orgId)
+    if (runMode) {
+      setRunMode(runMode)
     }
   }, [])
 
   const saveSettings = () => {
-    localStorage.setItem("openaiApiKey", openaiApiKey)
+    localStorage.setItem("runMode", runMode)
     settingsStore.setSetting({
       data: {
-        favorite_artist: favoriteArtist,
-        api_key: openaiApiKey,
+        run_mode: runMode,
       },
     })
     Modal.closeModal(modalId)
@@ -70,14 +60,21 @@ export const SettingsModal = (props: Props) => {
         <h3 className="m-0 p-0 !text-fluid-cmd font-bold">Settings</h3>
         <div className="daisydivider" />
         <div className="flex size-full flex-col gap-cmd">
-          <Input type="text" label="OpenAI API Key" value={openaiApiKey} onChange={(value) => setOpenaiApiKey(value)} />
-          <Input type="text" label="OpenAI Org ID" value={openaiOrgId} onChange={(value) => setOpenaiOrgId(value)} />
-          <Input
-            type="text"
-            label="Favorite artist"
-            value={favoriteArtist}
-            onChange={(e) => setFavoriteArtist(e.target.value)}
-          />
+          <div className="flex flex-row items-center justify-between">
+            <span className="text-xl font-medium">Run Mode</span>
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                type="checkbox"
+                className="peer sr-only"
+                checked={runMode === "openai"}
+                onChange={() => setRunMode(runMode === "openai" ? "local" : "openai")}
+              />
+              <div className="peer h-10 w-16 rounded-full bg-gray-200 after:absolute after:left-c3xs after:top-c3xs after:size-9 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-accent peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent/50 dark:bg-gray-700 dark:peer-focus:ring-accent/50"></div>
+              <span className="ml-3 text-xl font-medium text-gray-900 dark:text-gray-300">
+                {runMode === "openai" ? "OpenAI" : "Local"}
+              </span>
+            </label>
+          </div>
         </div>
       </div>
     </Modal.Component>
