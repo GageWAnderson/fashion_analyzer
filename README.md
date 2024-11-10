@@ -73,8 +73,8 @@ pnpm run dev
 #### Start the Backend
 To start the backend, run:
 ```bash
-cd backend
-uvicorn main:app --reload
+poetry install
+poetry run uvicorn backend.app.main:app --reload --port 9090
 ```
 
 ### Running the LLM server

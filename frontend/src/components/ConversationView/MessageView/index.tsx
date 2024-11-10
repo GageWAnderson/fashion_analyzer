@@ -52,7 +52,6 @@ const MessageView = (props: Props) => {
     messageStore.clearMessage((item) => item.id !== message.id)
   }
 
-  // TODO: Only display the item if the image link works on the client side
   const getClothingInfoMarkdown = (metadata: Record<string, any>) => {
     return `\n**Name:** ${metadata.name}  \n**Price:** ${metadata.price}  \n**Link:** [${metadata.link}](${metadata.link})  \n![${metadata.name}](${metadata.image_url})`
       .replace("\n", " ")
@@ -64,13 +63,21 @@ const MessageView = (props: Props) => {
 
     message.events
       .filter((e) => e.data_type === StreamingDataTypeEnum.APPENDIX && e.data === StreamingSignalsEnum.EXTRACTED_ITEM)
-      .forEach((event) => {
-        appendixEvents.push({
-          value: getClothingInfoMarkdown(event.metadata),
-          language: SUPPORTED_SYNTAX_LANGUAGES.CLOTHING_INFO,
-          title: event.metadata.name || "Clothing Item",
-          event: event,
-        })
+      .forEach(async (event) => {
+        try {
+          // Only display the item if the image link works on the client side
+          const response = await fetch(event.metadata.image_url || "", { method: "HEAD" })
+          if (response.ok) {
+            appendixEvents.push({
+              value: getClothingInfoMarkdown(event.metadata),
+              language: SUPPORTED_SYNTAX_LANGUAGES.CLOTHING_INFO,
+              title: event.metadata.name || "Clothing Item",
+              event: event,
+            })
+          }
+        } catch (error) {
+          console.warn(`Failed to verify image URL: ${event.metadata.image_url}`)
+        }
       })
 
     Object.values(SUPPORTED_SYNTAX_LANGUAGES).forEach((language) => {
