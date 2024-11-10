@@ -179,10 +179,10 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
         """Process a single link and extract clothing items."""
         logger.info(f"Processing link: {clicked_link}...")
         # TODO: Enable pruning when connecting to a local LLM server
-        # is_clothing_product_link = await self.is_clothing_product_link(clicked_link)
-        # if not is_clothing_product_link:
-        #     logger.info(f"Skipping link: {clicked_link}")
-        #     return []
+        is_clothing_product_link = await self.is_clothing_product_link(clicked_link)
+        if not is_clothing_product_link:
+            logger.info(f"Skipping link: {clicked_link}")
+            return []
 
         logger.info(f"Found clothing product link: {clicked_link}")
 
@@ -218,8 +218,8 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
             if items_streamed >= backend_config.max_clothing_items_to_stream:
                 break
             # TODO: Enable pruning by filtering chunks when connecting to a parallel local LLM server
-            # if not await self.contains_clothing_item_info_or_links(chunk):
-            #     continue
+            if not await self.contains_clothing_item_info_or_links(chunk):
+                continue
             try:
                 raw_res = await self.structured_llm.ainvoke_with_tools(
                     prompt.format(url=url, content=chunk),
@@ -232,13 +232,24 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
                 continue
             items.append(extracted_item)
 
-            # Only stream the clothing item if all fields are non-null
+            # Only stream the clothing item if all fields are non-null and image URL is accessible
             if all(
                 getattr(extracted_item, field) is not None
                 for field in extracted_item.model_fields
             ):
-                await self.stream_handler.on_extracted_item(extracted_item)
-                items_streamed += 1
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.head(extracted_item.image_url) as response:
+                            if response.status == 200:
+                                await self.stream_handler.on_extracted_item(
+                                    extracted_item
+                                )
+                                items_streamed += 1
+                except Exception as e:
+                    logger.warning(
+                        f"Could not verify image URL {extracted_item.image_url}: {e}"
+                    )
+                    continue
         return items
 
     async def is_clothing_product_link(self, url: str) -> bool:
