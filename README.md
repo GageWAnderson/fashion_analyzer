@@ -25,9 +25,13 @@ Fashion Analyzer is your personal AI-powered fashion assistant that brings toget
 ![Architecture Diagram](frontend/public/architecture_diagram.png)
 
 ## Behind the Scenes
-Significant effort was required at the hardware level to get the application running. In particular, I needed a machine capable of running a 70B parameter LLM and a network to allow my application to access the server securely.
-**TODO:** Include a full picture of GORT
-[Tailscale Network](https://tailscale.com/)
+Significant effort was required at the hardware and networking levels to get the application running. In particular, I needed a machine capable of running a 70B parameter LLM and a network to allow my application to access the server securely. I created the network between my sever and development machines with the [Tailscale Network](https://tailscale.com/).
+
+### Building an LLM Inference Server
+LLMs are possible to run with consumer hardware! Given 2 32GB VRAM GPUs, I was able to run a 70B parameter LLM with strong performance for this app! It required building a custom server with a 1600W power supply, 2 RTX 3090 GPUs, and 128 GB of RAM to handle the model weights for training and inference.
+
+![Gort](frontend/public/gort_1.png)
+![Gort](frontend/public/gort_2.png)
 ![Computer Parts](frontend/public/computer_parts.jpeg)
 ![LLM Inference Server Setup](frontend/public/nvtop.png)
 
