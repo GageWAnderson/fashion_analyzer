@@ -23,6 +23,8 @@ class RetrieveNode(Runnable[RagState, RagState]):
     ) -> RagState:
         docs = self.retriever.invoke(state["user_question"])
         logger.info(f"Retrieved {len(docs)} documents")
+        # TODO: Augment with BM25 retrieval using Rank-BM25
+        # https://github.com/dorianbrown/rank_bm25
         return {
             "user_question": state["user_question"],
             "messages": state["messages"],
