@@ -38,6 +38,8 @@ pytest = "^8.3.2"
 ruff = "^0.6.9"
 pre-commit = "^3.8.0"
 debugpy = "^1.8.6"
+pytest-asyncio = "^0.24.0"
+pytest-mock = "^3.14.0"
 
 [tool.poetry.scripts]
 crawler = "crawler.crawler:main"
