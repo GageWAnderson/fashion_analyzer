@@ -128,6 +128,13 @@ Feel free to experiment with different underlying models! The model choice is fu
 
 Note that vLLM requires significantly more VRAM for a given number of model weights due to its sophisticated paged attention caching system. This makes its inference incredibly efficient in parallel, but may reduce the maxiumum parameter cound (and therefore intelligence) of the model hosted.
 
+### Running the tests
+The application uses pytest to run the test suite. To run the tests, navigate to the root directory and run:
+```bash
+poetry run pytest -v -s
+```
+Under the hood, the tests use [Deep Eval](https://docs.confident-ai.com/) to check the LLM responses. The built-in Deep Eval RAGAS metrics are particularly useful for evaluating the model's performance on the RAG questions.
+
 ### Setting up the Environment
 To set up the environment, follow the `.env.example` file found in the root and frontend directories. Fill in the missing values, with the connection strings for the LLM servers and databases.
 
