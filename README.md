@@ -128,12 +128,35 @@ Feel free to experiment with different underlying models! The model choice is fu
 
 Note that vLLM requires significantly more VRAM for a given number of model weights due to its sophisticated paged attention caching system. This makes its inference incredibly efficient in parallel, but may reduce the maxiumum parameter cound (and therefore intelligence) of the model hosted.
 
+## Testing
+
 ### Running the tests
 The application uses pytest to run the test suite. To run the tests, navigate to the root directory and run:
 ```bash
 poetry run pytest -v -s
 ```
 Under the hood, the tests use [Deep Eval](https://docs.confident-ai.com/) to check the LLM responses. The built-in Deep Eval RAGAS metrics are particularly useful for evaluating the model's performance on the RAG questions.
+
+### Creating a Test Report
+The tests also output a test report in HTML format, which is viewable in any modern web browser. To view the test report, navigate to the `tests/test_outputs` directory and open the `test_report.html` file.
+The report file includes plots of the pass rate overall, by tool, by eval metric, and by latency. It uses Deep Eval RAGAS metrics to evaluate the performance of the LLM on the RAG questions and responsible AI metrics to evaluate the responses for potential harm.
+
+#### Example Report Sections
+
+##### Overall Pass Rate
+The overall pass rate plot shows the percentage of tests that passed across all test cases. This gives a high-level view of the system's performance.
+
+##### Router Pass Rate 
+The router pass rate plot shows how well the system routes queries to the appropriate tools and subgraphs.
+
+##### Pass Rate by Tool
+This section breaks down the pass rates for each individual tool in the system (e.g. clothing search, outfit generator, etc).
+
+##### Evaluation Metric Breakdown
+The evaluation metrics plot shows scores for different RAGAS metrics like answer relevance, context relevance, and faithfulness.
+
+##### Latency Analysis
+The latency breakdown plot shows response time distributions across different components and tools in the system.
 
 ### Setting up the Environment
 To set up the environment, follow the `.env.example` file found in the root and frontend directories. Fill in the missing values, with the connection strings for the LLM servers and databases.

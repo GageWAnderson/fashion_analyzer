@@ -41,6 +41,8 @@ class ChatGraph(BaseModel):
         asyncio.Queue
     )  # TODO: Create a more robust queue that returns messages to the fe more reliably
     stop_event: asyncio.Event
+    subgraphs: list[Subgraph]
+    llm: BaseLanguageModel
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
@@ -56,14 +58,8 @@ class ChatGraph(BaseModel):
         graph = StateGraph(AgentState)
         vector_store = await PgVectorStore.from_config(config)
 
-        # TODO: Consider abstracting this into a function that takes a config
-        # TODO: Add a missing_tool to filter out irrelevant requests
-        subgraphs: list[Subgraph] = [
-            RagGraph.from_config(config, vector_store, stream_handler),
-            ClothingSearchGraph.from_config(config, stream_handler),
-        ]
+        subgraphs = cls._get_subgraphs_from_config(config, vector_store, stream_handler)
 
-        # TODO: Refactor chat graph to have the available tools as sub-graphs
         end_node = EndNode.from_handler(stream_handler)
         graph.add_node(end_node.name, end_node)
         graph.add_edge(end_node.name, END)
@@ -97,6 +93,8 @@ class ChatGraph(BaseModel):
             queue=queue,
             stop_event=stop_event,
             stream_handler=stream_handler,
+            subgraphs=subgraphs,
+            llm=get_llm_from_config(config, config.fast_llm),
         )
 
     async def ainvoke(self, *args, **kwargs) -> Union[dict[str, Any], Any]:
@@ -138,6 +136,19 @@ class ChatGraph(BaseModel):
             except Exception as e:
                 logger.error(f"Error processing queue item: {e}")
                 continue
+
+    @staticmethod
+    def _get_subgraphs_from_config(
+        config: BackendConfig,
+        vector_store: PgVectorStore,
+        stream_handler: AsyncStreamingCallbackHandler,
+    ) -> list[Subgraph]:
+        # TODO: Consider abstracting this into a function that takes a config
+        # TODO: Add a missing_tool to filter out irrelevant requests
+        return [
+            RagGraph.from_config(config, vector_store, stream_handler),
+            ClothingSearchGraph.from_config(config, stream_handler),
+        ]
 
     @staticmethod
     async def select_subgraph(

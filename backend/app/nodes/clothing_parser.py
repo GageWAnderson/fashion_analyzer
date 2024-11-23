@@ -40,9 +40,9 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
         cls,
         llm: BaseLanguageModel,
         fast_llm: BaseLanguageModel,
-        structured_llm: BaseLanguageModel,
+        structured_llm: BaseLanguageModel | OpenAI | VLLMToolCallClient,
         stream_handler: AsyncStreamingCallbackHandler,
-    ):
+    ) -> "ClothingParserNode":
         return cls(
             llm=llm,
             fast_llm=fast_llm,
