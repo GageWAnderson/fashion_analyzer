@@ -31,6 +31,7 @@ async def test_router(
     router_accuracy = _get_router_accuracy(results)
     logger.info(f"Router accuracy: {router_accuracy}")
     df = pd.DataFrame(results)
+    df = _add_router_test_output_cols(df, run_id, chat_graph.llm.name)
     df.to_csv(test_outputs_dir / f"router_tool_results_{run_id}.csv", index=False)
     assert router_accuracy > CUTOFF
 
@@ -70,3 +71,12 @@ def _get_router_accuracy(results: list[dict]) -> float:
         sum(1 for result in results if result["passed"] is True) / len(results),
         ndigits=2,
     )
+
+
+def _add_router_test_output_cols(
+    df: pd.DataFrame, run_id: str, model_name: str
+) -> pd.DataFrame:
+    df["run_id"] = run_id
+    df["model_name"] = model_name
+    df["test_type"] = "router"
+    return df

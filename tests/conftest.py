@@ -42,17 +42,41 @@ def test_outputs_dir() -> Path:
     return Path(__file__).parent / "test_outputs"
 
 
-@pytest.fixture(scope="session")
-def cleanup(request, run_id: str, test_outputs_dir: Path) -> None:
+@pytest.fixture(scope="session", autouse=True)
+def cleanup(
+    request: pytest.FixtureRequest, run_id: str, test_outputs_dir: Path
+) -> None:
     """
     Aggregates the test results and outputs a readable report for the run_id.
     """
 
     def aggregate_results() -> None:
-        df = pd.read_csv(f"{test_outputs_dir}/{run_id}.csv")
+        df = aggregate_test_results(test_outputs_dir, run_id)
         if df.empty:
             logger.warning(f"No test results found for run_id: {run_id}")
             return
+        df.to_csv(
+            test_outputs_dir / f"aggregated_test_results_{run_id}.csv", index=False
+        )
         create_test_report(df, test_outputs_dir)
 
     request.addfinalizer(aggregate_results)
+
+
+def aggregate_test_results(test_outputs_dir: Path, run_id: str) -> pd.DataFrame:
+    """
+    Reads the test output files from all the tools into one DF to generate a report.
+    """
+    router_tool_results_path = test_outputs_dir / f"router_tool_results_{run_id}.csv"
+    router_tool_results_df = pd.read_csv(router_tool_results_path)
+
+    # tool_dfs = [
+    #     pd.read_csv(path) for path in (test_outputs_dir / "tools").glob("*.csv")
+    # ]
+    return pd.concat(
+        [
+            router_tool_results_df
+            #   , *tool_dfs
+        ],
+        ignore_index=True,
+    )
