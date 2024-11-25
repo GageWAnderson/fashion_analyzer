@@ -18,12 +18,12 @@ class SubgraphStartNode(BaseModel, Runnable):
     """
 
     name: str
-    stream_handler: AsyncStreamingCallbackHandler
+    stream_handler: Optional[AsyncStreamingCallbackHandler] = None
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
     def from_handler(
-        cls, name: str, stream_handler: AsyncStreamingCallbackHandler
+        cls, name: str, stream_handler: Optional[AsyncStreamingCallbackHandler] = None
     ) -> "SubgraphStartNode":
         return cls(name=name, stream_handler=stream_handler)
 
@@ -38,5 +38,6 @@ class SubgraphStartNode(BaseModel, Runnable):
         self, state: AgentState, config: Optional[RunnableConfig], **kwargs
     ) -> AgentState:
         logger.info(f"Starting subgraph: {self.name}")
-        await self.stream_handler.on_tool_start(self.name)
+        if self.stream_handler:
+            await self.stream_handler.on_tool_start(self.name)
         return {"selected_tool": self.name}

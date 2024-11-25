@@ -1,4 +1,4 @@
-# ADR 123: Pin dependency_name to <2.0.0
+# ADR 000: Pin dependency_name to <2.0.0
 
 ## Status
 Accepted

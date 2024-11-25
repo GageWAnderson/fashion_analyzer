@@ -1,5 +1,5 @@
 import re
-from typing import Any, Union
+from typing import Any, Union, Optional
 
 from langgraph.graph.state import StateGraph, START, END
 from langchain_core.prompts import PromptTemplate
@@ -28,13 +28,13 @@ class ClothingSearchGraph(Subgraph):
         Use this tool when your user is asking about a specific clothing item.
         """
     )
-    stream_handler: AsyncStreamingCallbackHandler
+    stream_handler: Optional[AsyncStreamingCallbackHandler] = None
 
     @classmethod
     def from_config(
         cls,
         config: BackendConfig,
-        stream_handler: AsyncStreamingCallbackHandler,
+        stream_handler: Optional[AsyncStreamingCallbackHandler] = None,
     ) -> "ClothingSearchGraph":
         llm = get_llm_from_config(config)
         fast_llm = get_llm_from_config(config, config.fast_llm)

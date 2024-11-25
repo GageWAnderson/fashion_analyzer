@@ -14,6 +14,7 @@ class RagState(TypedDict):
     user_question: Annotated[str, user_question_reducer]
     messages: Annotated[Sequence[BaseMessage], operator.add]
     docs: Annotated[list[Document], operator.add]
+    output: Annotated[str, operator.add]
 
 
 class DocumentGrade(BaseModel):

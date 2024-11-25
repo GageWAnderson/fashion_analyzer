@@ -23,12 +23,12 @@ class ClothingExtractorNode(
     BaseModel, Runnable[ClothingGraphState, ClothingGraphState]
 ):
     name: str = "clothing_extractor_node"
-    stream_handler: AsyncStreamingCallbackHandler
+    stream_handler: Optional[AsyncStreamingCallbackHandler] = None
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
     def from_handler(
-        cls, stream_handler: AsyncStreamingCallbackHandler
+        cls, stream_handler: Optional[AsyncStreamingCallbackHandler] = None
     ) -> "ClothingExtractorNode":
         return cls(stream_handler=stream_handler)
 

@@ -32,7 +32,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
     llm: BaseLanguageModel
     fast_llm: BaseLanguageModel
     structured_llm: BaseLanguageModel | OpenAI | VLLMToolCallClient
-    stream_handler: AsyncStreamingCallbackHandler
+    stream_handler: Optional[AsyncStreamingCallbackHandler] = None
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
@@ -41,7 +41,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
         llm: BaseLanguageModel,
         fast_llm: BaseLanguageModel,
         structured_llm: BaseLanguageModel | OpenAI | VLLMToolCallClient,
-        stream_handler: AsyncStreamingCallbackHandler,
+        stream_handler: Optional[AsyncStreamingCallbackHandler] = None,
     ) -> "ClothingParserNode":
         return cls(
             llm=llm,
@@ -233,7 +233,7 @@ class ClothingParserNode(BaseModel, Runnable[ClothingGraphState, ClothingGraphSt
             items.append(extracted_item)
 
             # Only stream the clothing item if all fields are non-null and image URL is accessible
-            if all(
+            if self.stream_handler and all(
                 getattr(extracted_item, field) is not None
                 for field in extracted_item.model_fields
             ):

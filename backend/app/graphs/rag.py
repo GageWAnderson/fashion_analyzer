@@ -1,4 +1,4 @@
-from typing import Union, Any
+from typing import Union, Any, Optional
 
 from langgraph.graph import StateGraph, START, END
 
@@ -24,14 +24,14 @@ class RagGraph(Subgraph):
         Use this tool when your user wants the most up-to-date advice and trends.
         """
     )
-    stream_handler: AsyncStreamingCallbackHandler
+    stream_handler: Optional[AsyncStreamingCallbackHandler] = None
 
     @classmethod
     def from_config(
         cls,
         config: BackendConfig,
         vector_store: PgVectorStore,
-        stream_handler: AsyncStreamingCallbackHandler,
+        stream_handler: Optional[AsyncStreamingCallbackHandler] = None,
     ) -> "RagGraph":
         graph = StateGraph(RagState)
 
@@ -47,8 +47,6 @@ class RagGraph(Subgraph):
         graph.add_edge("summarize", END)
 
         return cls(
-            # name=cls.get_name(),
-            # description=cls.get_description(),
             graph=graph.compile(),
             stream_handler=stream_handler,
         )

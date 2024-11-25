@@ -15,11 +15,13 @@ class EndNode(BaseModel, Runnable):
     """
 
     name: str = "end_node"
-    stream_handler: Optional[AsyncStreamingCallbackHandler]
+    stream_handler: Optional[AsyncStreamingCallbackHandler] = None
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @classmethod
-    def from_handler(cls, stream_handler: AsyncStreamingCallbackHandler) -> "EndNode":
+    def from_handler(
+        cls, stream_handler: Optional[AsyncStreamingCallbackHandler] = None
+    ) -> "EndNode":
         return cls(stream_handler=stream_handler)
 
     @classmethod
@@ -34,6 +36,7 @@ class EndNode(BaseModel, Runnable):
     ) -> AgentState:
         # TODO: Currently the agent can only call one subgraph tool per user question
         # TODO: Will need to move on_tool_end to another node to call multiple subgraph tools per user question
-        await self.stream_handler.on_tool_end(state["selected_tool"])
-        await self.stream_handler.on_graph_end()
+        if self.stream_handler:
+            await self.stream_handler.on_tool_end(state["selected_tool"])
+            await self.stream_handler.on_graph_end()
         return state

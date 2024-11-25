@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class SummarizeDocsNode(Runnable[RagState, RagState]):
-    def __init__(self, stream_handler: Optional[AsyncStreamingCallbackHandler]):
+    def __init__(self, stream_handler: Optional[AsyncStreamingCallbackHandler] = None):
         self.stream_handler = stream_handler
 
     def invoke(self, state: RagState) -> RagState:
@@ -29,22 +29,24 @@ class SummarizeDocsNode(Runnable[RagState, RagState]):
             raise ValueError("No documents found")
 
         metadatas = get_metadatas(state["docs"])
+        callbacks = [self.stream_handler] if self.stream_handler else None
         llm = get_llm_from_config(
             backend_config,
             llm=backend_config.summarize_llm,
-            callbacks=[self.stream_handler],
+            callbacks=callbacks,
         )
         response = await summarize_docs(
             state["user_question"], state["docs"], metadatas, llm
         )
 
         # TODO: Should Doc ID be used to track metadata on the frontend?
-        await self.stream_handler.on_tool_metadata(
-            metadata={
-                "sources": [doc.id for doc in state["docs"]],
-                "image_links": get_image_urls(metadatas),
-            }
-        )
+        if self.stream_handler:
+            await self.stream_handler.on_tool_metadata(
+                metadata={
+                    "sources": [doc.id for doc in state["docs"]],
+                    "image_links": get_image_urls(metadatas),
+                }
+            )
         logger.info(f"Summarized docs: {response.content}")
 
-        return {"messages": [response]}
+        return {"messages": [response], "output": response.content}

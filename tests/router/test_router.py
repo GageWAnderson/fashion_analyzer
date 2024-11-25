@@ -77,6 +77,5 @@ def _add_router_test_output_cols(
     df: pd.DataFrame, run_id: str, model_name: str
 ) -> pd.DataFrame:
     df["run_id"] = run_id
-    df["model_name"] = model_name
     df["test_type"] = "router"
     return df

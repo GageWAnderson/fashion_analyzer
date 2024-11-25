@@ -4,6 +4,7 @@ from pathlib import Path
 from plotly.offline import plot
 
 from tests.utils.visuals.overall_pass_rate import overall_pass_rate
+from tests.utils.visuals.pass_rate_by_tool import pass_rate_by_tool
 
 
 def create_test_report(df: pd.DataFrame, test_outputs_dir: Path) -> None:
@@ -17,30 +18,14 @@ def create_test_report(df: pd.DataFrame, test_outputs_dir: Path) -> None:
                 auto_play=False,
             )
         )
-        # f.write(
-        #     plot(
-        #         router_pass_rate(df),
-        #         output_type="div",
-        #         include_plotlyjs="cdn",
-        #         auto_play=False,
-        #     )
-        # )
-        # f.write(
-        #     plot(
-        #         pass_rate_by_tool(df),
-        #         output_type="div",
-        #         include_plotlyjs="cdn",
-        #         auto_play=False,
-        #     )
-        # )
-        # f.write(
-        #     plot(
-        #         pass_rate_by_tool(df),
-        #         output_type="div",
-        #         include_plotlyjs="cdn",
-        #         auto_play=False,
-        #     )
-        # )
+        f.write(
+            plot(
+                pass_rate_by_tool(df),
+                output_type="div",
+                include_plotlyjs="cdn",
+                auto_play=False,
+            )
+        )
         # f.write(
         #     plot(
         #         eval_metric_breakdown(df),

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import uuid
 from asyncio import AbstractEventLoopPolicy
 from pathlib import Path
@@ -20,6 +21,16 @@ pytest_plugins = ("pytest_asyncio",)
 @pytest.fixture(scope="session")
 def event_loop_policy() -> AbstractEventLoopPolicy:
     return asyncio.DefaultEventLoopPolicy()
+
+
+@pytest.fixture(scope="session")
+def set_test_env():
+    """
+    Sets the environment variables for the test suite.
+    """
+    os.environ["DEEPEVAL_TELEMETRY_OPT_OUT"] = "YES"
+    yield
+    del os.environ["DEEPEVAL_TELEMETRY_OPT_OUT"]
 
 
 @pytest.fixture(scope="session")
@@ -66,17 +77,34 @@ def cleanup(
 def aggregate_test_results(test_outputs_dir: Path, run_id: str) -> pd.DataFrame:
     """
     Reads the test output files from all the tools into one DF to generate a report.
+    Handles missing files gracefully.
     """
-    router_tool_results_path = test_outputs_dir / f"router_tool_results_{run_id}.csv"
-    router_tool_results_df = pd.read_csv(router_tool_results_path)
+    dfs = []
 
-    # tool_dfs = [
-    #     pd.read_csv(path) for path in (test_outputs_dir / "tools").glob("*.csv")
-    # ]
-    return pd.concat(
-        [
-            router_tool_results_df
-            #   , *tool_dfs
-        ],
-        ignore_index=True,
-    )
+    result_files = {
+        "router": f"router_tool_results_{run_id}.csv",
+        "graph": f"graph_results_{run_id}.csv",
+    }
+
+    for test_type, filename in result_files.items():
+        df = _try_read_results(test_outputs_dir / filename, test_type)
+        if df is not None:
+            dfs.append(df)
+
+    if not dfs:
+        logger.warning("No test results could be loaded")
+        return pd.DataFrame()  # Return empty DataFrame if no results
+
+    return pd.concat(dfs, ignore_index=True)
+
+
+def _try_read_results(file_path: Path, test_type: str) -> pd.DataFrame | None:
+    """Helper function to read a single results file."""
+    try:
+        if file_path.exists():
+            return pd.read_csv(file_path)
+        else:
+            logger.warning(f"{test_type.title()} results file not found: {file_path}")
+    except Exception as e:
+        logger.error(f"Error reading {test_type} results: {e}")
+    return None

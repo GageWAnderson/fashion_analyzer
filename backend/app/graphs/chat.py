@@ -2,7 +2,7 @@ import re
 import asyncio
 import logging
 from functools import partial
-from typing import AsyncGenerator, Any, Union
+from typing import AsyncGenerator, Any, Union, Optional
 
 from pydantic import BaseModel, ConfigDict
 from langchain_core.messages import HumanMessage, AIMessage
@@ -15,7 +15,7 @@ from common.utils.llm import get_llm_from_config
 from backend.app.config.config import BackendConfig, backend_config
 from backend.app.utils.streaming import AsyncStreamingCallbackHandler, StreamingData
 from backend.app.schemas.agent_state import AgentState
-from backend.app.schemas.subgraph import Subgraph, SubgraphSelectionResponse
+from backend.app.schemas.subgraph import Subgraph
 from backend.app.graphs.rag import RagGraph
 from backend.app.graphs.clothing_search import ClothingSearchGraph
 from backend.app.nodes.end import EndNode
@@ -36,11 +36,9 @@ class ChatGraph(BaseModel):
     """
 
     graph: CompiledStateGraph
-    stream_handler: AsyncStreamingCallbackHandler
-    queue: (
-        asyncio.Queue
-    )  # TODO: Create a more robust queue that returns messages to the fe more reliably
-    stop_event: asyncio.Event
+    stream_handler: Optional[AsyncStreamingCallbackHandler] = None
+    queue: Optional[asyncio.Queue] = None
+    stop_event: Optional[asyncio.Event] = None
     subgraphs: list[Subgraph]
     llm: BaseLanguageModel
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -49,11 +47,21 @@ class ChatGraph(BaseModel):
     async def from_config(
         cls,
         config: BackendConfig,
+        test_mode: bool = False,
     ) -> "ChatGraph":
+        """
+        Creates a ChatGraph from a BackendConfig.
+        Setting test_mode to True will create a ChatGraph without a stream handler,
+        allowing for testing without streaming.
+        """
         queue = asyncio.Queue(maxsize=backend_config.max_queue_size)
         stop_event = asyncio.Event()
-        stream_handler = AsyncStreamingCallbackHandler(
-            streaming_function=partial(cls._streaming_function, queue)
+        stream_handler = (
+            AsyncStreamingCallbackHandler(
+                streaming_function=partial(cls._streaming_function, queue)
+            )
+            if not test_mode
+            else None
         )
         graph = StateGraph(AgentState)
         vector_store = await PgVectorStore.from_config(config)
@@ -102,24 +110,30 @@ class ChatGraph(BaseModel):
         Wrapper function to invoke the graph with the streaming callback handler.
         """
         result = None
-        await self.stream_handler.on_llm_start(serialized={}, prompts=[], **kwargs)
+        if self.stream_handler:
+            await self.stream_handler.on_llm_start(serialized={}, prompts=[], **kwargs)
         try:
             # Log queue size periodically
-            if self.queue.qsize() > backend_config.max_queue_size * 0.5:
+            if self.queue and self.queue.qsize() > backend_config.max_queue_size * 0.5:
                 logger.warning(f"Queue size is large: {self.queue.qsize()}")
 
             result = await self.graph.ainvoke(*args, **kwargs)
         except Exception:
             error_message = """\nI'm sorry, but there was an issue while processing your request.
                 Please rephrase and try again."""
-            await self.stream_handler.on_text(text=error_message, **kwargs)
+            if self.stream_handler:
+                await self.stream_handler.on_text(text=error_message, **kwargs)
             logger.exception("There was an exception in the agent graph")
         finally:
-            self.stop_event.set()
+            if self.stop_event:
+                self.stop_event.set()
 
         return result
 
     async def process_queue(self) -> AsyncGenerator[str, None]:
+        if not self.queue or not self.stop_event:
+            return
+
         while not self.stop_event.is_set():
             try:
                 # Check if queue is getting too full
@@ -141,7 +155,7 @@ class ChatGraph(BaseModel):
     def _get_subgraphs_from_config(
         config: BackendConfig,
         vector_store: PgVectorStore,
-        stream_handler: AsyncStreamingCallbackHandler,
+        stream_handler: Optional[AsyncStreamingCallbackHandler],
     ) -> list[Subgraph]:
         # TODO: Consider abstracting this into a function that takes a config
         # TODO: Add a missing_tool to filter out irrelevant requests

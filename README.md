@@ -2,38 +2,73 @@
 
 Fashion Analyzer is your personal AI-powered fashion assistant that brings together cutting-edge local LLM technology with modern web architecture. Built with a FastAPI backend and React frontend, this application revolutionizes how we analyze and discover fashion trends.
 
-🌟 Key Capabilities:
-1. **Trend Analysis**: Get real-time insights and comprehensive analysis of the latest fashion trends, powered by state-of-the-art AI models
-2. **Smart Fashion Search**: Utilize our specialized AI search engine to discover clothing items across the web with unprecedented accuracy and relevance
-3. **Weekly Recap**: Get a weekly recap of the latest fashion trends and insights
+✨ Key Capabilities:
+1. 📊 **Trend Analysis**: Get real-time insights and comprehensive analysis of the latest fashion trends, powered by state-of-the-art AI models
+2. 🔍 **Smart Fashion Search**: Utilize our specialized AI search engine to discover clothing items across the web with unprecedented accuracy and relevance
+3. 📅 **Weekly Recap**: Get a weekly recap of the latest fashion trends and insights
 
 🚀 What makes us unique? Fashion Analyzer runs entirely on local models, leveraging the power of [vLLM](https://github.com/vllm-project/vllm) for lightning-fast LLM inference. This means superior performance, complete privacy, and no dependency on external API services.
 
-## Demo Video
+## 🎥 Demo Video
 
-## Architecture
+## 🏗️ Architecture
 
-- **FastAPI Backend**: Provides a robust and high-performance API for image analysis.
-- **React Frontend**: A modern and responsive user interface for uploading and viewing fashion images.
-- **Docker Compose**: Simplifies the setup and management of the application by coordinating multiple containers.
-- **Redis**: Used for caching and session management.
-- **Caddy**: Used as a reverse proxy to manage incoming requests and route them to the appropriate backend service.
-- **PGAdmin**: Used for storing and querying embeddings as well as other database management.
-- **Intelligent Search System**: Uses LLM-guided Tavily queries to efficiently discover and analyze fashion content.
+- 🔧 **FastAPI Backend**: Provides a robust and high-performance API for image analysis.
+- 💻 **React Frontend**: A modern and responsive user interface for uploading and viewing fashion images.
+- 🐳 **Docker Compose**: Simplifies the setup and management of the application by coordinating multiple containers.
+- 📦 **Redis**: Used for caching and session management.
+- 🔄 **Caddy**: Used as a reverse proxy to manage incoming requests and route them to the appropriate backend service.
+- 🗄️ **PGAdmin**: Used for storing and querying embeddings as well as other database management.
+- 🧠 **Intelligent Search System**: Uses LLM-guided Tavily queries to efficiently discover and analyze fashion content.
 
-### Architecture Diagram
+### 📊 Architecture Diagram
 ![Architecture Diagram](frontend/public/architecture_diagram.png)
 
-## Behind the Scenes
+## 🔧 Behind the Scenes
 Significant effort was required at the hardware and networking levels to get the application running. In particular, I needed a machine capable of running a 70B parameter LLM and a network to allow my application to access the server securely. I created the network between my sever and development machines with the [Tailscale Network](https://tailscale.com/).
 
-### Building an LLM Inference Server
+### 🖥️ Building an LLM Inference Server
 LLMs are possible to run with consumer hardware! Given 2 32GB VRAM GPUs, I was able to run a 70B parameter LLM with strong performance for this app! It required building a custom server with a 1600W power supply, 2 RTX 3090 GPUs, and 128 GB of RAM to handle the model weights for training and inference.
 
 ![Gort](frontend/public/gort_1.png)
 ![Gort](frontend/public/gort_2.png)
 ![Computer Parts](frontend/public/computer_parts.jpeg)
 ![LLM Inference Server Setup](frontend/public/nvtop.png)
+
+## 📚 Documentation
+
+### 🔌 API Documentation
+- FastAPI OpenAPI Documentation: Access the interactive API docs at `/docs` or `/redoc` when running the server
+- [FastAPI Best Practices Guide](https://fastapi.tiangolo.com/tutorial/best-practices/)
+- [FastAPI Project Structure](https://fastapi.tiangolo.com/tutorial/bigger-applications/)
+
+### 🎨 Frontend Documentation
+- [React Best Practices](https://react.dev/learn/thinking-in-react)
+- [React Project Structure](https://react.dev/learn/start-a-new-react-project)
+- Component documentation available in Storybook at `/storybook` when running in development mode
+
+### 🤖 LLM Integration
+- [vLLM Documentation](https://docs.vllm.ai/en/latest/)
+- [Langchain Documentation](https://python.langchain.com/docs/get_started/introduction)
+- [RAG Best Practices](https://www.pinecone.io/learn/retrieval-augmented-generation/)
+
+### 🧪 Testing
+- [FastAPI Testing Guide](https://fastapi.tiangolo.com/tutorial/testing/)
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [Pytest Best Practices](https://docs.pytest.org/en/stable/goodpractices.html)
+- See `tests/` directory for example test cases and testing utilities
+
+### 📖 Sphinx Documentation
+- API reference documentation is available in the `docs/` directory
+- Build the documentation by running `make html` in the `docs/` directory
+- View the built documentation at `docs/_build/html/index.html`
+- [Sphinx Documentation](https://www.sphinx-doc.org/en/master/)
+- [reStructuredText Guide](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html)
+
+### 🔗 Additional Resources
+- [Docker Best Practices](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
+- [Redis Documentation](https://redis.io/documentation)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 
 
 ## Prerequisites
@@ -138,8 +173,14 @@ poetry run pytest -v -s
 Under the hood, the tests use [Deep Eval](https://docs.confident-ai.com/) to check the LLM responses. The built-in Deep Eval RAGAS metrics are particularly useful for evaluating the model's performance on the RAG questions.
 
 ### Creating a Test Report
-The tests also output a test report in HTML format, which is viewable in any modern web browser. To view the test report, navigate to the `tests/test_outputs` directory and open the `test_report.html` file.
+Since I didn't want to pay for or rely on any external services like LangSmith or Confident AI, I created my own test report. The tests also output a test report in HTML format, which is viewable in any modern web browser. To view the test report, navigate to the `tests/test_outputs` directory and open the `test_report.html` file.
 The report file includes plots of the pass rate overall, by tool, by eval metric, and by latency. It uses Deep Eval RAGAS metrics to evaluate the performance of the LLM on the RAG questions and responsible AI metrics to evaluate the responses for potential harm.
+
+#### Notes on testing
+- The test suite is strongly limited by compute resources, meaning that the number of tests that can be run is limited by the available hardware
+- The test suite relies heavily on the LLM-as-a-judge paradigm, meaning that the tests are susceptible to the LLM's capabilities
+- The tests are also susceptible to the quality of the test data, which is why I included a few tests that were explicitly designed to be difficult for the LLM to answer
+- The tests cases are synthetic data generated through a separate synthetic data pipeline
 
 #### Example Report Sections
 
