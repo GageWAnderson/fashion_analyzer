@@ -4,7 +4,7 @@ Fashion Analyzer is your personal AI-powered fashion assistant that brings toget
 
 ✨ Key Capabilities:
 1. 📊 **Trend Analysis**: Get real-time insights and comprehensive analysis of the latest fashion trends, powered by state-of-the-art AI models
-2. 🔍 **Smart Fashion Search**: Utilize our specialized AI search engine to discover clothing items across the web with unprecedented accuracy and relevance
+2. 🔍 **Smart AI Fashion Search**: Utilize our specialized AI search engine to discover clothing items across the web with unprecedented accuracy and relevance
 3. 📅 **Weekly Recap**: Get a weekly recap of the latest fashion trends and insights
 
 🚀 What makes us unique? Fashion Analyzer runs entirely on local models, leveraging the power of [vLLM](https://github.com/vllm-project/vllm) for lightning-fast LLM inference. This means superior performance, complete privacy, and no dependency on external API services.
@@ -20,6 +20,7 @@ Fashion Analyzer is your personal AI-powered fashion assistant that brings toget
 - 🔄 **Caddy**: Used as a reverse proxy to manage incoming requests and route them to the appropriate backend service.
 - 🗄️ **PGAdmin**: Used for storing and querying embeddings as well as other database management.
 - 🧠 **Intelligent Search System**: Uses LLM-guided Tavily queries to efficiently discover and analyze fashion content.
+- 🧪 **Test Suite**: Comprehensive test coverage with automated metrics tracking for latency, accuracy, and evaluation metrics.
 
 ### 📊 Architecture Diagram
 ![Architecture Diagram](frontend/public/architecture_diagram.png)

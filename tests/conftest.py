@@ -69,7 +69,7 @@ def cleanup(
         df.to_csv(
             test_outputs_dir / f"aggregated_test_results_{run_id}.csv", index=False
         )
-        create_test_report(df, test_outputs_dir)
+        create_test_report(df, test_outputs_dir, run_id)
 
     request.addfinalizer(aggregate_results)
 

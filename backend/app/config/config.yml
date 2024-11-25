@@ -1,20 +1,29 @@
 # llm: gpt-4o-mini # NOTE: gpt-4o-mini is faster and cheaper than gpt-4o and can still do structured output very well
 # TODO: Get a local model that can do structured output
 
-# llm: vllm_meta-llama/Llama-3.1-8B-Instruct
-# tool_call_llm: vllm_tool_call_meta-llama/Llama-3.1-8B-Instruct
-# fast_llm: vllm_meta-llama/Llama-3.1-8B-Instruct
-# summarize_llm: vllm_meta-llama/Llama-3.1-8B-Instruct
+# VLLM Llama 3.1
+llm: vllm_meta-llama/Llama-3.1-8B-Instruct
+tool_call_llm: vllm_meta-llama/Llama-3.1-8B-Instruct
+fast_llm: vllm_meta-llama/Llama-3.1-8B-Instruct
+summarize_llm: vllm_meta-llama/Llama-3.1-8B-Instruct
 
+# VLLM Mistral
 # llm: vllm_mistralai/Mistral-7B-Instruct-v0.3
 # tool_call_llm: vllm_tool_call_mistralai/Mistral-7B-Instruct-v0.3
 # fast_llm: vllm_mistralai/Mistral-7B-Instruct-v0.3
 # summarize_llm: vllm_mistralai/Mistral-7B-Instruct-v0.3
 
-llm: ollama_llama3.1:70b
-tool_call_llm: ollama_llama3.1:70b
-fast_llm: ollama_llama3.1:70b
-summarize_llm: ollama_llama3.1:70b
+# Ollama Large Model
+# llm: ollama_llama3.1:70b
+# tool_call_llm: ollama_llama3.1:70b
+# fast_llm: ollama_llama3.1:70b
+# summarize_llm: ollama_llama3.1:70b
+
+# Ollama Small Model
+# llm: ollama_llama3.1
+# tool_call_llm: ollama_llama3.1
+# fast_llm: ollama_llama3.1
+# summarize_llm: ollama_llama3.1
 
 max_tool_call_retries: 3
 max_retries: 3
